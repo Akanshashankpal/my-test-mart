@@ -1,0 +1,872 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { useBilling } from "@/contexts/BillingContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { 
+  Search, 
+  Filter, 
+  Eye, 
+  Edit2, 
+  Trash2, 
+  Download,
+  FileText,
+  Calendar,
+  DollarSign,
+  Users,
+  Printer,
+  RefreshCcw,
+  TrendingUp,
+  TrendingDown
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Bill {
+  id: string;
+  billNumber: string;
+  billType: "GST" | "Non-GST" | "Demo";
+  billDate: Date;
+  dueDate?: Date;
+  customer: {
+    id: string;
+    name: string;
+    phone: string;
+    email?: string;
+  };
+  items: {
+    productName: string;
+    quantity: number;
+    rate: number;
+    totalAmount: number;
+  }[];
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  finalAmount: number;
+  paymentStatus: "Paid" | "Pending" | "Partial" | "Overdue";
+  paymentMethod?: string;
+  createdBy: string;
+  createdAt: Date;
+  status: "Draft" | "Sent" | "Paid" | "Cancelled";
+}
+
+// Mock data
+const mockBills: Bill[] = [
+  {
+    id: "1",
+    billNumber: "GST/24/0001",
+    billType: "GST",
+    billDate: new Date("2024-01-20"),
+    dueDate: new Date("2024-02-20"),
+    customer: {
+      id: "1",
+      name: "John Doe",
+      phone: "+91 9876543210",
+      email: "john@example.com",
+    },
+    items: [
+      { productName: "iPhone 15 Pro", quantity: 1, rate: 129999, totalAmount: 129999 },
+      { productName: "AirPods Pro", quantity: 1, rate: 24999, totalAmount: 24999 },
+    ],
+    subtotal: 154998,
+    discountAmount: 5000,
+    taxAmount: 27000,
+    finalAmount: 176998,
+    paymentStatus: "Paid",
+    paymentMethod: "Card",
+    createdBy: "Sarah Wilson",
+    createdAt: new Date("2024-01-20"),
+    status: "Paid",
+  },
+  {
+    id: "2",
+    billNumber: "NGST/24/0001",
+    billType: "Non-GST",
+    billDate: new Date("2024-01-19"),
+    customer: {
+      id: "2",
+      name: "Sarah Smith",
+      phone: "+91 9876543211",
+    },
+    items: [
+      { productName: "Phone Cover", quantity: 2, rate: 500, totalAmount: 1000 },
+    ],
+    subtotal: 1000,
+    discountAmount: 0,
+    taxAmount: 0,
+    finalAmount: 1000,
+    paymentStatus: "Pending",
+    createdBy: "Mike Johnson",
+    createdAt: new Date("2024-01-19"),
+    status: "Sent",
+  },
+  {
+    id: "3",
+    billNumber: "GST/24/0002",
+    billType: "GST",
+    billDate: new Date("2024-01-18"),
+    dueDate: new Date("2024-02-18"),
+    customer: {
+      id: "3",
+      name: "Mike Johnson",
+      phone: "+91 9876543212",
+      email: "mike@example.com",
+    },
+    items: [
+      { productName: "Samsung Galaxy S24", quantity: 1, rate: 99999, totalAmount: 99999 },
+    ],
+    subtotal: 99999,
+    discountAmount: 2000,
+    taxAmount: 17640,
+    finalAmount: 115639,
+    paymentStatus: "Overdue",
+    createdBy: "Admin User",
+    createdAt: new Date("2024-01-18"),
+    status: "Sent",
+  },
+  {
+    id: "4",
+    billNumber: "DEMO/24/0001",
+    billType: "Demo",
+    billDate: new Date("2024-01-17"),
+    customer: {
+      id: "4",
+      name: "Demo Customer",
+      phone: "+91 9999999999",
+    },
+    items: [
+      { productName: "Demo Product", quantity: 1, rate: 10000, totalAmount: 10000 },
+    ],
+    subtotal: 10000,
+    discountAmount: 0,
+    taxAmount: 1800,
+    finalAmount: 11800,
+    paymentStatus: "Paid",
+    createdBy: "Admin User",
+    createdAt: new Date("2024-01-17"),
+    status: "Paid",
+  },
+];
+
+export default function BillingHistory() {
+  const { bills, deleteBill } = useBilling();
+  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+  const [deleteBillId, setDeleteBillId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [billsPerPage] = useState(10);
+
+  // Sync with bills from context
+  useEffect(() => {
+    if (bills && Array.isArray(bills)) {
+      setFilteredBills(bills);
+    }
+  }, [bills]);
+
+  // Apply filters
+  useEffect(() => {
+    if (!bills || !Array.isArray(bills)) {
+      setFilteredBills([]);
+      return;
+    }
+    let filtered = [...bills];
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(bill =>
+        bill.billNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        bill.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        bill.customer.phone.includes(searchTerm)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(bill => bill.status.toLowerCase() === statusFilter);
+    }
+
+    // Type filter
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(bill => bill.billType === typeFilter);
+    }
+
+    // Payment filter
+    if (paymentFilter !== "all") {
+      filtered = filtered.filter(bill => bill.paymentStatus.toLowerCase() === paymentFilter);
+    }
+
+    // Date range filter
+    if (dateRange.start) {
+      filtered = filtered.filter(bill => bill.billDate >= new Date(dateRange.start));
+    }
+    if (dateRange.end) {
+      filtered = filtered.filter(bill => bill.billDate <= new Date(dateRange.end));
+    }
+
+    setFilteredBills(filtered);
+    setCurrentPage(1);
+  }, [bills, searchTerm, statusFilter, typeFilter, paymentFilter, dateRange]);
+
+  // Pagination
+  const indexOfLastBill = currentPage * billsPerPage;
+  const indexOfFirstBill = indexOfLastBill - billsPerPage;
+  const currentBills = filteredBills.slice(indexOfFirstBill, indexOfLastBill);
+  const totalPages = Math.ceil(filteredBills.length / billsPerPage);
+
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null || isNaN(amount)) {
+      return '₹0';
+    }
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      paid: "bg-green-100 text-green-800 border-green-200",
+      sent: "bg-blue-100 text-blue-800 border-blue-200",
+      draft: "bg-gray-100 text-gray-800 border-gray-200",
+      cancelled: "bg-red-100 text-red-800 border-red-200",
+    };
+    return styles[status.toLowerCase() as keyof typeof styles] || styles.draft;
+  };
+
+  const getPaymentBadge = (status: string) => {
+    const styles = {
+      paid: "bg-green-100 text-green-800 border-green-200",
+      pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      partial: "bg-orange-100 text-orange-800 border-orange-200",
+      overdue: "bg-red-100 text-red-800 border-red-200",
+    };
+    return styles[status.toLowerCase() as keyof typeof styles] || styles.pending;
+  };
+
+  const getTypeBadge = (type: string) => {
+    const styles = {
+      gst: "bg-green-100 text-green-800 border-green-200",
+      "non-gst": "bg-blue-100 text-blue-800 border-blue-200",
+      demo: "bg-purple-100 text-purple-800 border-purple-200",
+    };
+    return styles[type.toLowerCase() as keyof typeof styles] || styles.gst;
+  };
+
+  const handleDelete = (billId: string) => {
+    deleteBill(billId);
+    setDeleteBillId(null);
+  };
+
+  const downloadBillPDF = async (bill: Bill) => {
+    try {
+      // Dynamic import of jsPDF
+      const { default: jsPDF } = await import('jspdf');
+
+      const doc = new jsPDF();
+
+      // Company Header
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ElectroMart', 105, 20, { align: 'center' });
+
+      doc.setFontSize(16);
+      doc.text('INVOICE', 105, 30, { align: 'center' });
+
+      // Invoice details
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Invoice No: ${bill.billNumber}`, 20, 45);
+      doc.text(`Date: ${bill.billDate.toLocaleDateString()}`, 20, 52);
+      doc.text(`Mode: ${bill.billType} Billing`, 20, 59);
+
+      // Customer Info
+      doc.setFont('helvetica', 'bold');
+      doc.text('Bill To:', 20, 75);
+      doc.setFont('helvetica', 'normal');
+      doc.text(bill.customer.name, 20, 82);
+      doc.text(`Phone: ${bill.customer.phone}`, 20, 89);
+      if (bill.customer.address) {
+        doc.text(`Address: ${bill.customer.address}`, 20, 96);
+      }
+
+      // Table Headers
+      let yPos = 115;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Item', 20, yPos);
+      doc.text('Qty', 80, yPos);
+      doc.text('Rate (₹)', 100, yPos);
+      if (bill.billType === 'GST') {
+        doc.text('GST%', 130, yPos);
+        doc.text('GST Amt (₹)', 150, yPos);
+        doc.text('Total (₹)', 175, yPos);
+      } else {
+        doc.text('Total (₹)', 150, yPos);
+      }
+
+      // Draw line under headers
+      doc.line(20, yPos + 2, 190, yPos + 2);
+      yPos += 10;
+
+      // Items
+      doc.setFont('helvetica', 'normal');
+      bill.items.forEach(item => {
+        doc.text(item.productName.substring(0, 25), 20, yPos);
+        doc.text(item.quantity.toString(), 80, yPos);
+        doc.text(item.price.toLocaleString(), 100, yPos);
+        if (bill.billType === 'GST') {
+          doc.text(`${item.gstPercent}%`, 130, yPos);
+          doc.text(item.gstAmount.toLocaleString(), 150, yPos);
+          doc.text(item.totalAmount.toLocaleString(), 175, yPos);
+        } else {
+          doc.text(item.totalAmount.toLocaleString(), 150, yPos);
+        }
+        yPos += 8;
+      });
+
+      // Totals section
+      yPos += 10;
+      doc.line(100, yPos, 190, yPos);
+      yPos += 8;
+
+      doc.text('Subtotal:', 130, yPos);
+      doc.text(`₹${bill.subtotal.toLocaleString()}`, 175, yPos);
+      yPos += 6;
+
+      if (bill.discountAmount > 0) {
+        doc.text(`Discount:`, 130, yPos);
+        doc.text(`-₹${bill.discountAmount.toLocaleString()}`, 175, yPos);
+        yPos += 6;
+      }
+
+      if (bill.billType === 'GST' && bill.totalGst > 0) {
+        doc.text('CGST:', 130, yPos);
+        doc.text(`₹${bill.cgst.toLocaleString()}`, 175, yPos);
+        yPos += 6;
+
+        doc.text('SGST:', 130, yPos);
+        doc.text(`₹${bill.sgst.toLocaleString()}`, 175, yPos);
+        yPos += 6;
+
+        doc.text('Total GST:', 130, yPos);
+        doc.text(`₹${bill.totalGst.toLocaleString()}`, 175, yPos);
+        yPos += 8;
+      }
+
+      // Final total
+      doc.line(130, yPos, 190, yPos);
+      yPos += 6;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Final Amount:', 130, yPos);
+      doc.text(`₹${bill.finalAmount.toLocaleString()}`, 175, yPos);
+
+      // Footer
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Thank you for your business!', 105, 280, { align: 'center' });
+
+      // Save the PDF
+      doc.save(`Invoice_${bill.billNumber}.pdf`);
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
+
+  const calculateStats = () => {
+    const totalRevenue = filteredBills.reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
+    const paidBills = filteredBills.filter(b => b.paymentStatus === "Paid");
+    const paidRevenue = paidBills.reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
+    const pendingRevenue = totalRevenue - paidRevenue;
+
+    return {
+      totalBills: filteredBills.length,
+      totalRevenue,
+      paidRevenue,
+      pendingRevenue,
+      gstBills: filteredBills.filter(b => b.billType === "GST").length,
+      nonGstBills: filteredBills.filter(b => b.billType === "Non-GST").length,
+      demoBills: filteredBills.filter(b => b.billType === "Demo").length,
+    };
+  };
+
+  const stats = calculateStats();
+
+  return (
+    <div className="p-4 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Billing History</h2>
+          <p className="text-muted-foreground">View and manage all generated invoices</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline">
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+          <Button variant="outline">
+            <RefreshCcw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Total Bills
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalBills}</div>
+            <div className="text-sm text-muted-foreground">
+              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Demo: {stats.demoBills}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Total Revenue
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
+            <div className="flex items-center gap-1 text-sm">
+              <TrendingUp className="h-3 w-3 text-green-500" />
+              <span className="text-green-500">+12.5%</span>
+              <span className="text-muted-foreground">vs last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+              Paid Revenue
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.paidRevenue)}</div>
+            <div className="text-sm text-muted-foreground">
+              {((stats.paidRevenue / stats.totalRevenue) * 100).toFixed(1)}% of total
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <TrendingDown className="h-4 w-4 text-orange-600" />
+              Pending Revenue
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{formatCurrency(stats.pendingRevenue)}</div>
+            <div className="text-sm text-muted-foreground">
+              {((stats.pendingRevenue / stats.totalRevenue) * 100).toFixed(1)}% of total
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search bills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="GST">GST</SelectItem>
+                <SelectItem value="Non-GST">Non-GST</SelectItem>
+                <SelectItem value="Demo">Demo</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Payment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Input
+              type="date"
+              value={dateRange.start}
+              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+              placeholder="Start date"
+            />
+
+            <Input
+              type="date"
+              value={dateRange.end}
+              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+              placeholder="End date"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bills Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Bills ({filteredBills.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b">
+                <tr className="text-left">
+                  <th className="p-4 font-medium">Bill Number</th>
+                  <th className="p-4 font-medium">Customer</th>
+                  <th className="p-4 font-medium">Date</th>
+                  <th className="p-4 font-medium">Type</th>
+                  <th className="p-4 font-medium">Amount</th>
+                  <th className="p-4 font-medium">Payment</th>
+                  <th className="p-4 font-medium">Status</th>
+                  <th className="p-4 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentBills.map((bill) => (
+                  <tr key={bill.id} className="border-b hover:bg-muted/50">
+                    <td className="p-4">
+                      <div className="font-medium">{bill.billNumber}</div>
+                      <div className="text-sm text-muted-foreground">
+                        by {bill.createdBy}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium">{bill.customer.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {bill.customer.phone}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium">{formatDate(bill.billDate)}</div>
+                      {bill.dueDate && (
+                        <div className="text-sm text-muted-foreground">
+                          Due: {formatDate(bill.dueDate)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <Badge className={cn("text-xs", getTypeBadge(bill.billType))}>
+                        {bill.billType}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium">{formatCurrency(bill.finalAmount)}</div>
+                      {(bill.discountAmount || 0) > 0 && (
+                        <div className="text-sm text-muted-foreground">
+                          Discount: {formatCurrency(bill.discountAmount)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <Badge className={cn("text-xs", getPaymentBadge(bill.paymentStatus))}>
+                        {bill.paymentStatus}
+                      </Badge>
+                      {bill.paymentMethod && (
+                        <div className="text-sm text-muted-foreground">
+                          via {bill.paymentMethod}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <Badge className={cn("text-xs", getStatusBadge(bill.status))}>
+                        {bill.status}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedBill(bill)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => downloadBillPDF(bill)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteBillId(bill.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between p-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              Showing {indexOfFirstBill + 1} to {Math.min(indexOfLastBill, filteredBills.length)} of {filteredBills.length} bills
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bill Details Dialog */}
+      <Dialog open={!!selectedBill} onOpenChange={() => setSelectedBill(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Bill Details - {selectedBill?.billNumber}</DialogTitle>
+          </DialogHeader>
+          {selectedBill && (
+            <div className="space-y-6">
+              {/* Bill Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-2">Bill Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Bill Number:</span>
+                      <span className="font-medium">{selectedBill.billNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Type:</span>
+                      <Badge className={cn("text-xs", getTypeBadge(selectedBill.billType))}>
+                        {selectedBill.billType}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Date:</span>
+                      <span className="font-medium">{formatDate(selectedBill.billDate)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <Badge className={cn("text-xs", getStatusBadge(selectedBill.status))}>
+                        {selectedBill.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Customer Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Name:</span>
+                      <span className="font-medium">{selectedBill.customer.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Phone:</span>
+                      <span className="font-medium">{selectedBill.customer.phone}</span>
+                    </div>
+                    {selectedBill.customer.email && (
+                      <div className="flex justify-between">
+                        <span>Email:</span>
+                        <span className="font-medium">{selectedBill.customer.email}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div>
+                <h4 className="font-semibold mb-2">Items</h4>
+                <table className="w-full border rounded-lg">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="p-3 text-left">Product</th>
+                      <th className="p-3 text-right">Qty</th>
+                      <th className="p-3 text-right">Rate</th>
+                      <th className="p-3 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedBill.items.map((item, index) => (
+                      <tr key={index} className="border-t">
+                        <td className="p-3">{item.productName}</td>
+                        <td className="p-3 text-right">{item.quantity}</td>
+                        <td className="p-3 text-right">{formatCurrency(item.rate)}</td>
+                        <td className="p-3 text-right">{formatCurrency(item.totalAmount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals */}
+              <div className="flex justify-end">
+                <div className="w-80 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>{formatCurrency(selectedBill.subtotal)}</span>
+                  </div>
+                  {(selectedBill.discountAmount || 0) > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount:</span>
+                      <span>-{formatCurrency(selectedBill.discountAmount)}</span>
+                    </div>
+                  )}
+                  {(selectedBill.taxAmount || 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span>Tax:</span>
+                      <span>{formatCurrency(selectedBill.taxAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-lg border-t pt-2">
+                    <span>Total:</span>
+                    <span>{formatCurrency(selectedBill.finalAmount)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-4">
+                <Button>
+                  <Printer className="h-4 w-4" />
+                  Print
+                </Button>
+                <Button variant="outline" onClick={() => selectedBill && downloadBillPDF(selectedBill)}>
+                  <Download className="h-4 w-4" />
+                  Download PDF
+                </Button>
+                <Button variant="outline">
+                  <Edit2 className="h-4 w-4" />
+                  Edit
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteBillId} onOpenChange={() => setDeleteBillId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Bill</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this bill? This action cannot be undone and will remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteBillId && handleDelete(deleteBillId)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
