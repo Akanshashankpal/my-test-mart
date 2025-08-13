@@ -31,7 +31,10 @@ import {
   Calculator,
   Package,
   Calendar,
-  X
+  X,
+  FileText,
+  ArrowLeft,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -60,8 +63,17 @@ interface Invoice {
   discountPercent: number;
   discountAmount: number;
   gstTotal: number;
+  cgst: number;
+  sgst: number;
   finalAmount: number;
-  billingMode: "GST" | "Non-GST";
+  billingMode: "GST" | "Non-GST" | "Quotation";
+  observation: string;
+  termsAndConditions: string;
+  isReturnSale: boolean;
+  paymentMode: "full" | "partial";
+  paidAmount: number;
+  pendingAmount: number;
+  paymentMethod: "cash" | "online" | "mixed";
   createdAt: Date;
   status: "draft" | "saved";
 }
@@ -73,7 +85,7 @@ export default function SimpleBilling() {
   
   // Current workflow state
   const [currentStep, setCurrentStep] = useState<"customer" | "invoice" | "list">("list");
-  const [billingMode, setBillingMode] = useState<"GST" | "Non-GST">("GST");
+  const [billingMode, setBillingMode] = useState<"GST" | "Non-GST" | "Quotation">("GST");
   
   // Customer form state
   const [customer, setCustomer] = useState<Customer>({
@@ -92,8 +104,17 @@ export default function SimpleBilling() {
     discountPercent: 0,
     discountAmount: 0,
     gstTotal: 0,
+    cgst: 0,
+    sgst: 0,
     finalAmount: 0,
     billingMode: "GST",
+    observation: "",
+    termsAndConditions: "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
+    isReturnSale: false,
+    paymentMode: "full",
+    paidAmount: 0,
+    pendingAmount: 0,
+    paymentMethod: "cash",
     createdAt: new Date(),
     status: "draft",
   });
@@ -105,6 +126,12 @@ export default function SimpleBilling() {
     price: 0,
     gstPercent: 18,
   });
+
+  // Bill preview dialog state
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Payment dialog state
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   
   // Generate bill number
   const generateBillNumber = () => {
@@ -118,22 +145,31 @@ export default function SimpleBilling() {
     const subtotal = currentInvoice.items.reduce((sum, item) => sum + item.totalAmount, 0);
     const discountAmount = (subtotal * currentInvoice.discountPercent) / 100;
     const discountedSubtotal = subtotal - discountAmount;
-    
+
     let gstTotal = 0;
+    let cgst = 0;
+    let sgst = 0;
+
     if (billingMode === "GST") {
       gstTotal = currentInvoice.items.reduce((sum, item) => sum + item.gstAmount, 0);
+      cgst = gstTotal / 2;
+      sgst = gstTotal / 2;
     }
-    
+
     const finalAmount = discountedSubtotal + gstTotal;
-    
+    const pendingAmount = finalAmount - currentInvoice.paidAmount;
+
     setCurrentInvoice(prev => ({
       ...prev,
       subtotal,
       discountAmount,
       gstTotal,
+      cgst,
+      sgst,
       finalAmount,
+      pendingAmount,
     }));
-  }, [currentInvoice.items, currentInvoice.discountPercent, billingMode]);
+  }, [currentInvoice.items, currentInvoice.discountPercent, currentInvoice.paidAmount, billingMode]);
   
   // Start new invoice
   const startNewInvoice = () => {
@@ -158,8 +194,17 @@ export default function SimpleBilling() {
       discountPercent: 0,
       discountAmount: 0,
       gstTotal: 0,
+      cgst: 0,
+      sgst: 0,
       finalAmount: 0,
       billingMode,
+      observation: "",
+      termsAndConditions: "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
+      isReturnSale: false,
+      paymentMode: "full",
+      paidAmount: 0,
+      pendingAmount: 0,
+      paymentMethod: "cash",
       createdAt: new Date(),
       status: "draft",
     });
@@ -169,33 +214,37 @@ export default function SimpleBilling() {
   
   // Add item to invoice
   const addItem = () => {
-    if (!newItem.productName || newItem.quantity <= 0 || newItem.price <= 0) {
-      alert("Please fill in all item details");
+    const quantity = parseFloat(newItem.quantity) || 0;
+    const price = parseFloat(newItem.price) || 0;
+
+    if (!newItem.productName || quantity <= 0 || price <= 0) {
+      alert("Please fill in all item details with valid values");
       return;
     }
-    
-    const totalAmount = newItem.quantity * newItem.price;
+
+    const totalAmount = quantity * price;
     const gstAmount = billingMode === "GST" ? (totalAmount * newItem.gstPercent) / 100 : 0;
-    
+
     const item: InvoiceItem = {
       id: Date.now().toString(),
       productName: newItem.productName,
-      quantity: newItem.quantity,
-      price: newItem.price,
+      quantity,
+      price,
       gstPercent: newItem.gstPercent,
       totalAmount,
       gstAmount,
     };
-    
+
     setCurrentInvoice(prev => ({
       ...prev,
       items: [...prev.items, item],
     }));
-    
+
+    // Auto-clear form after adding item
     setNewItem({
       productName: "",
-      quantity: 1,
-      price: 0,
+      quantity: "",
+      price: "",
       gstPercent: 18,
     });
   };
@@ -259,100 +308,193 @@ export default function SimpleBilling() {
     try {
       const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF();
-      
-      // Header
-      doc.setFontSize(20);
+
+      // Enhanced Header (matching preview format)
+      doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
-      doc.text('ElectroMart', 105, 20, { align: 'center' });
-      
-      doc.setFontSize(16);
-      doc.text('INVOICE', 105, 30, { align: 'center' });
-      
-      // Invoice details
+      doc.text('ElectroMart', 20, 25);
+
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Invoice No: ${currentInvoice.billNumber}`, 20, 45);
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 52);
-      doc.text(`Mode: ${billingMode} Billing`, 20, 59);
-      
-      // Customer details
+      doc.text('Business Management Solution', 20, 32);
+      doc.text('Delhi, India', 20, 38);
+
+      // Right side header info
+      const documentTitle = billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE";
+      doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text('Bill To:', 20, 75);
+      doc.text(documentTitle, 150, 25);
+
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(currentInvoice.customer.name, 20, 82);
-      doc.text(`Phone: ${currentInvoice.customer.phone}`, 20, 89);
-      if (currentInvoice.customer.address) {
-        doc.text(`Address: ${currentInvoice.customer.address}`, 20, 96);
-      }
-      
-      // Items table
-      let yPos = 115;
+      doc.text(`No: ${currentInvoice.billNumber}`, 150, 32);
+      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 150, 38);
+      doc.text(`Type: ${billingMode}`, 150, 44);
+
+      // Header border line
+      doc.line(20, 50, 190, 50);
+
+      // Customer details
+      let yPos = 60;
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('Bill To:', 20, yPos);
+      yPos += 8;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(currentInvoice.customer.name, 20, yPos);
+      yPos += 6;
+      doc.text(`Phone: ${currentInvoice.customer.phone}`, 20, yPos);
+      yPos += 6;
+      if (currentInvoice.customer.address) {
+        doc.text(`Address: ${currentInvoice.customer.address}`, 20, yPos);
+        yPos += 6;
+      }
+
+      // Items table header
+      yPos += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
       doc.text('Item', 20, yPos);
       doc.text('Qty', 80, yPos);
-      doc.text('Rate (₹)', 100, yPos);
+      doc.text('Rate (₹)', 105, yPos);
       if (billingMode === 'GST') {
         doc.text('GST%', 130, yPos);
-        doc.text('GST Amt (₹)', 150, yPos);
-        doc.text('Total (₹)', 175, yPos);
-      } else {
-        doc.text('Total (₹)', 150, yPos);
+        doc.text('GST (₹)', 150, yPos);
       }
-      
+      doc.text('Total (₹)', 175, yPos);
+
+      // Table header line
       doc.line(20, yPos + 2, 190, yPos + 2);
-      yPos += 10;
-      
+      yPos += 8;
+
       // Items
       doc.setFont('helvetica', 'normal');
       currentInvoice.items.forEach(item => {
-        doc.text(item.productName.substring(0, 25), 20, yPos);
+        doc.text(item.productName.substring(0, 20), 20, yPos);
         doc.text(item.quantity.toString(), 80, yPos);
-        doc.text(item.price.toLocaleString(), 100, yPos);
+        doc.text(item.price.toLocaleString(), 105, yPos);
         if (billingMode === 'GST') {
           doc.text(`${item.gstPercent}%`, 130, yPos);
           doc.text(item.gstAmount.toLocaleString(), 150, yPos);
-          doc.text(item.totalAmount.toLocaleString(), 175, yPos);
-        } else {
-          doc.text(item.totalAmount.toLocaleString(), 150, yPos);
         }
-        yPos += 8;
+        doc.text(item.totalAmount.toLocaleString(), 175, yPos);
+        yPos += 7;
       });
-      
-      // Totals
+
+      // Totals section
       yPos += 10;
-      doc.line(100, yPos, 190, yPos);
+      doc.line(105, yPos, 190, yPos);
       yPos += 8;
-      
+
+      // Subtotal
       doc.text('Subtotal:', 130, yPos);
       doc.text(`₹${currentInvoice.subtotal.toLocaleString()}`, 175, yPos);
       yPos += 6;
-      
+
+      // Discount
       if (currentInvoice.discountAmount > 0) {
         doc.text(`Discount (${currentInvoice.discountPercent}%):`, 130, yPos);
         doc.text(`-₹${currentInvoice.discountAmount.toLocaleString()}`, 175, yPos);
         yPos += 6;
       }
-      
+
+      // GST breakdown (matching preview format)
       if (billingMode === 'GST' && currentInvoice.gstTotal > 0) {
+        doc.text('CGST (9%):', 130, yPos);
+        doc.text(`₹${currentInvoice.cgst.toLocaleString()}`, 175, yPos);
+        yPos += 6;
+        doc.text('SGST (9%):', 130, yPos);
+        doc.text(`₹${currentInvoice.sgst.toLocaleString()}`, 175, yPos);
+        yPos += 6;
+        doc.setFont('helvetica', 'bold');
         doc.text('Total GST:', 130, yPos);
         doc.text(`₹${currentInvoice.gstTotal.toLocaleString()}`, 175, yPos);
+        doc.setFont('helvetica', 'normal');
         yPos += 8;
       }
-      
+
       // Final total
       doc.line(130, yPos, 190, yPos);
-      yPos += 6;
+      yPos += 8;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text('Final Amount:', 130, yPos);
       doc.text(`₹${currentInvoice.finalAmount.toLocaleString()}`, 175, yPos);
-      
-      // Footer
-      doc.setFontSize(8);
+      yPos += 12;
+
+      // Payment Details Section
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('Payment Details:', 20, yPos);
+      yPos += 8;
+
       doc.setFont('helvetica', 'normal');
-      doc.text('Thank you for your business!', 105, 280, { align: 'center' });
-      
-      doc.save(`Invoice_${currentInvoice.billNumber}.pdf`);
+      doc.setFontSize(9);
+      doc.text(`Method: ${currentInvoice.paymentMethod.toUpperCase()}`, 20, yPos);
+      yPos += 5;
+      doc.text(`Status: ${currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}`, 20, yPos);
+      yPos += 5;
+
+      if (currentInvoice.paymentMode === "partial") {
+        doc.text(`Paid: ₹${currentInvoice.paidAmount.toLocaleString()}`, 20, yPos);
+        yPos += 5;
+        doc.setTextColor(255, 0, 0); // Red color for pending
+        doc.text(`Pending: ₹${currentInvoice.pendingAmount.toLocaleString()}`, 20, yPos);
+        doc.setTextColor(0, 0, 0); // Reset to black
+        yPos += 5;
+      }
+
+      // Observation
+      if (currentInvoice.observation) {
+        yPos += 8;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Observation:', 20, yPos);
+        yPos += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        const observationLines = doc.splitTextToSize(currentInvoice.observation, 170);
+        doc.text(observationLines, 20, yPos);
+        yPos += observationLines.length * 4;
+      }
+
+      // Terms & Conditions
+      yPos += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Terms & Conditions:', 20, yPos);
+      yPos += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      const termsLines = currentInvoice.termsAndConditions.split('\\n');
+      termsLines.forEach(term => {
+        if (term.trim()) {
+          doc.text(term, 20, yPos);
+          yPos += 4;
+        }
+      });
+
+      // Footer
+      yPos += 15;
+      doc.line(20, yPos, 190, yPos);
+      yPos += 8;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Thank you for your business!', 105, yPos, { align: 'center' });
+      yPos += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text('This is a computer-generated document and does not require a signature.', 105, yPos, { align: 'center' });
+
+      // Generate filename based on document type
+      const filename = billingMode === "Quotation" ? `Quotation_${currentInvoice.billNumber}.pdf` :
+                      currentInvoice.isReturnSale ? `Return_${currentInvoice.billNumber}.pdf` :
+                      `Invoice_${currentInvoice.billNumber}.pdf`;
+
+      doc.save(filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
@@ -361,7 +503,299 @@ export default function SimpleBilling() {
   
   // Print invoice
   const printInvoice = () => {
-    window.print();
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const billContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print Invoice - ${currentInvoice.billNumber}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 14px;
+              line-height: 1.4;
+              color: #000;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              border-bottom: 2px solid #000;
+              padding-bottom: 15px;
+              margin-bottom: 20px;
+            }
+            .company-info h1 {
+              font-size: 28px;
+              color: #16a34a;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            .company-info p {
+              font-size: 12px;
+              color: #666;
+              margin: 2px 0;
+            }
+            .document-info {
+              text-align: right;
+            }
+            .document-info h2 {
+              font-size: 20px;
+              font-weight: bold;
+              margin-bottom: 8px;
+            }
+            .document-info p {
+              font-size: 12px;
+              margin: 2px 0;
+            }
+            .customer-section {
+              margin-bottom: 20px;
+            }
+            .customer-section h3 {
+              font-weight: bold;
+              margin-bottom: 8px;
+              font-size: 14px;
+            }
+            .customer-section p {
+              font-size: 12px;
+              margin: 3px 0;
+            }
+            .items-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            .items-table th,
+            .items-table td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+              font-size: 12px;
+            }
+            .items-table th {
+              background-color: #f5f5f5;
+              font-weight: bold;
+            }
+            .items-table .text-center {
+              text-align: center;
+            }
+            .items-table .text-right {
+              text-align: right;
+            }
+            .totals-section {
+              display: flex;
+              justify-content: flex-end;
+              margin-bottom: 20px;
+            }
+            .totals-table {
+              width: 300px;
+            }
+            .totals-table tr {
+              border-bottom: 1px solid #eee;
+            }
+            .totals-table td {
+              padding: 5px;
+              font-size: 12px;
+            }
+            .totals-table .final-total {
+              font-weight: bold;
+              font-size: 14px;
+              border-top: 2px solid #000;
+              padding-top: 8px;
+            }
+            .payment-section,
+            .observation-section,
+            .terms-section {
+              margin-bottom: 20px;
+            }
+            .payment-section h3,
+            .observation-section h3,
+            .terms-section h3 {
+              font-weight: bold;
+              margin-bottom: 8px;
+              font-size: 14px;
+            }
+            .payment-details {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              font-size: 12px;
+            }
+            .payment-details p {
+              margin: 3px 0;
+            }
+            .pending-amount {
+              color: #dc2626;
+              font-weight: bold;
+            }
+            .observation-content,
+            .terms-content {
+              background-color: #f9f9f9;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              font-size: 12px;
+            }
+            .terms-content p {
+              margin: 3px 0;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 30px;
+              padding-top: 15px;
+              border-top: 1px solid #ddd;
+              font-size: 12px;
+              color: #666;
+            }
+            .footer .thank-you {
+              font-weight: bold;
+              font-size: 14px;
+              color: #000;
+              margin-bottom: 5px;
+            }
+            @media print {
+              body { margin: 0; padding: 15px; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="company-info">
+              <h1>ElectroMart</h1>
+              <p>Business Management Solution</p>
+              <p>Delhi, India</p>
+            </div>
+            <div class="document-info">
+              <h2>${billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE"}</h2>
+              <p><strong>No:</strong> ${currentInvoice.billNumber}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
+              <p><strong>Type:</strong> ${billingMode}</p>
+            </div>
+          </div>
+
+          <div class="customer-section">
+            <h3>Bill To:</h3>
+            <p><strong>${currentInvoice.customer.name}</strong></p>
+            <p>Phone: ${currentInvoice.customer.phone}</p>
+            ${currentInvoice.customer.address ? `<p>Address: ${currentInvoice.customer.address}</p>` : ''}
+          </div>
+
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="text-center">Qty</th>
+                <th class="text-right">Rate (₹)</th>
+                ${billingMode === 'GST' ? '<th class="text-center">GST%</th><th class="text-right">GST Amt (₹)</th>' : ''}
+                <th class="text-right">Total (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${currentInvoice.items.map(item => `
+                <tr>
+                  <td>${item.productName}</td>
+                  <td class="text-center">${item.quantity}</td>
+                  <td class="text-right">${item.price.toLocaleString()}</td>
+                  ${billingMode === 'GST' ? `
+                    <td class="text-center">${item.gstPercent}%</td>
+                    <td class="text-right">${item.gstAmount.toLocaleString()}</td>
+                  ` : ''}
+                  <td class="text-right">${item.totalAmount.toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="totals-section">
+            <table class="totals-table">
+              <tr>
+                <td>Subtotal:</td>
+                <td class="text-right">₹${currentInvoice.subtotal.toLocaleString()}</td>
+              </tr>
+              ${currentInvoice.discountAmount > 0 ? `
+                <tr>
+                  <td>Discount (${currentInvoice.discountPercent}%):</td>
+                  <td class="text-right" style="color: #16a34a;">-₹${currentInvoice.discountAmount.toLocaleString()}</td>
+                </tr>
+              ` : ''}
+              ${billingMode === 'GST' && currentInvoice.gstTotal > 0 ? `
+                <tr>
+                  <td>CGST (9%):</td>
+                  <td class="text-right">₹${currentInvoice.cgst.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td>SGST (9%):</td>
+                  <td class="text-right">₹${currentInvoice.sgst.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td><strong>Total GST:</strong></td>
+                  <td class="text-right"><strong>₹${currentInvoice.gstTotal.toLocaleString()}</strong></td>
+                </tr>
+              ` : ''}
+              <tr class="final-total">
+                <td><strong>Final Amount:</strong></td>
+                <td class="text-right"><strong>₹${currentInvoice.finalAmount.toLocaleString()}</strong></td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="payment-section">
+            <h3>Payment Details:</h3>
+            <div class="payment-details">
+              <div>
+                <p><strong>Method:</strong> ${currentInvoice.paymentMethod.toUpperCase()}</p>
+                <p><strong>Status:</strong> ${currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}</p>
+                ${currentInvoice.paymentMode === "partial" ? `
+                  <p><strong>Paid:</strong> ₹${currentInvoice.paidAmount.toLocaleString()}</p>
+                  <p class="pending-amount"><strong>Pending:</strong> ₹${currentInvoice.pendingAmount.toLocaleString()}</p>
+                ` : ''}
+              </div>
+              ${currentInvoice.observation ? `
+                <div>
+                  <h4 style="font-weight: bold; margin-bottom: 5px;">Observation:</h4>
+                  <p style="font-size: 11px; background: #f9f9f9; padding: 8px; border-radius: 3px;">${currentInvoice.observation}</p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="terms-section">
+            <h3>Terms & Conditions:</h3>
+            <div class="terms-content">
+              ${currentInvoice.termsAndConditions.split('\\n').map(term =>
+                term.trim() ? `<p>${term}</p>` : ''
+              ).join('')}
+            </div>
+          </div>
+
+          <div class="footer">
+            <p class="thank-you">Thank you for your business!</p>
+            <p>This is a computer-generated document and does not require a signature.</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(billContent);
+    printWindow.document.close();
+
+    // Wait for content to load, then print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    };
   };
   
   // Format currency
@@ -384,9 +818,24 @@ export default function SimpleBilling() {
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">New Invoice</h1>
-            <p className="text-gray-600">Enter customer details to create a new invoice</p>
+          <div className="mb-8">
+            {/* Mobile Back Button */}
+            <div className="flex items-center gap-4 mb-4 lg:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentStep("list")}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">New Invoice</h1>
+              <p className="text-gray-600">Enter customer details to create a new invoice</p>
+            </div>
           </div>
           
           {/* Billing Mode Selection */}
@@ -394,26 +843,20 @@ export default function SimpleBilling() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calculator className="h-5 w-5" />
-                Billing Mode
+                Document Type
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
-                <Button
-                  variant={billingMode === "GST" ? "default" : "outline"}
-                  onClick={() => setBillingMode("GST")}
-                  className="flex-1"
-                >
-                  GST Billing
-                </Button>
-                <Button
-                  variant={billingMode === "Non-GST" ? "default" : "outline"}
-                  onClick={() => setBillingMode("Non-GST")}
-                  className="flex-1"
-                >
-                  Non-GST Billing
-                </Button>
-              </div>
+              <Select value={billingMode} onValueChange={(value: "GST" | "Non-GST" | "Quotation") => setBillingMode(value)}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Select billing mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="GST">GST Billing</SelectItem>
+                  <SelectItem value="Non-GST">Non-GST Billing</SelectItem>
+                  <SelectItem value="Quotation">Quotation</SelectItem>
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
           
@@ -490,12 +933,25 @@ export default function SimpleBilling() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">
+            {/* Mobile Back Button */}
+            <div className="flex items-center gap-4 mb-4 lg:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentStep("list")}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </div>
+
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
                 <p className="text-gray-600">Invoice No: {currentInvoice.billNumber}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 hidden lg:flex">
                 <Button variant="outline" onClick={() => setCurrentStep("list")}>
                   <X className="h-4 w-4 mr-2" />
                   Cancel
@@ -542,7 +998,7 @@ export default function SimpleBilling() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="productName">Product Name</Label>
                       <Input
@@ -559,7 +1015,8 @@ export default function SimpleBilling() {
                         type="number"
                         min="1"
                         value={newItem.quantity}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, quantity: e.target.value }))}
+                        placeholder="Enter quantity"
                       />
                     </div>
                     <div>
@@ -570,22 +1027,10 @@ export default function SimpleBilling() {
                         min="0"
                         step="0.01"
                         value={newItem.price}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                        onChange={(e) => setNewItem(prev => ({ ...prev, price: e.target.value }))}
+                        placeholder="Enter price"
                       />
                     </div>
-                    {billingMode === "GST" && (
-                      <div>
-                        <Label htmlFor="gstPercent">GST %</Label>
-                        <Input
-                          id="gstPercent"
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={newItem.gstPercent}
-                          onChange={(e) => setNewItem(prev => ({ ...prev, gstPercent: parseFloat(e.target.value) || 0 }))}
-                        />
-                      </div>
-                    )}
                   </div>
                   <Button onClick={addItem} className="mt-4 w-full bg-green-600 hover:bg-green-700">
                     <Package className="h-4 w-4 mr-2" />
@@ -688,10 +1133,20 @@ export default function SimpleBilling() {
                     )}
 
                     {billingMode === "GST" && currentInvoice.gstTotal > 0 && (
-                      <div className="flex justify-between">
-                        <span>Total GST:</span>
-                        <span>{formatCurrency(currentInvoice.gstTotal)}</span>
-                      </div>
+                      <>
+                        <div className="flex justify-between">
+                          <span>CGST (9%):</span>
+                          <span>{formatCurrency(currentInvoice.cgst)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>SGST (9%):</span>
+                          <span>{formatCurrency(currentInvoice.sgst)}</span>
+                        </div>
+                        <div className="flex justify-between font-medium">
+                          <span>Total GST:</span>
+                          <span>{formatCurrency(currentInvoice.gstTotal)}</span>
+                        </div>
+                      </>
                     )}
 
                     <div className="border-t pt-2">
@@ -703,10 +1158,164 @@ export default function SimpleBilling() {
                   </div>
                 </CardContent>
               </Card>
-              
+
+              {/* Return Sale Toggle */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Return Sale
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="returnSale"
+                      checked={currentInvoice.isReturnSale}
+                      onChange={(e) => setCurrentInvoice(prev => ({
+                        ...prev,
+                        isReturnSale: e.target.checked
+                      }))}
+                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                    />
+                    <Label htmlFor="returnSale" className="text-sm">
+                      This is a return sale
+                    </Label>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Observation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Observation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <textarea
+                    value={currentInvoice.observation}
+                    onChange={(e) => setCurrentInvoice(prev => ({
+                      ...prev,
+                      observation: e.target.value
+                    }))}
+                    placeholder="Add any notes or observations for this invoice..."
+                    className="w-full h-16 p-3 border border-gray-300 rounded-lg resize-none text-sm"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Terms & Conditions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Terms & Conditions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <textarea
+                    value={currentInvoice.termsAndConditions}
+                    onChange={(e) => setCurrentInvoice(prev => ({
+                      ...prev,
+                      termsAndConditions: e.target.value
+                    }))}
+                    placeholder="Enter terms and conditions..."
+                    className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none text-sm"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Payment Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Payment Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="paymentMethod">Payment Method</Label>
+                      <Select
+                        value={currentInvoice.paymentMethod}
+                        onValueChange={(value: "cash" | "online" | "mixed") =>
+                          setCurrentInvoice(prev => ({ ...prev, paymentMethod: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="online">Online</SelectItem>
+                          <SelectItem value="mixed">Mixed (Cash + Online)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="paymentMode">Payment Status</Label>
+                      <Select
+                        value={currentInvoice.paymentMode}
+                        onValueChange={(value: "full" | "partial") =>
+                          setCurrentInvoice(prev => ({ ...prev, paymentMode: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="full">Full Payment</SelectItem>
+                          <SelectItem value="partial">Partial Payment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {currentInvoice.paymentMode === "partial" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="paidAmount">Paid Amount (₹)</Label>
+                        <Input
+                          id="paidAmount"
+                          type="number"
+                          min="0"
+                          max={currentInvoice.finalAmount}
+                          value={currentInvoice.paidAmount}
+                          onChange={(e) => setCurrentInvoice(prev => ({
+                            ...prev,
+                            paidAmount: parseFloat(e.target.value) || 0
+                          }))}
+                          placeholder="Enter paid amount"
+                        />
+                      </div>
+                      <div>
+                        <Label>Pending Amount</Label>
+                        <div className="h-10 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md flex items-center text-sm">
+                          {formatCurrency(currentInvoice.pendingAmount)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Action Buttons */}
               <Card>
                 <CardContent className="pt-6 space-y-3">
+                  <Button
+                    onClick={() => setShowPreview(true)}
+                    variant="outline"
+                    className="w-full"
+                    disabled={currentInvoice.items.length === 0}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Preview Bill
+                  </Button>
+
                   <Button
                     onClick={saveInvoice}
                     className="w-full bg-green-600 hover:bg-green-700"
@@ -740,6 +1349,169 @@ export default function SimpleBilling() {
             </div>
           </div>
         </div>
+
+        {/* Bill Preview Dialog */}
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Invoice Preview - {currentInvoice.billNumber}</DialogTitle>
+            </DialogHeader>
+            <div className="bg-white p-8 border border-gray-200 rounded-lg">
+              {/* Invoice Header */}
+              <div className="border-b pb-6 mb-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h1 className="text-3xl font-bold text-green-600 mb-2">ElectroMart</h1>
+                    <p className="text-sm text-gray-600">Business Management Solution</p>
+                    <p className="text-sm text-gray-600">Delhi, India</p>
+                  </div>
+                  <div className="text-right">
+                    <h2 className="text-2xl font-bold mb-2">
+                      {billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE"}
+                    </h2>
+                    <p><strong>No:</strong> {currentInvoice.billNumber}</p>
+                    <p><strong>Date:</strong> {new Date().toLocaleDateString('en-IN')}</p>
+                    <p><strong>Type:</strong> {billingMode}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Details */}
+              <div className="mb-6">
+                <h3 className="font-bold mb-2">Bill To:</h3>
+                <p className="font-medium">{currentInvoice.customer.name}</p>
+                <p>Phone: {currentInvoice.customer.phone}</p>
+                {currentInvoice.customer.address && (
+                  <p>Address: {currentInvoice.customer.address}</p>
+                )}
+              </div>
+
+              {/* Items Table */}
+              <div className="mb-6">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 p-2 text-left">Item</th>
+                      <th className="border border-gray-300 p-2 text-center">Qty</th>
+                      <th className="border border-gray-300 p-2 text-right">Rate (₹)</th>
+                      {billingMode === 'GST' && (
+                        <>
+                          <th className="border border-gray-300 p-2 text-center">GST%</th>
+                          <th className="border border-gray-300 p-2 text-right">GST Amt (₹)</th>
+                        </>
+                      )}
+                      <th className="border border-gray-300 p-2 text-right">Total (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentInvoice.items.map((item) => (
+                      <tr key={item.id}>
+                        <td className="border border-gray-300 p-2">{item.productName}</td>
+                        <td className="border border-gray-300 p-2 text-center">{item.quantity}</td>
+                        <td className="border border-gray-300 p-2 text-right">{item.price.toLocaleString()}</td>
+                        {billingMode === 'GST' && (
+                          <>
+                            <td className="border border-gray-300 p-2 text-center">{item.gstPercent}%</td>
+                            <td className="border border-gray-300 p-2 text-right">{item.gstAmount.toLocaleString()}</td>
+                          </>
+                        )}
+                        <td className="border border-gray-300 p-2 text-right">{item.totalAmount.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals */}
+              <div className="flex justify-end mb-6">
+                <div className="w-64">
+                  <div className="flex justify-between py-1">
+                    <span>Subtotal:</span>
+                    <span>₹{currentInvoice.subtotal.toLocaleString()}</span>
+                  </div>
+                  {currentInvoice.discountAmount > 0 && (
+                    <div className="flex justify-between py-1 text-green-600">
+                      <span>Discount ({currentInvoice.discountPercent}%):</span>
+                      <span>-₹{currentInvoice.discountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {billingMode === 'GST' && currentInvoice.gstTotal > 0 && (
+                    <>
+                      <div className="flex justify-between py-1">
+                        <span>CGST (9%):</span>
+                        <span>₹{currentInvoice.cgst.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span>SGST (9%):</span>
+                        <span>₹{currentInvoice.sgst.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between py-1 font-medium">
+                        <span>Total GST:</span>
+                        <span>₹{currentInvoice.gstTotal.toLocaleString()}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Final Amount:</span>
+                      <span>₹{currentInvoice.finalAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              <div className="mb-6 grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-bold mb-2">Payment Details:</h3>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Method:</strong> {currentInvoice.paymentMethod.toUpperCase()}</p>
+                    <p><strong>Status:</strong> {currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}</p>
+                    {currentInvoice.paymentMode === "partial" && (
+                      <>
+                        <p><strong>Paid:</strong> ₹{currentInvoice.paidAmount.toLocaleString()}</p>
+                        <p className="text-red-600"><strong>Pending:</strong> ₹{currentInvoice.pendingAmount.toLocaleString()}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {currentInvoice.observation && (
+                  <div>
+                    <h3 className="font-bold mb-2">Observation:</h3>
+                    <p className="text-sm bg-gray-50 p-3 rounded border">{currentInvoice.observation}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Terms & Conditions */}
+              <div className="mb-6">
+                <h3 className="font-bold mb-2">Terms & Conditions:</h3>
+                <div className="text-sm bg-gray-50 p-3 rounded border">
+                  {currentInvoice.termsAndConditions.split('\\n').map((term, index) => (
+                    <p key={index} className="mb-1">{term}</p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-sm text-gray-600 mt-8 border-t pt-4">
+                <p className="font-medium">Thank you for your business!</p>
+                <p className="text-xs mt-1">This is a computer-generated document and does not require a signature.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-4">
+              <Button onClick={() => setShowPreview(false)} variant="outline" className="flex-1">
+                Close Preview
+              </Button>
+              <Button onClick={downloadPDF} className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

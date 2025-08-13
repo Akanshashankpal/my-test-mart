@@ -21,7 +21,8 @@ import {
   Activity,
   Target,
   Star,
-  ShieldAlert
+  ShieldAlert,
+  Receipt
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ import { cn } from "@/lib/utils";
 const todayStats = {
   sales: { amount: 23450, transactions: 12, change: 18.5 },
   customers: { new: 8, returning: 15, change: 12.0 },
+  returnSales: { amount: 1200, count: 2, change: -5.2 },
 };
 
 const overallStats = {
@@ -175,7 +177,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="px-4 pb-4 pt-0 space-y-6">
+    <div className="px-4 pb-4 pt-0 space-y-4">
       {/* Header with Notifications */}
       <div className="flex items-center justify-between">
         <div>
@@ -298,24 +300,24 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Activity className="h-4 w-4 text-purple-600" />
-                Avg. Order Value
+                <TrendingDown className="h-4 w-4 text-red-600" />
+                Today Return Sale
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {formatCurrency(Math.round(todayStats.sales.amount / todayStats.sales.transactions))}
+              <div className="text-2xl font-bold text-red-600">
+                {formatCurrency(todayStats.returnSales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+8.2%</span>
+                <TrendingDown className="h-3 w-3 text-red-500" />
+                <span className="text-red-500">{todayStats.returnSales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                Per transaction average
+                {todayStats.returnSales.count} return transactions
               </div>
             </CardContent>
           </Card>
@@ -340,7 +342,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Overall Statistics */}
+      {/* Overall Statistics */} 
       <div>
         <h3 className="text-xl font-semibold mb-4 text-foreground">Overall Performance</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -381,15 +383,16 @@ export default function Dashboard() {
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Products
+                <DollarSign className="h-4 w-4" />
+                Total Rs
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overallStats.products.total}</div>
+              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <AlertCircle className="h-3 w-3 text-orange-500" />
-                <span className="text-orange-500">{overallStats.products.lowStock} low stock</span>
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                <span className="text-green-500">+{overallStats.revenue.growth}%</span>
+                <span className="text-muted-foreground">total value</span>
               </div>
             </CardContent>
           </Card>
@@ -445,51 +448,54 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Category Breakdown */}
+        {/* Sales Donut Chart */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PieChart className="h-5 w-5 text-primary" />
-              Sales by Category
+              Sales Distribution
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {chartData.categoryBreakdown.map((category, index) => (
-                <div key={category.category} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{category.category}</span>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 w-24">
-                      <div className="bg-gray-200 rounded-full h-2">
-                        <div
-                          className={cn(
-                            "h-2 rounded-full",
-                            index === 0 && "bg-green-500",
-                            index === 1 && "bg-blue-500",
-                            index === 2 && "bg-purple-500",
-                            index === 3 && "bg-orange-500"
-                          )}
-                          style={{ width: `${category.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted-foreground w-16 text-right">
-                      {category.percentage}%
-                    </span>
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative w-32 h-32">
+                <div className="w-32 h-32 rounded-full border-8 border-green-500 border-t-blue-500 border-r-purple-500 border-b-orange-500 animate-pulse"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-lg font-bold">₹12.5L</div>
+                    <div className="text-xs text-muted-foreground">Total Sales</div>
                   </div>
                 </div>
-              ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>GST Sales</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Non-GST</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <span>Returns</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span>Pending</span>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Transactions */}
+      {/* Recent Bills */}
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            Recent Transactions
+            <Receipt className="h-5 w-5 text-primary" />
+            Recent Bills
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">

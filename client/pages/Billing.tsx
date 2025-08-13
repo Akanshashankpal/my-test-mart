@@ -335,6 +335,7 @@ export default function Billing() {
                   <SelectContent>
                     <SelectItem value="GST">GST Billing</SelectItem>
                     <SelectItem value="Non-GST">Non-GST Billing</SelectItem>
+                    <SelectItem value="Non-GST">Quatation</SelectItem>
                   </SelectContent>
                 </Select>
               </CardContent>
