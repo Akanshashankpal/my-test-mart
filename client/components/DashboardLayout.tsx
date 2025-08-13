@@ -220,7 +220,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Main content area */}
-        <main className="flex-1 min-h-0 pt-20">
+        <main className="flex-1 min-h-0 lg:absolute lg:top-16 lg:left-64 lg:right-0">
           {children}
         </main>
 
