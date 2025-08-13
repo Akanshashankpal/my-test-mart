@@ -70,8 +70,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar overlay */}
+<div className="h-screen flex bg-gray-50 overflow-hidden">
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
@@ -79,11 +79,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Sidebar for desktop */}
-      <div className={cn(
-        'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      )}>
+      {/* Sidebar */}
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          'lg:translate-x-0'
+        )}
+      >
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -107,7 +110,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -122,17 +125,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   )}
                 >
-                  <item.icon className={cn(
-                    'h-5 w-5 flex-shrink-0',
-                    isActive ? 'text-green-600' : 'text-gray-400'
-                  )} />
+                  <item.icon
+                    className={cn(
+                      'h-5 w-5 flex-shrink-0',
+                      isActive ? 'text-green-600' : 'text-gray-400'
+                    )}
+                  />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
 
-          {/* User info in sidebar */}
+          {/* User info */}
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
               <Avatar className="h-8 w-8">
@@ -155,11 +160,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col lg:pl-64">
-        {/* Top header */}
+      <div className="flex-1 flex flex-col lg:pl-64">
+        {/* Fixed header */}
         <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 fixed top-0 right-0 left-0 lg:left-64 z-40">
           <div className="flex items-center justify-between">
-            {/* Mobile menu button */}
             <Button
               variant="ghost"
               size="sm"
@@ -169,14 +173,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Page title (hidden on mobile to save space) */}
             <div className="hidden sm:block">
               <h1 className="text-xl font-semibold text-gray-900">
                 {navigation.find(item => item.href === location.pathname)?.name || 'Dashboard'}
               </h1>
             </div>
 
-            {/* Profile dropdown */}
+            {/* Profile menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -207,7 +210,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="cursor-pointer text-red-600 focus:text-red-600"
                   onClick={handleLogout}
                 >
@@ -219,12 +222,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </header>
 
-        {/* Main content area */}
-        <main className="flex-1 min-h-0 lg:absolute lg:top-16 lg:left-64 lg:right-0">
+        {/* Scrollable content */}
+        <main className="flex-1 overflow-y-auto pt-16 px-4 lg:px-6">
           {children}
         </main>
 
-        {/* Bottom navigation for mobile */}
+        {/* Mobile bottom nav */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
           <div className="flex justify-around">
             {navigation.map((item) => {
@@ -248,7 +251,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </nav>
 
-        {/* Bottom padding for mobile navigation */}
         <div className="h-20 lg:hidden" />
       </div>
     </div>
