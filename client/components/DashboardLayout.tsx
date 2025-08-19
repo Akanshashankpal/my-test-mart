@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <item.icon
                     className={cn(
                       "h-5 w-5 flex-shrink-0",
-                      isActive ? "text-electric-blue" : "text-gray-400"
+                      isActive ? "text-blue-600" : "text-gray-400"
                     )}
                   />
                   {item.name}
