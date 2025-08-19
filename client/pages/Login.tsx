@@ -36,12 +36,12 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-electric-blue/5 via-white to-electric-purple/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="bg-green-600 text-white p-3 rounded-xl shadow-lg">
+            <div className="bg-electric-blue text-white p-3 rounded-xl shadow-lg">
               <Store className="h-8 w-8" />
             </div>
             <div className="text-left">
@@ -126,7 +126,7 @@ export default function Login() {
 
               <Button 
                 type="submit" 
-                className="w-full h-11 bg-green-600 hover:bg-green-700 text-white"
+                className="w-full h-11 bg-electric-blue hover:bg-electric-blue/90 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -143,7 +143,7 @@ export default function Login() {
             <div className="text-center">
               <button
                 onClick={() => setIsSignup(!isSignup)}
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
+                className="text-sm text-electric-blue hover:text-electric-blue/80 font-medium"
                 disabled={isLoading}
               >
                 {isSignup 
@@ -156,10 +156,10 @@ export default function Login() {
         </Card>
 
         {/* Demo Credentials */}
-        <Card className="shadow-lg border-green-200 bg-green-50/50">
+        <Card className="shadow-lg border-electric-blue/20 bg-electric-blue/5">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-green-800">Demo Credentials</CardTitle>
-            <CardDescription className="text-green-700">
+            <CardTitle className="text-lg text-electric-blue">Demo Credentials</CardTitle>
+            <CardDescription className="text-electric-blue/80">
               Use these credentials to test the application
             </CardDescription>
           </CardHeader>
@@ -167,20 +167,20 @@ export default function Login() {
             {demoCredentials.map((cred, index) => (
               <div 
                 key={index}
-                className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 cursor-pointer hover:bg-green-50 transition-colors"
+                className="flex items-center justify-between p-3 bg-white rounded-lg border border-electric-blue/20 cursor-pointer hover:bg-electric-blue/5 transition-colors"
                 onClick={() => {
                   setEmail(cred.email);
                   setPassword(cred.password);
                 }}
               >
                 <div>
-                  <p className="font-medium text-green-800">{cred.role}</p>
-                  <p className="text-sm text-green-600">{cred.email}</p>
+                  <p className="font-medium text-electric-blue">{cred.role}</p>
+                  <p className="text-sm text-electric-blue/80">{cred.email}</p>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-green-600 hover:text-green-700 hover:bg-green-100"
+                  className="text-electric-blue hover:text-electric-blue/80 hover:bg-electric-blue/10"
                   onClick={(e) => {
                     e.stopPropagation();
                     setEmail(cred.email);
