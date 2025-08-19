@@ -356,8 +356,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-electric-green" />
+                <span className="text-electric-green">+{overallStats.sales.change}%</span>
                 <span className="text-muted-foreground">this month</span>
               </div>
             </CardContent>
@@ -373,8 +373,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{overallStats.customers.total}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-electric-green" />
+                <span className="text-electric-green">+{overallStats.customers.change}%</span>
                 <span className="text-muted-foreground">growth</span>
               </div>
             </CardContent>
@@ -390,8 +390,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.revenue.growth}%</span>
+                <TrendingUp className="h-3 w-3 text-electric-green" />
+                <span className="text-electric-green">+{overallStats.revenue.growth}%</span>
                 <span className="text-muted-foreground">total value</span>
               </div>
             </CardContent>
@@ -405,7 +405,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">+{overallStats.revenue.growth}%</div>
+              <div className="text-2xl font-bold text-electric-purple">+{overallStats.revenue.growth}%</div>
               <div className="text-sm text-muted-foreground">
                 {formatCurrency(overallStats.revenue.thisMonth)} this month
               </div>
