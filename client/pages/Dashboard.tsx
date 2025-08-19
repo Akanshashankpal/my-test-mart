@@ -502,7 +502,7 @@ export default function Dashboard() {
           {recentTransactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-white rounded-lg border border-green-100 hover:shadow-md transition-shadow"
+              className="flex items-center justify-between p-4 bg-gradient-to-r from-electric-blue/5 to-white rounded-lg border border-electric-blue/20 hover:shadow-md transition-shadow"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -517,7 +517,7 @@ export default function Dashboard() {
                     variant={transaction.status === "completed" ? "default" : "secondary"}
                     className={cn(
                       "text-xs",
-                      transaction.status === "completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                      transaction.status === "completed" ? "bg-electric-green/20 text-electric-green" : "bg-yellow-100 text-yellow-800"
                     )}
                   >
                     {transaction.status}
@@ -533,7 +533,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold text-green-600">
+                <div className="font-semibold text-electric-blue">
                   {formatCurrency(transaction.amount)}
                 </div>
               </div>
