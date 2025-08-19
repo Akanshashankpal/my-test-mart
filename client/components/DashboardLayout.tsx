@@ -53,9 +53,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
           <div className="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
-            <div className="bg-green-600 text-white p-2 rounded-lg">
-              <Store className="h-5 w-5" />
-            </div>
+            <div className="bg-electric-blue text-white p-2 rounded-lg">
+            <Store className="h-5 w-5" />
+          </div>
             <div>
               <h1 className="font-bold text-lg text-gray-900">ElectroMart</h1>
               <p className="text-xs text-gray-500">Business Management</p>
@@ -73,14 +73,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
                     isActive
-                      ? "bg-green-100 text-green-700 shadow-sm"
+                      ? "bg-electric-blue/10 text-electric-blue shadow-sm"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   )}
                 >
                   <item.icon
                     className={cn(
                       "h-5 w-5 flex-shrink-0",
-                      isActive ? "text-green-600" : "text-gray-400"
+                      isActive ? "text-electric-blue" : "text-gray-400"
                     )}
                   />
                   {item.name}
@@ -184,7 +184,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   className={cn(
                     "flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors",
                     isActive
-                      ? "text-green-600 bg-green-50"
+                      ? "text-electric-blue bg-electric-blue/10"
                       : "text-gray-500 hover:text-gray-700"
                   )}
                 >
