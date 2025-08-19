@@ -256,20 +256,20 @@ export default function Dashboard() {
       <div>
         <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="border-l-4 border-l-electric-blue shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-green-600" />
+                <DollarSign className="h-4 w-4 text-electric-blue" />
                 Today's Sales
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-electric-blue">
                 {formatCurrency(todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-electric-green" />
+                <span className="text-electric-green">+{todayStats.sales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -290,8 +290,8 @@ export default function Dashboard() {
                 {todayStats.customers.new + todayStats.customers.returning}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-electric-green" />
+                <span className="text-electric-green">+{todayStats.customers.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
