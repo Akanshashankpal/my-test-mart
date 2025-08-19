@@ -256,20 +256,20 @@ export default function Dashboard() {
       <div>
         <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-electric-blue shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-electric-blue" />
+                <DollarSign className="h-4 w-4 text-blue-600" />
                 Today's Sales
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-electric-blue">
+              <div className="text-2xl font-bold text-blue-600">
                 {formatCurrency(todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-electric-green" />
-                <span className="text-electric-green">+{todayStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                <span className="text-green-500">+{todayStats.sales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -278,20 +278,20 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4 text-blue-600" />
+                <Users className="h-4 w-4 text-purple-600" />
                 Today's Customers
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-purple-600">
                 {todayStats.customers.new + todayStats.customers.returning}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-electric-green" />
-                <span className="text-electric-green">+{todayStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                <span className="text-green-500">+{todayStats.customers.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -322,20 +322,20 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-orange-500 shadow-lg hover:shadow-xl transition-shadow">
+          <Card className="border-l-4 border-l-emerald-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-orange-600" />
+                <Target className="h-4 w-4 text-emerald-600" />
                 Daily Target
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">78%</div>
+              <div className="text-2xl font-bold text-emerald-600">78%</div>
               <div className="flex items-center gap-1 text-sm mt-2">
                 <span className="text-muted-foreground">₹30,000 target</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-orange-500 h-2 rounded-full" style={{ width: "78%" }}></div>
+                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: "78%" }}></div>
               </div>
             </CardContent>
           </Card>
