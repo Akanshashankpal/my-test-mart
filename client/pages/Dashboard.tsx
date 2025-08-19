@@ -432,7 +432,7 @@ export default function Dashboard() {
                   <div className="flex-1 mx-4">
                     <div className="bg-gray-200 rounded-full h-3 relative">
                       <div
-                        className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
+                        className="bg-gradient-to-r from-electric-blue to-electric-purple h-3 rounded-full"
                         style={{
                           width: `${(data.sales / Math.max(...chartData.salesTrend.map(d => d.sales))) * 100}%`
                         }}
@@ -459,7 +459,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center justify-center mb-6">
               <div className="relative w-32 h-32">
-                <div className="w-32 h-32 rounded-full border-8 border-green-500 border-t-blue-500 border-r-purple-500 border-b-orange-500 animate-pulse"></div>
+                <div className="w-32 h-32 rounded-full border-8 border-electric-blue border-t-electric-purple border-r-electric-orange border-b-electric-green animate-pulse"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-lg font-bold">₹12.5L</div>
@@ -470,19 +470,19 @@ export default function Dashboard() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-electric-blue rounded-full"></div>
                 <span>GST Sales</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-electric-purple rounded-full"></div>
                 <span>Non-GST</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-electric-orange rounded-full"></div>
                 <span>Returns</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-electric-green rounded-full"></div>
                 <span>Pending</span>
               </div>
             </div>
