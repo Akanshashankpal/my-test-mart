@@ -128,7 +128,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.avatar} alt={user?.name} />
-                    <AvatarFallback className="bg-green-600 text-white text-xs">
+                    <AvatarFallback className="bg-electric-purple text-white text-xs">
                       {user ? getUserInitials(user.name) : "U"}
                     </AvatarFallback>
                   </Avatar>
