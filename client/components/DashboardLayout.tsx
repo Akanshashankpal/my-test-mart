@@ -53,7 +53,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
           <div className="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
-            <div className="bg-electric-blue text-white p-2 rounded-lg">
+            <div className="bg-blue-600 text-white p-2 rounded-lg">
             <Store className="h-5 w-5" />
           </div>
             <div>
