@@ -469,7 +469,7 @@ export default function EnhancedBilling() {
                 <CardContent className="p-6 text-center space-y-4">
                   <div className={cn(
                     "w-16 h-16 mx-auto rounded-full flex items-center justify-center",
-                    option.color === "green" && "bg-green-100 text-green-600",
+                    option.color === "green" && "bg-emerald-100 text-emerald-600",
                     option.color === "blue" && "bg-blue-100 text-blue-600",
                     option.color === "purple" && "bg-purple-100 text-purple-600"
                   )}>
@@ -502,7 +502,7 @@ export default function EnhancedBilling() {
                 <Button
                   variant="link"
                   onClick={() => setBillingMode(null)}
-                  className="ml-2 p-0 h-auto text-green-600"
+                  className="ml-2 p-0 h-auto text-slate-600"
                 >
                   Change Mode
                 </Button>
@@ -741,7 +741,7 @@ export default function EnhancedBilling() {
               </div>
               
               {currentInvoice.discountPercent > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-amber-600">
                   <span>Discount ({currentInvoice.discountPercent}%):</span>
                   <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
                 </div>
@@ -775,7 +775,7 @@ export default function EnhancedBilling() {
               <div className="border-t pt-2">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span className="text-green-600">{formatCurrency(currentInvoice.finalAmount)}</span>
+                  <span className="text-slate-700 font-semibold">{formatCurrency(currentInvoice.finalAmount)}</span>
                 </div>
               </div>
             </div>
@@ -819,11 +819,11 @@ export default function EnhancedBilling() {
           </DialogHeader>
           {invoicePreview && (
             <div className="space-y-6">
-              <div className="text-center p-6 bg-green-50 rounded-lg">
-                <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
-                <h3 className="text-lg font-semibold text-green-800">Invoice Created!</h3>
-                <p className="text-green-700">Invoice #{invoicePreview.invoiceNumber}</p>
-                <p className="text-sm text-green-600 mt-1">
+              <div className="text-center p-6 bg-blue-50 rounded-lg">
+                <CheckCircle className="h-12 w-12 text-blue-600 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold text-blue-800">Invoice Created!</h3>
+                <p className="text-blue-700">Invoice #{invoicePreview.invoiceNumber}</p>
+                <p className="text-sm text-blue-600 mt-1">
                   Total: {formatCurrency(invoicePreview.finalAmount)}
                 </p>
               </div>
