@@ -373,7 +373,7 @@ export default function EnhancedBilling() {
   };
 
   const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `���${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const saveBillToHistory = () => {
@@ -469,9 +469,9 @@ export default function EnhancedBilling() {
                 <CardContent className="p-6 text-center space-y-4">
                   <div className={cn(
                     "w-16 h-16 mx-auto rounded-full flex items-center justify-center",
-                    option.color === "green" && "bg-emerald-100 text-emerald-600",
-                    option.color === "blue" && "bg-blue-100 text-blue-600",
-                    option.color === "purple" && "bg-purple-100 text-purple-600"
+                    option.color === "green" && "bg-gray-100 text-gray-800",
+                    option.color === "blue" && "bg-gray-100 text-gray-800",
+                    option.color === "purple" && "bg-gray-100 text-gray-800"
                   )}>
                     <option.icon className="h-8 w-8" />
                   </div>
@@ -681,7 +681,7 @@ export default function EnhancedBilling() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeItem(index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-gray-700 hover:text-gray-800"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -741,7 +741,7 @@ export default function EnhancedBilling() {
               </div>
               
               {currentInvoice.discountPercent > 0 && (
-                <div className="flex justify-between text-amber-600">
+                <div className="flex justify-between text-gray-700">
                   <span>Discount ({currentInvoice.discountPercent}%):</span>
                   <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
                 </div>
@@ -819,11 +819,11 @@ export default function EnhancedBilling() {
           </DialogHeader>
           {invoicePreview && (
             <div className="space-y-6">
-              <div className="text-center p-6 bg-blue-50 rounded-lg">
-                <CheckCircle className="h-12 w-12 text-blue-600 mx-auto mb-2" />
-                <h3 className="text-lg font-semibold text-blue-800">Invoice Created!</h3>
-                <p className="text-blue-700">Invoice #{invoicePreview.invoiceNumber}</p>
-                <p className="text-sm text-blue-600 mt-1">
+              <div className="text-center p-6 bg-gray-50 rounded-lg">
+                <CheckCircle className="h-12 w-12 text-gray-700 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold text-gray-800">Invoice Created!</h3>
+                <p className="text-gray-700">Invoice #{invoicePreview.invoiceNumber}</p>
+                <p className="text-sm text-gray-600 mt-1">
                   Total: {formatCurrency(invoicePreview.finalAmount)}
                 </p>
               </div>
