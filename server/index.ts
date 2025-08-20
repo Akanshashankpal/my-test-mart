@@ -73,6 +73,7 @@ export function createServer() {
 
   // Users API routes
   app.get("/api/users", getUsers);
+  app.get("/api/users/stats", getUserStats);
   app.get("/api/users/:id", getUserById);
   app.post("/api/users", createUser);
   app.put("/api/users/:id", updateUser);
