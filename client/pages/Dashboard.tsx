@@ -533,7 +533,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold text-slate-700">
+                <div className="font-semibold text-black">
                   {formatCurrency(transaction.amount)}
                 </div>
               </div>
