@@ -390,8 +390,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-electric-green" />
-                <span className="text-electric-green">+{overallStats.revenue.growth}%</span>
+                <TrendingUp className="h-3 w-3 text-cyan-600" />
+                <span className="text-cyan-600">+{overallStats.revenue.growth}%</span>
                 <span className="text-muted-foreground">total value</span>
               </div>
             </CardContent>
