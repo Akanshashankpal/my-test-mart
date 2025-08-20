@@ -601,12 +601,12 @@ export default function SalesReturn() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-red-600" />
+              <DollarSign className="h-4 w-4 text-gray-700" />
               Total Refunds
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalRefundAmount)}</div>
+            <div className="text-2xl font-bold text-black">{formatCurrency(stats.totalRefundAmount)}</div>
           </CardContent>
         </Card>
       </div>
@@ -677,7 +677,7 @@ export default function SalesReturn() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Refund Amount:</span>
-                      <p className="font-semibold text-red-600">{formatCurrency(returnItem.totalRefundAmount)}</p>
+                      <p className="font-semibold text-gray-800">{formatCurrency(returnItem.totalRefundAmount)}</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Refund Method:</span>
@@ -723,7 +723,7 @@ export default function SalesReturn() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleStatusUpdate(returnItem.id, "Rejected")}
-                        className="text-xs text-red-600 border-red-300"
+                        className="text-xs text-gray-700 border-gray-300"
                       >
                         <X className="h-3 w-3" />
                         Reject
@@ -838,7 +838,7 @@ export default function SalesReturn() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Total Refund</p>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-black">
                     {formatCurrency(selectedReturn.totalRefundAmount)}
                   </p>
                 </div>
