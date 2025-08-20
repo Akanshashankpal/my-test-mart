@@ -1106,7 +1106,7 @@ export default function SimpleBilling() {
                     <span className="text-sm text-gray-600">%</span>
                   </div>
                   {currentInvoice.discountPercent > 0 && (
-                    <p className="text-sm text-green-600 mt-2">
+                    <p className="text-sm text-amber-600 mt-2">
                       Discount: {formatCurrency(currentInvoice.discountAmount)}
                     </p>
                   )}
@@ -1126,7 +1126,7 @@ export default function SimpleBilling() {
                     </div>
                     
                     {currentInvoice.discountAmount > 0 && (
-                      <div className="flex justify-between text-green-600">
+                      <div className="flex justify-between text-amber-600">
                         <span>Discount ({currentInvoice.discountPercent}%):</span>
                         <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
                       </div>
@@ -1152,7 +1152,7 @@ export default function SimpleBilling() {
                     <div className="border-t pt-2">
                       <div className="flex justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span className="text-green-600">{formatCurrency(currentInvoice.finalAmount)}</span>
+                        <span className="text-slate-700 font-semibold">{formatCurrency(currentInvoice.finalAmount)}</span>
                       </div>
                     </div>
                   </div>
@@ -1177,7 +1177,7 @@ export default function SimpleBilling() {
                         ...prev,
                         isReturnSale: e.target.checked
                       }))}
-                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <Label htmlFor="returnSale" className="text-sm">
                       This is a return sale
@@ -1361,7 +1361,7 @@ export default function SimpleBilling() {
               <div className="border-b pb-6 mb-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-3xl font-bold text-green-600 mb-2">ElectroMart</h1>
+                    <h1 className="text-3xl font-bold text-slate-800 mb-2">ElectroMart</h1>
                     <p className="text-sm text-gray-600">Business Management Solution</p>
                     <p className="text-sm text-gray-600">Delhi, India</p>
                   </div>
@@ -1430,7 +1430,7 @@ export default function SimpleBilling() {
                     <span>₹{currentInvoice.subtotal.toLocaleString()}</span>
                   </div>
                   {currentInvoice.discountAmount > 0 && (
-                    <div className="flex justify-between py-1 text-green-600">
+                    <div className="flex justify-between py-1 text-amber-600">
                       <span>Discount ({currentInvoice.discountPercent}%):</span>
                       <span>-₹{currentInvoice.discountAmount.toLocaleString()}</span>
                     </div>
@@ -1543,8 +1543,8 @@ export default function SimpleBilling() {
                 <div key={bill.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="bg-green-100 p-2 rounded-lg">
-                        <Receipt className="h-4 w-4 text-green-600" />
+                      <div className="bg-blue-100 p-2 rounded-lg">
+                        <Receipt className="h-4 w-4 text-blue-600" />
                       </div>
                       <div>
                         <h4 className="font-medium">{bill.billNumber}</h4>
@@ -1562,7 +1562,7 @@ export default function SimpleBilling() {
                   <Badge 
                     variant="outline"
                     className={cn(
-                      bill.billType === "GST" ? "border-green-200 text-green-800" : "border-blue-200 text-blue-800"
+                      bill.billType === "GST" ? "border-blue-200 text-blue-800" : "border-purple-200 text-purple-800"
                     )}
                   >
                     {bill.billType}
