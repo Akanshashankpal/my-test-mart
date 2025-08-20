@@ -419,7 +419,7 @@ export default function Products() {
                     <span className="text-muted-foreground">Stock:</span>
                     <p className={cn(
                       "font-semibold",
-                      product.stockQuantity <= 5 ? "text-orange-600" : "text-green-600"
+                      product.stockQuantity <= 5 ? "text-orange-600" : "text-emerald-600"
                     )}>
                       {product.stockQuantity} units
                     </p>
@@ -490,7 +490,7 @@ export default function Products() {
                     <div className="text-right">
                       <p className={cn(
                         "font-semibold",
-                        product.stockQuantity <= 5 ? "text-orange-600" : "text-green-600"
+                        product.stockQuantity <= 5 ? "text-orange-600" : "text-emerald-600"
                       )}>
                         {product.stockQuantity} units
                       </p>
