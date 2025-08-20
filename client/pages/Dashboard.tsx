@@ -301,7 +301,7 @@ export default function Dashboard() {
               <Card className="border-l-4 border-l-emerald-500 shadow-lg hover:shadow-xl transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Target className="h-4 w-4 text-emerald-600" />
+                    <Target className="h-4 w-4 text-black" />
                     Daily Target
                   </CardTitle>
                 </CardHeader>
