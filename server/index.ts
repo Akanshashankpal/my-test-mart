@@ -16,7 +16,7 @@ import { getCustomers, getCustomerById, createCustomer, updateCustomer, deleteCu
 import { getBills, getBillById, createBill, updateBill, deleteBill, generateBillPDF, getDashboardStats as getBillingStats, getSalesReturns, createSalesReturn, updateSalesReturnStatus } from "./routes/billing";
 
 // Users routes
-import { getUsers, getUserById, createUser, updateUser, deleteUser } from "./routes/users";
+import { getUsers, getUserById, createUser, updateUser, deleteUser, getUserStats } from "./routes/users";
 
 export function createServer() {
   const app = express();
