@@ -201,7 +201,7 @@ export default function SalesReturn() {
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      approved: "bg-green-100 text-green-800 border-green-200",
+      approved: "bg-blue-100 text-blue-800 border-blue-200",
       processed: "bg-blue-100 text-blue-800 border-blue-200",
       rejected: "bg-red-100 text-red-800 border-red-200",
     };
@@ -210,7 +210,7 @@ export default function SalesReturn() {
 
   const getConditionBadge = (condition: string) => {
     const styles = {
-      good: "bg-green-100 text-green-800 border-green-200",
+      good: "bg-emerald-100 text-emerald-800 border-emerald-200",
       damaged: "bg-orange-100 text-orange-800 border-orange-200",
       defective: "bg-red-100 text-red-800 border-red-200",
     };
@@ -526,7 +526,7 @@ export default function SalesReturn() {
                 
                 <div className="space-y-2">
                   <Label>Total Refund Amount</Label>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-blue-600">
                     {formatCurrency(calculateTotalRefund())}
                   </div>
                 </div>
@@ -589,12 +589,12 @@ export default function SalesReturn() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-blue-600" />
               Approved Returns
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.approvedReturns}</div>
+            <div className="text-2xl font-bold text-blue-600">{stats.approvedReturns}</div>
           </CardContent>
         </Card>
 
