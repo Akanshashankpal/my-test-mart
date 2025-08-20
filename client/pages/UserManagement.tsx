@@ -287,7 +287,7 @@ export default function UserManagement() {
       case "manager":
         return <ShieldCheck className="h-4 w-4 text-blue-600" />;
       case "cashier":
-        return <Calculator className="h-4 w-4 text-green-600" />;
+        return <Calculator className="h-4 w-4 text-blue-600" />;
       case "accountant":
         return <ClipboardList className="h-4 w-4 text-purple-600" />;
       default:
@@ -547,7 +547,7 @@ export default function UserManagement() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-blue-600">
               {users.filter(u => u.isActive).length}
             </div>
           </CardContent>
@@ -635,7 +635,7 @@ export default function UserManagement() {
                       <span className="text-muted-foreground">Status:</span>
                       <p className={cn(
                         "font-semibold",
-                        user.isActive ? "text-green-600" : "text-red-600"
+                        user.isActive ? "text-blue-600" : "text-red-600"
                       )}>
                         {user.isActive ? "Active" : "Inactive"}
                       </p>
@@ -670,7 +670,7 @@ export default function UserManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => toggleUserStatus(user.id)}
-                    className={user.isActive ? "text-orange-600" : "text-green-600"}
+                    className={user.isActive ? "text-orange-600" : "text-blue-600"}
                   >
                     {user.isActive ? "Deactivate" : "Activate"}
                   </Button>
