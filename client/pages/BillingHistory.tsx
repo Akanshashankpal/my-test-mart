@@ -486,12 +486,12 @@ export default function BillingHistory() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-blue-600" />
               Paid Revenue
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.paidRevenue)}</div>
+            <div className="text-2xl font-bold text-blue-600">{formatCurrency(stats.paidRevenue)}</div>
             <div className="text-sm text-muted-foreground">
               {((stats.paidRevenue / stats.totalRevenue) * 100).toFixed(1)}% of total
             </div>
@@ -809,7 +809,7 @@ export default function BillingHistory() {
                     <span>{formatCurrency(selectedBill.subtotal)}</span>
                   </div>
                   {(selectedBill.discountAmount || 0) > 0 && (
-                    <div className="flex justify-between text-green-600">
+                    <div className="flex justify-between text-blue-600">
                       <span>Discount:</span>
                       <span>-{formatCurrency(selectedBill.discountAmount)}</span>
                     </div>
