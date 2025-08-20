@@ -201,18 +201,18 @@ export default function SalesReturn() {
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      approved: "bg-blue-100 text-blue-800 border-blue-200",
-      processed: "bg-blue-100 text-blue-800 border-blue-200",
-      rejected: "bg-red-100 text-red-800 border-red-200",
+      approved: "bg-gray-100 text-gray-800 border-gray-200",
+      processed: "bg-gray-100 text-gray-800 border-gray-200",
+      rejected: "bg-gray-100 text-gray-700 border-gray-200",
     };
     return styles[status.toLowerCase() as keyof typeof styles] || styles.pending;
   };
 
   const getConditionBadge = (condition: string) => {
     const styles = {
-      good: "bg-emerald-100 text-emerald-800 border-emerald-200",
-      damaged: "bg-orange-100 text-orange-800 border-orange-200",
-      defective: "bg-red-100 text-red-800 border-red-200",
+      good: "bg-gray-100 text-gray-800 border-gray-200",
+      damaged: "bg-gray-100 text-gray-700 border-gray-200",
+      defective: "bg-gray-100 text-gray-700 border-gray-200",
     };
     return styles[condition.toLowerCase() as keyof typeof styles] || styles.good;
   };
@@ -476,7 +476,7 @@ export default function SalesReturn() {
                               variant="ghost"
                               size="sm"
                               onClick={() => removeItemRow(index)}
-                              className="text-red-600"
+                              className="text-gray-700"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -526,7 +526,7 @@ export default function SalesReturn() {
                 
                 <div className="space-y-2">
                   <Label>Total Refund Amount</Label>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-black">
                     {formatCurrency(calculateTotalRefund())}
                   </div>
                 </div>
@@ -589,12 +589,12 @@ export default function SalesReturn() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-blue-600" />
+              <CheckCircle className="h-4 w-4 text-gray-700" />
               Approved Returns
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.approvedReturns}</div>
+            <div className="text-2xl font-bold text-black">{stats.approvedReturns}</div>
           </CardContent>
         </Card>
 
