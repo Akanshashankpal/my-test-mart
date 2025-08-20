@@ -397,7 +397,7 @@ export default function Customers() {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Total Purchases:</span>
-                        <p className="font-semibold text-green-600">₹{customer.totalPurchases.toLocaleString()}</p>
+                        <p className="font-semibold text-slate-700">₹{customer.totalPurchases.toLocaleString()}</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Orders:</span>
