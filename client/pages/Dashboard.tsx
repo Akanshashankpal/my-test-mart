@@ -470,19 +470,19 @@ export default function Dashboard() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-blue rounded-full"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 <span>GST Sales</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-purple rounded-full"></div>
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                 <span>Non-GST</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-orange rounded-full"></div>
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                 <span>Returns</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-green rounded-full"></div>
+                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
                 <span>Pending</span>
               </div>
             </div>
