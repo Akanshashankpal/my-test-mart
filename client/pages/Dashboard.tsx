@@ -303,17 +303,17 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-red-600" />
+                <TrendingDown className="h-4 w-4 text-gray-800" />
                 Today Return Sale
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-black">
                 {formatCurrency(todayStats.returnSales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingDown className="h-3 w-3 text-red-500" />
-                <span className="text-red-500">{todayStats.returnSales.change}%</span>
+                <TrendingDown className="h-3 w-3 text-gray-600" />
+                <span className="text-gray-600">{todayStats.returnSales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -325,12 +325,12 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-emerald-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-emerald-600" />
+                <Target className="h-4 w-4 text-gray-800" />
                 Daily Target
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-600">78%</div>
+              <div className="text-2xl font-bold text-black">78%</div>
               <div className="flex items-center gap-1 text-sm mt-2">
                 <span className="text-muted-foreground">₹30,000 target</span>
               </div>
@@ -356,8 +356,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-indigo-600" />
-                <span className="text-indigo-600">+{overallStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{overallStats.sales.change}%</span>
                 <span className="text-muted-foreground">this month</span>
               </div>
             </CardContent>
@@ -373,8 +373,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{overallStats.customers.total}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-teal-600" />
-                <span className="text-teal-600">+{overallStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{overallStats.customers.change}%</span>
                 <span className="text-muted-foreground">growth</span>
               </div>
             </CardContent>
