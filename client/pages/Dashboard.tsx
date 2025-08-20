@@ -356,8 +356,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-electric-green" />
-                <span className="text-electric-green">+{overallStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-indigo-600" />
+                <span className="text-indigo-600">+{overallStats.sales.change}%</span>
                 <span className="text-muted-foreground">this month</span>
               </div>
             </CardContent>
