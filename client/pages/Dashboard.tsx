@@ -459,7 +459,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center justify-center mb-6">
               <div className="relative w-32 h-32">
-                <div className="w-32 h-32 rounded-full border-8 border-electric-blue border-t-electric-purple border-r-electric-orange border-b-electric-green animate-pulse"></div>
+                <div className="w-32 h-32 rounded-full border-8 border-blue-500 border-t-purple-500 border-r-orange-500 border-b-gray-500 animate-pulse"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-lg font-bold">₹12.5L</div>
