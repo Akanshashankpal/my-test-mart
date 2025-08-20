@@ -1070,7 +1070,7 @@ export default function SimpleBilling() {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeItem(item.id)}
-                            className="text-gray-700 hover:text-gray-800"
+                            className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -1106,7 +1106,7 @@ export default function SimpleBilling() {
                     <span className="text-sm text-gray-600">%</span>
                   </div>
                   {currentInvoice.discountPercent > 0 && (
-                    <p className="text-sm text-gray-700 mt-2">
+                    <p className="text-sm text-amber-600 mt-2">
                       Discount: {formatCurrency(currentInvoice.discountAmount)}
                     </p>
                   )}
@@ -1126,7 +1126,7 @@ export default function SimpleBilling() {
                     </div>
                     
                     {currentInvoice.discountAmount > 0 && (
-                      <div className="flex justify-between text-gray-700">
+                      <div className="flex justify-between text-amber-600">
                         <span>Discount ({currentInvoice.discountPercent}%):</span>
                         <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
                       </div>
@@ -1177,7 +1177,7 @@ export default function SimpleBilling() {
                         ...prev,
                         isReturnSale: e.target.checked
                       }))}
-                      className="h-4 w-4 text-gray-700 focus:ring-gray-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <Label htmlFor="returnSale" className="text-sm">
                       This is a return sale
@@ -1430,7 +1430,7 @@ export default function SimpleBilling() {
                     <span>₹{currentInvoice.subtotal.toLocaleString()}</span>
                   </div>
                   {currentInvoice.discountAmount > 0 && (
-                    <div className="flex justify-between py-1 text-gray-700">
+                    <div className="flex justify-between py-1 text-amber-600">
                       <span>Discount ({currentInvoice.discountPercent}%):</span>
                       <span>-₹{currentInvoice.discountAmount.toLocaleString()}</span>
                     </div>
@@ -1470,7 +1470,7 @@ export default function SimpleBilling() {
                     {currentInvoice.paymentMode === "partial" && (
                       <>
                         <p><strong>Paid:</strong> ₹{currentInvoice.paidAmount.toLocaleString()}</p>
-                        <p className="text-gray-700"><strong>Pending:</strong> ₹{currentInvoice.pendingAmount.toLocaleString()}</p>
+                        <p className="text-red-600"><strong>Pending:</strong> ₹{currentInvoice.pendingAmount.toLocaleString()}</p>
                       </>
                     )}
                   </div>
@@ -1544,7 +1544,7 @@ export default function SimpleBilling() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-lg">
-                        <Receipt className="h-4 w-4 text-gray-700" />
+                        <Receipt className="h-4 w-4 text-blue-600" />
                       </div>
                       <div>
                         <h4 className="font-medium">{bill.billNumber}</h4>
@@ -1562,7 +1562,7 @@ export default function SimpleBilling() {
                   <Badge 
                     variant="outline"
                     className={cn(
-                      bill.billType === "GST" ? "border-gray-200 text-gray-800" : "border-gray-200 text-gray-700"
+                      bill.billType === "GST" ? "border-blue-200 text-blue-800" : "border-purple-200 text-purple-800"
                     )}
                   >
                     {bill.billType}

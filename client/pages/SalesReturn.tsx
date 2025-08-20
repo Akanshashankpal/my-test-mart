@@ -201,18 +201,18 @@ export default function SalesReturn() {
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      approved: "bg-gray-100 text-gray-800 border-gray-200",
-      processed: "bg-gray-100 text-gray-800 border-gray-200",
-      rejected: "bg-gray-100 text-gray-700 border-gray-200",
+      approved: "bg-blue-100 text-blue-800 border-blue-200",
+      processed: "bg-blue-100 text-blue-800 border-blue-200",
+      rejected: "bg-red-100 text-red-800 border-red-200",
     };
     return styles[status.toLowerCase() as keyof typeof styles] || styles.pending;
   };
 
   const getConditionBadge = (condition: string) => {
     const styles = {
-      good: "bg-gray-100 text-gray-800 border-gray-200",
-      damaged: "bg-gray-100 text-gray-700 border-gray-200",
-      defective: "bg-gray-100 text-gray-700 border-gray-200",
+      good: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      damaged: "bg-orange-100 text-orange-800 border-orange-200",
+      defective: "bg-red-100 text-red-800 border-red-200",
     };
     return styles[condition.toLowerCase() as keyof typeof styles] || styles.good;
   };
@@ -476,7 +476,7 @@ export default function SalesReturn() {
                               variant="ghost"
                               size="sm"
                               onClick={() => removeItemRow(index)}
-                              className="text-gray-700"
+                              className="text-red-600"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -526,7 +526,7 @@ export default function SalesReturn() {
                 
                 <div className="space-y-2">
                   <Label>Total Refund Amount</Label>
-                  <div className="text-2xl font-bold text-black">
+                  <div className="text-2xl font-bold text-blue-600">
                     {formatCurrency(calculateTotalRefund())}
                   </div>
                 </div>
@@ -589,24 +589,24 @@ export default function SalesReturn() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-gray-700" />
+              <CheckCircle className="h-4 w-4 text-blue-600" />
               Approved Returns
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.approvedReturns}</div>
+            <div className="text-2xl font-bold text-blue-600">{stats.approvedReturns}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-gray-700" />
+              <DollarSign className="h-4 w-4 text-red-600" />
               Total Refunds
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{formatCurrency(stats.totalRefundAmount)}</div>
+            <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalRefundAmount)}</div>
           </CardContent>
         </Card>
       </div>
@@ -677,7 +677,7 @@ export default function SalesReturn() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Refund Amount:</span>
-                      <p className="font-semibold text-gray-800">{formatCurrency(returnItem.totalRefundAmount)}</p>
+                      <p className="font-semibold text-red-600">{formatCurrency(returnItem.totalRefundAmount)}</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Refund Method:</span>
@@ -723,7 +723,7 @@ export default function SalesReturn() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleStatusUpdate(returnItem.id, "Rejected")}
-                        className="text-xs text-gray-700 border-gray-300"
+                        className="text-xs text-red-600 border-red-300"
                       >
                         <X className="h-3 w-3" />
                         Reject
@@ -838,7 +838,7 @@ export default function SalesReturn() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Total Refund</p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-2xl font-bold text-red-600">
                     {formatCurrency(selectedReturn.totalRefundAmount)}
                   </p>
                 </div>

@@ -497,7 +497,7 @@ export default function Billing() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeItem(index)}
-                        className="text-gray-700 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -553,7 +553,7 @@ export default function Billing() {
               </div>
               
               {currentInvoice.discountPercent > 0 && (
-                <div className="flex justify-between text-gray-700">
+                <div className="flex justify-between text-amber-600">
                   <span>Discount ({currentInvoice.discountPercent}%):</span>
                   <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
                 </div>
@@ -683,7 +683,7 @@ export default function Billing() {
                   <span>{formatCurrency(invoicePreview.subtotal)}</span>
                 </div>
                 {invoicePreview.discountAmount > 0 && (
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-amber-600">
                     <span>Discount:</span>
                     <span>-{formatCurrency(invoicePreview.discountAmount)}</span>
                   </div>

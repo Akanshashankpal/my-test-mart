@@ -166,11 +166,11 @@ export default function Dashboard() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "high":
-        return "text-gray-800 bg-gray-50 border-gray-200";
+        return "text-red-600 bg-red-50 border-red-200";
       case "medium":
         return "text-orange-600 bg-orange-50 border-orange-200";
       case "low":
-        return "text-gray-700 bg-gray-50 border-gray-200";
+        return "text-blue-600 bg-blue-50 border-blue-200";
       default:
         return "text-gray-600 bg-gray-50 border-gray-200";
     }
@@ -259,17 +259,17 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-gray-800" />
+                <DollarSign className="h-4 w-4 text-blue-600" />
                 Today's Sales
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">
+              <div className="text-2xl font-bold text-blue-600">
                 {formatCurrency(todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{todayStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-blue-600" />
+                <span className="text-blue-600">+{todayStats.sales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -281,17 +281,17 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4 text-gray-800" />
+                <Users className="h-4 w-4 text-purple-600" />
                 Today's Customers
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">
+              <div className="text-2xl font-bold text-purple-600">
                 {todayStats.customers.new + todayStats.customers.returning}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{todayStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-purple-600" />
+                <span className="text-purple-600">+{todayStats.customers.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -303,17 +303,17 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-gray-800" />
+                <TrendingDown className="h-4 w-4 text-red-600" />
                 Today Return Sale
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">
+              <div className="text-2xl font-bold text-red-600">
                 {formatCurrency(todayStats.returnSales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingDown className="h-3 w-3 text-gray-600" />
-                <span className="text-gray-600">{todayStats.returnSales.change}%</span>
+                <TrendingDown className="h-3 w-3 text-red-500" />
+                <span className="text-red-500">{todayStats.returnSales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -325,12 +325,12 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-emerald-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-gray-800" />
+                <Target className="h-4 w-4 text-emerald-600" />
                 Daily Target
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">78%</div>
+              <div className="text-2xl font-bold text-emerald-600">78%</div>
               <div className="flex items-center gap-1 text-sm mt-2">
                 <span className="text-muted-foreground">₹30,000 target</span>
               </div>
@@ -356,8 +356,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{overallStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-indigo-600" />
+                <span className="text-indigo-600">+{overallStats.sales.change}%</span>
                 <span className="text-muted-foreground">this month</span>
               </div>
             </CardContent>
@@ -373,8 +373,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{overallStats.customers.total}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{overallStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-teal-600" />
+                <span className="text-teal-600">+{overallStats.customers.change}%</span>
                 <span className="text-muted-foreground">growth</span>
               </div>
             </CardContent>
@@ -390,8 +390,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{overallStats.revenue.growth}%</span>
+                <TrendingUp className="h-3 w-3 text-cyan-600" />
+                <span className="text-cyan-600">+{overallStats.revenue.growth}%</span>
                 <span className="text-muted-foreground">total value</span>
               </div>
             </CardContent>
@@ -405,7 +405,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">+{overallStats.revenue.growth}%</div>
+              <div className="text-2xl font-bold text-electric-purple">+{overallStats.revenue.growth}%</div>
               <div className="text-sm text-muted-foreground">
                 {formatCurrency(overallStats.revenue.thisMonth)} this month
               </div>
@@ -517,7 +517,7 @@ export default function Dashboard() {
                     variant={transaction.status === "completed" ? "default" : "secondary"}
                     className={cn(
                       "text-xs",
-                      transaction.status === "completed" ? "bg-gray-100 text-gray-800" : "bg-gray-100 text-gray-700"
+                      transaction.status === "completed" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"
                     )}
                   >
                     {transaction.status}
