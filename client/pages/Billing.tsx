@@ -497,7 +497,7 @@ export default function Billing() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeItem(index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-gray-700 hover:text-red-700"
                       >
                         <X className="h-4 w-4" />
                       </Button>
