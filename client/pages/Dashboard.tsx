@@ -166,11 +166,11 @@ export default function Dashboard() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "high":
-        return "text-red-600 bg-red-50 border-red-200";
+        return "text-gray-800 bg-gray-50 border-gray-200";
       case "medium":
         return "text-orange-600 bg-orange-50 border-orange-200";
       case "low":
-        return "text-blue-600 bg-blue-50 border-blue-200";
+        return "text-gray-700 bg-gray-50 border-gray-200";
       default:
         return "text-gray-600 bg-gray-50 border-gray-200";
     }
@@ -259,17 +259,17 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-blue-600" />
+                <DollarSign className="h-4 w-4 text-gray-800" />
                 Today's Sales
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-black">
                 {formatCurrency(todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-blue-600" />
-                <span className="text-blue-600">+{todayStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{todayStats.sales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -281,17 +281,17 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4 text-purple-600" />
+                <Users className="h-4 w-4 text-gray-800" />
                 Today's Customers
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-black">
                 {todayStats.customers.new + todayStats.customers.returning}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-purple-600" />
-                <span className="text-purple-600">+{todayStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{todayStats.customers.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
