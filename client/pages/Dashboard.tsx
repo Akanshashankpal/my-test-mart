@@ -390,8 +390,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-cyan-600" />
-                <span className="text-cyan-600">+{overallStats.revenue.growth}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{overallStats.revenue.growth}%</span>
                 <span className="text-muted-foreground">total value</span>
               </div>
             </CardContent>
@@ -405,7 +405,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-electric-purple">+{overallStats.revenue.growth}%</div>
+              <div className="text-2xl font-bold text-black">+{overallStats.revenue.growth}%</div>
               <div className="text-sm text-muted-foreground">
                 {formatCurrency(overallStats.revenue.thisMonth)} this month
               </div>
@@ -517,7 +517,7 @@ export default function Dashboard() {
                     variant={transaction.status === "completed" ? "default" : "secondary"}
                     className={cn(
                       "text-xs",
-                      transaction.status === "completed" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"
+                      transaction.status === "completed" ? "bg-gray-100 text-gray-800" : "bg-gray-100 text-gray-700"
                     )}
                   >
                     {transaction.status}
