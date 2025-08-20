@@ -356,8 +356,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-indigo-600" />
-                <span className="text-indigo-600">+{overallStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{overallStats.sales.change}%</span>
                 <span className="text-muted-foreground">this month</span>
               </div>
             </CardContent>
@@ -373,8 +373,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{overallStats.customers.total}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-teal-600" />
-                <span className="text-teal-600">+{overallStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{overallStats.customers.change}%</span>
                 <span className="text-muted-foreground">growth</span>
               </div>
             </CardContent>
@@ -390,8 +390,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-cyan-600" />
-                <span className="text-cyan-600">+{overallStats.revenue.growth}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{overallStats.revenue.growth}%</span>
                 <span className="text-muted-foreground">total value</span>
               </div>
             </CardContent>
