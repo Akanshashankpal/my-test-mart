@@ -290,8 +290,8 @@ export default function Dashboard() {
                 {todayStats.customers.new + todayStats.customers.returning}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-purple-600" />
+                <span className="text-purple-600">+{todayStats.customers.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
