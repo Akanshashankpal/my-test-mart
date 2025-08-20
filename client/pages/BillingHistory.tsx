@@ -476,8 +476,8 @@ export default function BillingHistory() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
             <div className="flex items-center gap-1 text-sm">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span className="text-green-500">+12.5%</span>
+              <TrendingUp className="h-3 w-3 text-indigo-600" />
+              <span className="text-indigo-600">+12.5%</span>
               <span className="text-muted-foreground">vs last month</span>
             </div>
           </CardContent>
