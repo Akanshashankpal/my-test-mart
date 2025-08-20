@@ -268,8 +268,8 @@ export default function Dashboard() {
                 {formatCurrency(todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-blue-600" />
-                <span className="text-blue-600">+{todayStats.sales.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{todayStats.sales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -290,8 +290,8 @@ export default function Dashboard() {
                 {todayStats.customers.new + todayStats.customers.returning}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-purple-600" />
-                <span className="text-purple-600">+{todayStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">+{todayStats.customers.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
@@ -312,8 +312,8 @@ export default function Dashboard() {
                 {formatCurrency(todayStats.returnSales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingDown className="h-3 w-3 text-red-500" />
-                <span className="text-red-500">{todayStats.returnSales.change}%</span>
+                <TrendingDown className="h-3 w-3 text-gray-700" />
+                <span className="text-gray-700">{todayStats.returnSales.change}%</span>
                 <span className="text-muted-foreground">vs yesterday</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
