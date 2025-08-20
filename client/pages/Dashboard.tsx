@@ -517,7 +517,7 @@ export default function Dashboard() {
                     variant={transaction.status === "completed" ? "default" : "secondary"}
                     className={cn(
                       "text-xs",
-                      transaction.status === "completed" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"
+                      transaction.status === "completed" ? "bg-gray-100 text-gray-800" : "bg-gray-100 text-gray-700"
                     )}
                   >
                     {transaction.status}
