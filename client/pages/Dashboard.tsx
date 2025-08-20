@@ -432,7 +432,7 @@ export default function Dashboard() {
                   <div className="flex-1 mx-4">
                     <div className="bg-gray-200 rounded-full h-3 relative">
                       <div
-                        className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
+                        className="bg-gradient-to-r from-gray-400 to-gray-600 h-3 rounded-full"
                         style={{
                           width: `${(data.sales / Math.max(...chartData.salesTrend.map(d => d.sales))) * 100}%`
                         }}
