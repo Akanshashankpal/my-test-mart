@@ -373,8 +373,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{overallStats.customers.total}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-electric-green" />
-                <span className="text-electric-green">+{overallStats.customers.change}%</span>
+                <TrendingUp className="h-3 w-3 text-teal-600" />
+                <span className="text-teal-600">+{overallStats.customers.change}%</span>
                 <span className="text-muted-foreground">growth</span>
               </div>
             </CardContent>
