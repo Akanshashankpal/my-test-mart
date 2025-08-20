@@ -25,119 +25,61 @@ import {
   Receipt
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { DashboardStats, NotificationResponse, RecentTransaction, ApiResponse } from "@shared/api";
 
-// Enhanced mock data for comprehensive dashboard
-const todayStats = {
-  sales: { amount: 23450, transactions: 12, change: 18.5 },
-  customers: { new: 8, returning: 15, change: 12.0 },
-  returnSales: { amount: 1200, count: 2, change: -5.2 },
+// API functions
+const fetchDashboardStats = async (): Promise<DashboardStats> => {
+  const response = await fetch('/api/dashboard/stats');
+  const data: ApiResponse<DashboardStats> = await response.json();
+  if (!data.success) throw new Error(data.error || 'Failed to fetch dashboard stats');
+  return data.data!;
 };
 
-const overallStats = {
-  sales: { amount: 1250420, transactions: 3247, change: 12.5 },
-  customers: { total: 892, active: 654, change: 8.3 },
-  products: { total: 1240, lowStock: 23, outOfStock: 5 },
-  revenue: { thisMonth: 345670, lastMonth: 298450, growth: 15.8 },
+const fetchNotifications = async (): Promise<NotificationResponse[]> => {
+  const response = await fetch('/api/dashboard/notifications');
+  const data: ApiResponse<NotificationResponse[]> = await response.json();
+  if (!data.success) throw new Error(data.error || 'Failed to fetch notifications');
+  return data.data!;
 };
 
-const chartData = {
-  salesTrend: [
-    { month: "Jan", sales: 85000, customers: 120 },
-    { month: "Feb", sales: 92000, customers: 135 },
-    { month: "Mar", sales: 108000, customers: 158 },
-    { month: "Apr", sales: 125000, customers: 180 },
-    { month: "May", sales: 134000, customers: 195 },
-    { month: "Jun", sales: 145000, customers: 210 },
-  ],
-  categoryBreakdown: [
-    { category: "Mobile", sales: 450000, percentage: 36 },
-    { category: "AC", sales: 320000, percentage: 26 },
-    { category: "TV", sales: 280000, percentage: 22 },
-    { category: "Laptop", sales: 200000, percentage: 16 },
-  ],
+const fetchRecentTransactions = async (): Promise<RecentTransaction[]> => {
+  const response = await fetch('/api/dashboard/transactions');
+  const data: ApiResponse<RecentTransaction[]> = await response.json();
+  if (!data.success) throw new Error(data.error || 'Failed to fetch transactions');
+  return data.data!;
 };
-
-const notifications = [
-  {
-    id: "1",
-    type: "security",
-    title: "Multiple Login Detected",
-    message: "Admin account logged in from new device (Mobile - Mumbai)",
-    timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-    read: false,
-    severity: "high",
-  },
-  {
-    id: "2",
-    type: "deletion",
-    title: "Bill Deletion Request",
-    message: "Cashier requested deletion of invoice INV-2024-001234",
-    timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-    read: false,
-    severity: "medium",
-    actionRequired: true,
-  },
-  {
-    id: "3",
-    type: "system",
-    title: "Low Stock Alert",
-    message: "23 products are running low on stock",
-    timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-    read: true,
-    severity: "low",
-  },
-  {
-    id: "4",
-    type: "security",
-    title: "Admin Login",
-    message: "Main admin logged in from Desktop - Delhi",
-    timestamp: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-    read: true,
-    severity: "low",
-  },
-];
-
-const recentTransactions = [
-  {
-    id: "TXN001",
-    customer: "John Doe",
-    amount: 2450,
-    items: 3,
-    time: "2 min ago",
-    type: "GST",
-    status: "completed",
-  },
-  {
-    id: "TXN002",
-    customer: "Sarah Smith",
-    amount: 1200,
-    items: 1,
-    time: "15 min ago",
-    type: "Non-GST",
-    status: "completed",
-  },
-  {
-    id: "TXN003",
-    customer: "Mike Johnson",
-    amount: 850,
-    items: 2,
-    time: "1 hour ago",
-    type: "GST",
-    status: "pending",
-  },
-];
 
 export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(
-    notifications.filter(n => !n.read).length
-  );
+
+  // Fetch dashboard data using React Query
+  const { data: dashboardStats, isLoading: statsLoading, error: statsError } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: fetchDashboardStats,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: fetchNotifications,
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  const { data: recentTransactions = [], isLoading: transactionsLoading } = useQuery({
+    queryKey: ['recent-transactions'],
+    queryFn: fetchRecentTransactions,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const formatCurrency = (amount: number) => {
     return `₹${amount.toLocaleString('en-IN')}`;
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
@@ -166,15 +108,30 @@ export default function Dashboard() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "high":
-        return "text-red-600 bg-red-50 border-red-200";
+        return "text-gray-800 bg-gray-50 border-gray-200";
       case "medium":
-        return "text-orange-600 bg-orange-50 border-orange-200";
+        return "text-gray-700 bg-gray-50 border-gray-200";
       case "low":
-        return "text-blue-600 bg-blue-50 border-blue-200";
+        return "text-gray-700 bg-gray-50 border-gray-200";
       default:
         return "text-gray-600 bg-gray-50 border-gray-200";
     }
   };
+
+  if (statsError) {
+    return (
+      <div className="px-4 pb-4 pt-0 space-y-4">
+        <div className="text-center py-8">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load Dashboard</h3>
+          <p className="text-gray-600 mb-4">We couldn't load your dashboard data. Please try refreshing the page.</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 pb-4 pt-0 space-y-4">
@@ -205,342 +162,378 @@ export default function Dashboard() {
                 <h3 className="font-semibold">Notifications</h3>
               </div>
               <div className="space-y-0">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={cn(
-                      "p-4 border-b hover:bg-muted/50 transition-colors",
-                      !notification.read && "bg-primary/5"
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        getSeverityColor(notification.severity)
-                      )}>
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm">{notification.title}</h4>
-                          <span className="text-xs text-muted-foreground">
-                            {formatTime(notification.timestamp)}
-                          </span>
+                {notificationsLoading ? (
+                  <div className="p-4 text-center text-gray-500">Loading notifications...</div>
+                ) : notifications.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500">No notifications</div>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={cn(
+                        "p-4 border-b hover:bg-muted/50 transition-colors",
+                        !notification.read && "bg-primary/5"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={cn(
+                          "p-2 rounded-full",
+                          getSeverityColor(notification.severity)
+                        )}>
+                          {getNotificationIcon(notification.type)}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {notification.message}
-                        </p>
-                        {notification.actionRequired && (
-                          <div className="flex gap-2 mt-2">
-                            <Button size="sm" variant="outline" className="text-xs">
-                              <CheckCircle className="h-3 w-3" />
-                              Approve
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-xs">
-                              <X className="h-3 w-3" />
-                              Deny
-                            </Button>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-sm">{notification.title}</h4>
+                            <span className="text-xs text-muted-foreground">
+                              {formatTime(notification.timestamp)}
+                            </span>
                           </div>
-                        )}
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {notification.message}
+                          </p>
+                          {notification.actionRequired && (
+                            <div className="flex gap-2 mt-2">
+                              <Button size="sm" variant="outline" className="text-xs">
+                                <CheckCircle className="h-3 w-3" />
+                                Approve
+                              </Button>
+                              <Button size="sm" variant="outline" className="text-xs">
+                                <X className="h-3 w-3" />
+                                Deny
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Today's Statistics */}
-      <div>
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-blue-600" />
-                Today's Sales
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {formatCurrency(todayStats.sales.amount)}
-              </div>
-              <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{todayStats.sales.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.sales.transactions} transactions
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4 text-purple-600" />
-                Today's Customers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {todayStats.customers.new + todayStats.customers.returning}
-              </div>
-              <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{todayStats.customers.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.customers.new} new, {todayStats.customers.returning} returning
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-red-600" />
-                Today Return Sale
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(todayStats.returnSales.amount)}
-              </div>
-              <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingDown className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">{todayStats.returnSales.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.returnSales.count} return transactions
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-emerald-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-emerald-600" />
-                Daily Target
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-emerald-600">78%</div>
-              <div className="flex items-center gap-1 text-sm mt-2">
-                <span className="text-muted-foreground">₹30,000 target</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: "78%" }}></div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Overall Statistics */} 
-      <div>
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Overall Performance</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Total Revenue
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
-              <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{overallStats.sales.change}%</span>
-                <span className="text-muted-foreground">this month</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Total Customers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{overallStats.customers.total}</div>
-              <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{overallStats.customers.change}%</span>
-                <span className="text-muted-foreground">growth</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Total Rs
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
-              <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-gray-700" />
-                <span className="text-gray-700">+{overallStats.revenue.growth}%</span>
-                <span className="text-muted-foreground">total value</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Monthly Growth
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-electric-purple">+{overallStats.revenue.growth}%</div>
-              <div className="text-sm text-muted-foreground">
-                {formatCurrency(overallStats.revenue.thisMonth)} this month
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales Trend Chart */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              Sales Trend (6 Months)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {chartData.salesTrend.map((data, index) => (
-                <div key={data.month} className="flex items-center justify-between">
-                  <span className="text-sm font-medium w-12">{data.month}</span>
-                  <div className="flex-1 mx-4">
-                    <div className="bg-gray-200 rounded-full h-3 relative">
-                      <div
-                        className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
-                        style={{
-                          width: `${(data.sales / Math.max(...chartData.salesTrend.map(d => d.sales))) * 100}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                  <span className="text-sm text-muted-foreground w-20 text-right">
-                    {formatCurrency(data.sales)}
-                  </span>
-                </div>
+      {statsLoading ? (
+        <div className="space-y-4">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-200 rounded mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-gray-200 rounded-lg h-32"></div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Today's Statistics */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-blue-600" />
+                    Today's Sales
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {formatCurrency(dashboardStats?.todayStats.sales.amount || 0)}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm mt-2">
+                    <TrendingUp className="h-3 w-3 text-gray-700" />
+                    <span className="text-gray-700">+{dashboardStats?.todayStats.sales.change.toFixed(1) || 0}%</span>
+                    <span className="text-muted-foreground">vs yesterday</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {dashboardStats?.todayStats.sales.transactions || 0} transactions
+                  </div>
+                </CardContent>
+              </Card>
 
-        {/* Sales Donut Chart */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5 text-primary" />
-              Sales Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center mb-6">
-              <div className="relative w-32 h-32">
-                <div className="w-32 h-32 rounded-full border-8 border-electric-blue border-t-electric-purple border-r-electric-orange border-b-electric-green animate-pulse"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-lg font-bold">₹12.5L</div>
-                    <div className="text-xs text-muted-foreground">Total Sales</div>
+              <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Users className="h-4 w-4 text-purple-600" />
+                    Today's Customers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {(dashboardStats?.todayStats.customers.new || 0) + (dashboardStats?.todayStats.customers.returning || 0)}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm mt-2">
+                    <TrendingUp className="h-3 w-3 text-gray-700" />
+                    <span className="text-gray-700">+{dashboardStats?.todayStats.customers.change.toFixed(1) || 0}%</span>
+                    <span className="text-muted-foreground">vs yesterday</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {dashboardStats?.todayStats.customers.new || 0} new, {dashboardStats?.todayStats.customers.returning || 0} returning
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <TrendingDown className="h-4 w-4 text-red-600" />
+                    Today Return Sale
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">
+                    {formatCurrency(dashboardStats?.todayStats.returnSales.amount || 0)}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm mt-2">
+                    <TrendingDown className="h-3 w-3 text-gray-700" />
+                    <span className="text-gray-700">{dashboardStats?.todayStats.returnSales.change.toFixed(1) || 0}%</span>
+                    <span className="text-muted-foreground">vs yesterday</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {dashboardStats?.todayStats.returnSales.count || 0} return transactions
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-emerald-500 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Target className="h-4 w-4 text-emerald-600" />
+                    Daily Target
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-emerald-600">
+                    {dashboardStats?.todayStats.target.percentage || 0}%
+                  </div>
+                  <div className="flex items-center gap-1 text-sm mt-2">
+                    <span className="text-muted-foreground">
+                      ₹{dashboardStats?.todayStats.target.target?.toLocaleString() || '30,000'} target
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-emerald-500 h-2 rounded-full" 
+                      style={{ width: `${dashboardStats?.todayStats.target.percentage || 0}%` }}
+                    ></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Overall Statistics */} 
+          <div>
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Overall Performance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Total Revenue
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatCurrency(dashboardStats?.overallStats.sales.amount || 0)}</div>
+                  <div className="flex items-center gap-1 text-sm">
+                    <TrendingUp className="h-3 w-3 text-gray-700" />
+                    <span className="text-gray-700">+{dashboardStats?.overallStats.sales.change.toFixed(1) || 0}%</span>
+                    <span className="text-muted-foreground">this month</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Total Customers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{dashboardStats?.overallStats.customers.total || 0}</div>
+                  <div className="flex items-center gap-1 text-sm">
+                    <TrendingUp className="h-3 w-3 text-gray-700" />
+                    <span className="text-gray-700">+{dashboardStats?.overallStats.customers.change.toFixed(1) || 0}%</span>
+                    <span className="text-muted-foreground">growth</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Total Rs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency((dashboardStats?.overallStats.sales.amount || 0) + (dashboardStats?.overallStats.revenue.thisMonth || 0))}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm">
+                    <TrendingUp className="h-3 w-3 text-gray-700" />
+                    <span className="text-gray-700">+{dashboardStats?.overallStats.revenue.growth.toFixed(1) || 0}%</span>
+                    <span className="text-muted-foreground">total value</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Monthly Growth
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-black">+{dashboardStats?.overallStats.revenue.growth.toFixed(1) || 0}%</div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatCurrency(dashboardStats?.overallStats.revenue.thisMonth || 0)} this month
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Sales Trend Chart */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  Sales Trend (6 Months)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {dashboardStats?.chartData.salesTrend.map((data, index) => (
+                    <div key={data.month} className="flex items-center justify-between">
+                      <span className="text-sm font-medium w-12">{data.month}</span>
+                      <div className="flex-1 mx-4">
+                        <div className="bg-gray-200 rounded-full h-3 relative">
+                          <div
+                            className="bg-gradient-to-r from-gray-400 to-gray-600 h-3 rounded-full"
+                            style={{
+                              width: `${(data.sales / Math.max(...(dashboardStats?.chartData.salesTrend.map(d => d.sales) || [1]))) * 100}%`
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                      <span className="text-sm text-muted-foreground w-20 text-right">
+                        {formatCurrency(data.sales)}
+                      </span>
+                    </div>
+                  )) || []}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sales Donut Chart */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="h-5 w-5 text-primary" />
+                  Sales Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center mb-6">
+                  <div className="relative w-32 h-32">
+                    <div className="w-32 h-32 rounded-full border-8 border-blue-500 border-t-purple-500 border-r-orange-500 border-b-gray-500 animate-pulse"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-lg font-bold">₹12.5L</div>
+                        <div className="text-xs text-muted-foreground">Total Sales</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-blue rounded-full"></div>
-                <span>GST Sales</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-purple rounded-full"></div>
-                <span>Non-GST</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-orange rounded-full"></div>
-                <span>Returns</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-electric-green rounded-full"></div>
-                <span>Pending</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Bills */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-primary" />
-            Recent Bills
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {recentTransactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className="flex items-center justify-between p-4 bg-gradient-to-r from-electric-blue/5 to-white rounded-lg border border-electric-blue/20 hover:shadow-md transition-shadow"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">{transaction.customer}</span>
-                  <Badge
-                    variant={transaction.type === "GST" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {transaction.type}
-                  </Badge>
-                  <Badge
-                    variant={transaction.status === "completed" ? "default" : "secondary"}
-                    className={cn(
-                      "text-xs",
-                      transaction.status === "completed" ? "bg-gray-100 text-gray-800" : "bg-gray-100 text-gray-700"
-                    )}
-                  >
-                    {transaction.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{transaction.id}</span>
-                  <span>{transaction.items} items</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {transaction.time}
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span>GST Sales</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span>Non-GST</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span>Returns</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                    <span>Pending</span>
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-black">
-                  {formatCurrency(transaction.amount)}
-                </div>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Bills */}
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-primary" />
+                Recent Bills
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {transactionsLoading ? (
+                <div className="text-center py-4 text-gray-500">Loading transactions...</div>
+              ) : recentTransactions.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">No recent transactions</div>
+              ) : (
+                recentTransactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 bg-gradient-to-r from-electric-blue/5 to-white rounded-lg border border-electric-blue/20 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">{transaction.customer}</span>
+                        <Badge
+                          variant={transaction.type === "GST" ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {transaction.type}
+                        </Badge>
+                        <Badge
+                          variant={transaction.status === "completed" ? "default" : "secondary"}
+                          className={cn(
+                            "text-xs",
+                            transaction.status === "completed" ? "bg-gray-100 text-gray-800" : "bg-gray-100 text-gray-700"
+                          )}
+                        >
+                          {transaction.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{transaction.id}</span>
+                        <span>{transaction.items} items</span>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {transaction.time}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-black">
+                        {formatCurrency(transaction.amount)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
