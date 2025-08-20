@@ -306,7 +306,7 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-emerald-600">
+                  <div className="text-2xl font-bold text-black">
                     {dashboardStats?.todayStats.target.percentage || 0}%
                   </div>
                   <div className="flex items-center gap-1 text-sm mt-2">
