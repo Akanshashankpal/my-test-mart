@@ -152,15 +152,18 @@ const mockAuth = {
 export const authAPI = {
   login: async (email: string, password: string) => {
     try {
+      console.log('Attempting API login...');
       const response = await api.post('/api/auth/login', { email, password });
+      console.log('API login successful');
       return response.data;
     } catch (error: any) {
-      // If network error, use mock authentication
-      if (!error.response || error.message.includes('Network Error')) {
-        console.warn('API unavailable, using mock authentication');
-        return await mockAuth.login(email, password);
-      }
-      throw error;
+      console.log('API login failed, error:', error);
+      console.log('Error response:', error.response);
+      console.log('Error message:', error.message);
+
+      // Use mock authentication for any error (network, server down, etc.)
+      console.warn('API unavailable, using mock authentication');
+      return await mockAuth.login(email, password);
     }
   },
 
