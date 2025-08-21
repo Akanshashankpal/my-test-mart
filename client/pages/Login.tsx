@@ -46,8 +46,9 @@ export default function Login() {
   const displayError = localError || authError;
 
   const demoCredentials = [
-    { email: 'admin@electromart.com', password: 'admin123', role: 'Admin' },
-    { email: 'manager@electromart.com', password: 'manager123', role: 'Manager' },
+    { email: 'admin@example.com', password: 'password123', role: 'Admin' },
+    { email: 'manager@example.com', password: 'password123', role: 'Manager' },
+    { email: 'cashier@example.com', password: 'password123', role: 'Cashier' },
   ];
 
   return (
