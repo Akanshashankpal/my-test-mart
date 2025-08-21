@@ -100,6 +100,14 @@ export default function Login() {
               <div className="flex items-center gap-2 text-sm text-red-600">
                 <WifiOff className="h-4 w-4" />
                 <span>Server connection failed</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={checkConnection}
+                  className="ml-2 h-6 px-2 text-xs"
+                >
+                  Retry
+                </Button>
               </div>
             )}
           </div>
