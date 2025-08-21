@@ -3,11 +3,21 @@ import axios from 'axios';
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: 'https://billing-system-i3py.onrender.com',
-  timeout: 10000,
+  timeout: 15000, // Increased timeout for slow connections
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Add API health check
+export const healthCheck = async () => {
+  try {
+    const response = await api.get('/api/health');
+    return { success: true, data: response.data };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
