@@ -46,6 +46,17 @@ import {
   TrendingDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  ResponsiveTable,
+  ResponsiveTableHeader,
+  ResponsiveTableHeaderCell,
+  ResponsiveTableBody,
+  ResponsiveTableRow,
+  ResponsiveTableCell,
+  MobileTableCard,
+  MobileTableRowItem,
+  useResponsiveTable,
+} from "@/components/ui/responsive-table";
 
 interface Bill {
   id: string;
