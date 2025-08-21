@@ -172,7 +172,15 @@ export default function Login() {
                 </div>
               </div>
 
-              {displayError && (
+              {connectionStatus === 'disconnected' && (
+                <Alert className="border-orange-200 bg-orange-50">
+                  <AlertDescription className="text-orange-800">
+                    Unable to connect to the server. Please check your internet connection and try again.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {displayError && connectionStatus === 'connected' && (
                 <Alert className="border-red-200 bg-red-50">
                   <AlertDescription className="text-red-800">
                     {displayError}
