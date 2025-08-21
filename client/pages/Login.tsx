@@ -28,7 +28,8 @@ export default function Login() {
   };
 
   useEffect(() => {
-    checkConnection();
+    // Start with connected status since we'll handle errors in the login process
+    setConnectionStatus('connected');
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
