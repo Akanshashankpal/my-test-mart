@@ -12,7 +12,7 @@ const api = axios.create({
 // Add API health check
 export const healthCheck = async () => {
   try {
-    const response = await api.get('/api/health');
+    const response = await api.get('/api/login');
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, error };
