@@ -83,35 +83,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Connection Status */}
-          <div className="flex items-center justify-center gap-2 mb-4">
-            {connectionStatus === 'checking' && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Checking connection...</span>
-              </div>
-            )}
-            {connectionStatus === 'connected' && (
-              <div className="flex items-center gap-2 text-sm text-green-600">
-                <CheckCircle className="h-4 w-4" />
-                <span>Connected to server</span>
-              </div>
-            )}
-            {connectionStatus === 'disconnected' && (
-              <div className="flex items-center gap-2 text-sm text-red-600">
-                <WifiOff className="h-4 w-4" />
-                <span>Server connection failed</span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={checkConnection}
-                  className="ml-2 h-6 px-2 text-xs"
-                >
-                  Retry
-                </Button>
-              </div>
-            )}
-          </div>
 
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">Welcome Back</h2>
           <p className="text-gray-600">Sign in to your business dashboard</p>
