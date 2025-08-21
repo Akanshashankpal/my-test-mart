@@ -72,7 +72,7 @@ export default function Login() {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="bg-electric-blue text-white p-3 rounded-xl shadow-lg">
+            <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg">
               <Store className="h-8 w-8" />
             </div>
             <div className="text-left">
@@ -80,15 +80,31 @@ export default function Login() {
               <p className="text-sm text-gray-600">Business Management</p>
             </div>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            {isSignup ? 'Create Account' : 'Welcome Back'}
-          </h2>
-          <p className="text-gray-600">
-            {isSignup 
-              ? 'Enter your details to create your account' 
-              : 'Sign in to your business dashboard'
-            }
-          </p>
+
+          {/* Connection Status */}
+          <div className="flex items-center justify-center gap-2 mb-4">
+            {connectionStatus === 'checking' && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Checking connection...</span>
+              </div>
+            )}
+            {connectionStatus === 'connected' && (
+              <div className="flex items-center gap-2 text-sm text-green-600">
+                <CheckCircle className="h-4 w-4" />
+                <span>Connected to server</span>
+              </div>
+            )}
+            {connectionStatus === 'disconnected' && (
+              <div className="flex items-center gap-2 text-sm text-red-600">
+                <WifiOff className="h-4 w-4" />
+                <span>Server connection failed</span>
+              </div>
+            )}
+          </div>
+
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Welcome Back</h2>
+          <p className="text-gray-600">Sign in to your business dashboard</p>
         </div>
 
         {/* Login Form */}
