@@ -213,31 +213,31 @@ export default function Login() {
         </Card>
 
         {/* Demo Credentials */}
-        <Card className="shadow-lg border-electric-blue/20 bg-electric-blue/5">
+        <Card className="shadow-lg border-blue-200 bg-blue-50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-electric-blue">Demo Credentials</CardTitle>
-            <CardDescription className="text-electric-blue/80">
+            <CardTitle className="text-lg text-blue-600">Demo Credentials</CardTitle>
+            <CardDescription className="text-blue-600/80">
               Use these credentials to test the application
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {demoCredentials.map((cred, index) => (
-              <div 
+              <div
                 key={index}
-                className="flex items-center justify-between p-3 bg-white rounded-lg border border-electric-blue/20 cursor-pointer hover:bg-electric-blue/5 transition-colors"
+                className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition-colors"
                 onClick={() => {
                   setEmail(cred.email);
                   setPassword(cred.password);
                 }}
               >
                 <div>
-                  <p className="font-medium text-electric-blue">{cred.role}</p>
-                  <p className="text-sm text-electric-blue/80">{cred.email}</p>
+                  <p className="font-medium text-blue-600">{cred.role}</p>
+                  <p className="text-sm text-blue-600/80">{cred.email}</p>
                 </div>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
-                  className="text-electric-blue hover:text-electric-blue/80 hover:bg-electric-blue/10"
+                  className="text-blue-600 hover:text-blue-600/80 hover:bg-blue-50"
                   onClick={(e) => {
                     e.stopPropagation();
                     setEmail(cred.email);
