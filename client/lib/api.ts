@@ -75,7 +75,7 @@ api.interceptors.response.use(
   }
 );
 
-// Mock user data for fallback
+// Mock user data for fallback - must match exactly with demo credentials
 const mockUsers = [
   {
     id: '1',
@@ -84,7 +84,7 @@ const mockUsers = [
     password: 'password123',
     role: 'admin',
     avatar: null,
-    lastLogin: new Date()
+    lastLogin: new Date().toISOString()
   },
   {
     id: '2',
@@ -93,7 +93,7 @@ const mockUsers = [
     password: 'password123',
     role: 'manager',
     avatar: null,
-    lastLogin: new Date()
+    lastLogin: new Date().toISOString()
   },
   {
     id: '3',
@@ -102,9 +102,12 @@ const mockUsers = [
     password: 'password123',
     role: 'cashier',
     avatar: null,
-    lastLogin: new Date()
+    lastLogin: new Date().toISOString()
   }
 ];
+
+// Add validation to ensure we have the right credentials
+console.log('Mock users initialized:', mockUsers.map(u => ({ email: u.email, password: u.password })));
 
 // Mock authentication function
 const mockAuth = {
