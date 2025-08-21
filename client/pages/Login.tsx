@@ -13,8 +13,22 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState('');
-  const [isSignup, setIsSignup] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const { login, isLoading, error: authError } = useAuth();
+
+  // Check API connection on component mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const result = await healthCheck();
+        setConnectionStatus(result.success ? 'connected' : 'disconnected');
+      } catch (error) {
+        setConnectionStatus('disconnected');
+      }
+    };
+
+    checkConnection();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
