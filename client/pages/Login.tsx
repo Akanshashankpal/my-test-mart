@@ -162,50 +162,6 @@ export default function Login() {
               </Button>
             </form>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Use the demo credentials below to test the application
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Demo Credentials */}
-        <Card className="shadow-lg border-blue-200 bg-blue-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-blue-600">Demo Credentials</CardTitle>
-            <CardDescription className="text-blue-600/80">
-              Use these credentials to test the application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {demoCredentials.map((cred, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-50 transition-colors"
-                onClick={() => {
-                  setEmail(cred.email);
-                  setPassword(cred.password);
-                }}
-              >
-                <div>
-                  <p className="font-medium text-blue-600">{cred.role}</p>
-                  <p className="text-sm text-blue-600/80">{cred.email}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-blue-600 hover:text-blue-600/80 hover:bg-blue-50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEmail(cred.email);
-                    setPassword(cred.password);
-                  }}
-                >
-                  Use
-                </Button>
-              </div>
-            ))}
           </CardContent>
         </Card>
 
