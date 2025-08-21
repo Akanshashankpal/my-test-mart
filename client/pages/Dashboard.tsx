@@ -230,8 +230,8 @@ export default function Dashboard() {
         <>
           {/* Today's Statistics */}
           <div>
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Today's Performance</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <Card className="border-l-4 border-l-blue-500 shadow-lg hover:shadow-xl transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -327,8 +327,8 @@ export default function Dashboard() {
 
           {/* Overall Statistics */} 
           <div>
-            <h3 className="text-xl font-semibold mb-4 text-foreground">Overall Performance</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-foreground">Overall Performance</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <Card className="shadow-lg hover:shadow-xl transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -400,7 +400,7 @@ export default function Dashboard() {
           </div>
 
           {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Sales Trend Chart */}
             <Card className="shadow-lg">
               <CardHeader>
