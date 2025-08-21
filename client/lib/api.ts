@@ -113,17 +113,24 @@ console.log('Mock users initialized:', mockUsers.map(u => ({ email: u.email, pas
 const mockAuth = {
   login: async (email: string, password: string) => {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    console.log('Mock Auth - Attempting login with:', { email, password });
-    console.log('Mock Auth - Available users:', mockUsers.map(u => ({ email: u.email, password: u.password })));
+    // Trim whitespace and ensure exact matching
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
 
-    const user = mockUsers.find(u => u.email === email && u.password === password);
-    console.log('Mock Auth - Found user:', user);
+    console.log('Mock Auth - Cleaned credentials:', { cleanEmail, cleanPassword });
+
+    const user = mockUsers.find(u =>
+      u.email.trim().toLowerCase() === cleanEmail &&
+      u.password.trim() === cleanPassword
+    );
+
+    console.log('Mock Auth - Found user:', user ? 'YES' : 'NO');
 
     if (user) {
       const { password: _, ...userWithoutPassword } = user;
-      return {
+      const result = {
         success: true,
         message: 'Login successful (Mock Mode)',
         data: {
@@ -131,9 +138,13 @@ const mockAuth = {
           token: 'mock-jwt-token-' + Date.now()
         }
       };
+      console.log('Mock Auth - Returning success:', result);
+      return result;
     } else {
-      console.error('Mock Auth - No matching user found for credentials:', { email, password });
-      throw new Error('Invalid credentials');
+      console.error('Mock Auth - Invalid credentials. Available emails:', mockUsers.map(u => u.email));
+      const error = new Error('Invalid credentials');
+      console.error('Mock Auth - Throwing error:', error);
+      throw error;
     }
   },
 
