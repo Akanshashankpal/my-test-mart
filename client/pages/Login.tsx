@@ -132,10 +132,10 @@ export default function Login() {
                 </div>
               </div>
 
-              {error && (
+              {displayError && (
                 <Alert className="border-red-200 bg-red-50">
                   <AlertDescription className="text-red-800">
-                    {error}
+                    {displayError}
                   </AlertDescription>
                 </Alert>
               )}
