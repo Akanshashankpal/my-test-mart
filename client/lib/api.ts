@@ -76,29 +76,11 @@ api.interceptors.response.use(
 );
 
 
-// Auth API functions with fallback
+// Auth API functions
 export const authAPI = {
   login: async (email: string, password: string) => {
-    // Temporarily force mock authentication for debugging
-    console.log('Forcing mock authentication for debugging...');
-    return await mockAuth.login(email, password);
-
-    /* Original API call (temporarily disabled for debugging)
-    try {
-      console.log('Attempting API login...');
-      const response = await api.post('/api/auth/login', { email, password });
-      console.log('API login successful');
-      return response.data;
-    } catch (error: any) {
-      console.log('API login failed, error:', error);
-      console.log('Error response:', error.response);
-      console.log('Error message:', error.message);
-
-      // Use mock authentication for any error (network, server down, etc.)
-      console.warn('API unavailable, using mock authentication');
-      return await mockAuth.login(email, password);
-    }
-    */
+    const response = await api.post('/api/auth/login', { email, password });
+    return response.data;
   },
 
   logout: async () => {
