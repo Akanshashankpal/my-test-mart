@@ -76,12 +76,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     try {
       const response = await authAPI.login(email, password);
 
-      if (response.success && response.token && response.user) {
+      if (response.success && response.data?.token && response.data?.user) {
         // Store auth token and user data
-        localStorage.setItem('electromart_token', response.token);
-        localStorage.setItem('electromart_user', JSON.stringify(response.user));
+        localStorage.setItem('electromart_token', response.data.token);
+        localStorage.setItem('electromart_user', JSON.stringify(response.data.user));
 
-        setUser(response.user);
+        setUser(response.data.user);
         setIsLoading(false);
         return true;
       } else {
