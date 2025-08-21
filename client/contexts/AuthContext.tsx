@@ -81,6 +81,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         localStorage.setItem('electromart_token', response.data.token);
         localStorage.setItem('electromart_user', JSON.stringify(response.data.user));
 
+        // Check if we're in mock mode
+        if (response.message?.includes('Mock Mode')) {
+          localStorage.setItem('electromart_mock_mode', 'true');
+        }
+
         setUser(response.data.user);
         setIsLoading(false);
         return true;
