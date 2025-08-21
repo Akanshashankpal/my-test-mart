@@ -47,9 +47,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           // Optionally verify with backend
           try {
             const profileData = await authAPI.getProfile();
-            if (profileData.success) {
-              setUser(profileData.user);
-              localStorage.setItem('electromart_user', JSON.stringify(profileData.user));
+            if (profileData.success && profileData.data?.user) {
+              setUser(profileData.data.user);
+              localStorage.setItem('electromart_user', JSON.stringify(profileData.data.user));
             }
           } catch (error) {
             // Token might be expired, clear storage
