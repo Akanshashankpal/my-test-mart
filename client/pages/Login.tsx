@@ -62,12 +62,6 @@ export default function Login() {
   // Combined error from local validation and auth context
   const displayError = localError || authError;
 
-  const demoCredentials = [
-    { email: 'admin@example.com', password: 'password123', role: 'Admin' },
-    { email: 'manager@example.com', password: 'password123', role: 'Manager' },
-    { email: 'cashier@example.com', password: 'password123', role: 'Cashier' },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
