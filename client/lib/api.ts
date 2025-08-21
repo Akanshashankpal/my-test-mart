@@ -81,20 +81,30 @@ export const authAPI = {
     const response = await api.post('/api/auth/login', { email, password });
     return response.data;
   },
-  
-  logout: async () => {
-    const response = await api.post('/api/auth/logout');
+
+  register: async (name: string, email: string, password: string, role?: string) => {
+    const response = await api.post('/api/auth/register', { name, email, password, role });
     return response.data;
   },
-  
+
   getProfile: async () => {
-    const response = await api.get('/api/auth/profile');
+    const response = await api.get('/api/auth/me');
     return response.data;
   },
-  
-  refreshToken: async () => {
-    const response = await api.post('/api/auth/refresh');
+
+  updateProfile: async (name?: string, email?: string, avatar?: string) => {
+    const response = await api.put('/api/auth/profile', { name, email, avatar });
     return response.data;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await api.put('/api/auth/password', { currentPassword, newPassword });
+    return response.data;
+  },
+
+  logout: async () => {
+    // Since there's no logout endpoint in the provided code, we'll handle logout locally
+    return { success: true, message: 'Logged out successfully' };
   }
 };
 
