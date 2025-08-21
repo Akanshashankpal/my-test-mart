@@ -125,7 +125,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     setUser(null);
     localStorage.removeItem('electromart_token');
     localStorage.removeItem('electromart_user');
-    localStorage.removeItem('electromart_mock_mode');
     setIsLoading(false);
   };
 
