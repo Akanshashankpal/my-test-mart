@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { healthCheck } from '@/lib/api';
-import { Store, Lock, Mail, Eye, EyeOff, Loader2, Wifi, WifiOff, CheckCircle } from 'lucide-react';
+import { Store, Lock, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
