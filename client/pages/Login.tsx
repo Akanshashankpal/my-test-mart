@@ -16,17 +16,18 @@ export default function Login() {
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const { login, isLoading, error: authError } = useAuth();
 
-  // Check API connection on component mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const result = await healthCheck();
-        setConnectionStatus(result.success ? 'connected' : 'disconnected');
-      } catch (error) {
-        setConnectionStatus('disconnected');
-      }
-    };
+  // Check API connection
+  const checkConnection = async () => {
+    setConnectionStatus('checking');
+    try {
+      const result = await healthCheck();
+      setConnectionStatus(result.success ? 'connected' : 'disconnected');
+    } catch (error) {
+      setConnectionStatus('disconnected');
+    }
+  };
 
+  useEffect(() => {
     checkConnection();
   }, []);
 
