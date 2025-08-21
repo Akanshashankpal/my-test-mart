@@ -12,7 +12,7 @@ const api = axios.create({
 // Add API health check
 export const healthCheck = async () => {
   try {
-    const response = await api.get('/');
+    const response = await api.post('/api/auth/login');
     return { success: true, data: response.data };
   } catch (error) {
     return { success: false, error };
@@ -81,30 +81,20 @@ export const authAPI = {
     const response = await api.post('/api/auth/login', { email, password });
     return response.data;
   },
-
-  register: async (name: string, email: string, password: string, role?: string) => {
-    const response = await api.post('/api/auth/register', { name, email, password, role });
+  
+  logout: async () => {
+    const response = await api.post('/api/auth/logout');
     return response.data;
   },
-
+  
   getProfile: async () => {
     const response = await api.get('/api/auth/me');
     return response.data;
   },
-
-  updateProfile: async (name?: string, email?: string, avatar?: string) => {
-    const response = await api.put('/api/auth/profile', { name, email, avatar });
+  
+  refreshToken: async () => {
+    const response = await api.post('/api/auth/refresh');
     return response.data;
-  },
-
-  changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await api.put('/api/auth/password', { currentPassword, newPassword });
-    return response.data;
-  },
-
-  logout: async () => {
-    // Since there's no logout endpoint in the provided code, we'll handle logout locally
-    return { success: true, message: 'Logged out successfully' };
   }
 };
 
