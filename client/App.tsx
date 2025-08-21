@@ -107,6 +107,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <MockModeNotification />
         <AuthProvider>
           <BrowserRouter>
             <AppContent />
