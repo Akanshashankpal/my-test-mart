@@ -439,6 +439,168 @@ export default function BillingHistory() {
   };
 
   const stats = calculateStats();
+  const { isMobile } = useResponsiveTable();
+
+  // Responsive Bills Component
+  const BillsResponsiveTable = ({ bills }: { bills: typeof currentBills }) => {
+    if (isMobile) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Bills ({filteredBills.length})</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {bills.map((bill) => (
+              <MobileTableCard key={bill.id}>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-medium">{bill.billNumber}</div>
+                    <div className="text-xs text-gray-500">by {bill.createdBy}</div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedBill(bill)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => downloadBillPDF(bill)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <MobileTableRowItem label="Customer">{bill.customer.name}</MobileTableRowItem>
+                <MobileTableRowItem label="Phone">{bill.customer.phone}</MobileTableRowItem>
+                <MobileTableRowItem label="Date">{formatDate(bill.billDate)}</MobileTableRowItem>
+                <MobileTableRowItem label="Type">
+                  <Badge className={cn("text-xs", getTypeBadge(bill.billType))}>
+                    {bill.billType}
+                  </Badge>
+                </MobileTableRowItem>
+                <MobileTableRowItem label="Amount">{formatCurrency(bill.finalAmount)}</MobileTableRowItem>
+                <MobileTableRowItem label="Payment">
+                  <Badge className={cn("text-xs", getPaymentBadge(bill.paymentStatus))}>
+                    {bill.paymentStatus}
+                  </Badge>
+                </MobileTableRowItem>
+                <MobileTableRowItem label="Status">
+                  <Badge className={cn("text-xs", getStatusBadge(bill.status))}>
+                    {bill.status}
+                  </Badge>
+                </MobileTableRowItem>
+              </MobileTableCard>
+            ))}
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Bills ({filteredBills.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ResponsiveTable>
+            <ResponsiveTableHeader>
+              <tr>
+                <ResponsiveTableHeaderCell>Bill Number</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Customer</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Date</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Type</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Amount</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Payment</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Status</ResponsiveTableHeaderCell>
+                <ResponsiveTableHeaderCell>Actions</ResponsiveTableHeaderCell>
+              </tr>
+            </ResponsiveTableHeader>
+            <ResponsiveTableBody>
+              {bills.map((bill) => (
+                <ResponsiveTableRow key={bill.id}>
+                  <ResponsiveTableCell>
+                    <div className="font-medium">{bill.billNumber}</div>
+                    <div className="text-sm text-muted-foreground">by {bill.createdBy}</div>
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <div className="font-medium">{bill.customer.name}</div>
+                    <div className="text-sm text-muted-foreground">{bill.customer.phone}</div>
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <div className="font-medium">{formatDate(bill.billDate)}</div>
+                    {bill.dueDate && (
+                      <div className="text-sm text-muted-foreground">
+                        Due: {formatDate(bill.dueDate)}
+                      </div>
+                    )}
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <Badge className={cn("text-xs", getTypeBadge(bill.billType))}>
+                      {bill.billType}
+                    </Badge>
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <div className="font-medium">{formatCurrency(bill.finalAmount)}</div>
+                    {(bill.discountAmount || 0) > 0 && (
+                      <div className="text-sm text-muted-foreground">
+                        Discount: {formatCurrency(bill.discountAmount)}
+                      </div>
+                    )}
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <Badge className={cn("text-xs", getPaymentBadge(bill.paymentStatus))}>
+                      {bill.paymentStatus}
+                    </Badge>
+                    {bill.paymentMethod && (
+                      <div className="text-sm text-muted-foreground">
+                        via {bill.paymentMethod}
+                      </div>
+                    )}
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <Badge className={cn("text-xs", getStatusBadge(bill.status))}>
+                      {bill.status}
+                    </Badge>
+                  </ResponsiveTableCell>
+                  <ResponsiveTableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedBill(bill)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => downloadBillPDF(bill)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeleteBillId(bill.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </ResponsiveTableCell>
+                </ResponsiveTableRow>
+              ))}
+            </ResponsiveTableBody>
+          </ResponsiveTable>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="p-4 space-y-6">
