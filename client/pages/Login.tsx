@@ -120,7 +120,7 @@ export default function Login() {
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">
-              {isSignup ? 'Sign Up' : 'Sign In'}
+              Sign In
             </CardTitle>
             <CardDescription className="text-center">
               Access your business management dashboard
