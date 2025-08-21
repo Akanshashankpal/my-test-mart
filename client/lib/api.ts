@@ -112,7 +112,12 @@ const mockAuth = {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    console.log('Mock Auth - Attempting login with:', { email, password });
+    console.log('Mock Auth - Available users:', mockUsers.map(u => ({ email: u.email, password: u.password })));
+
     const user = mockUsers.find(u => u.email === email && u.password === password);
+    console.log('Mock Auth - Found user:', user);
+
     if (user) {
       const { password: _, ...userWithoutPassword } = user;
       return {
@@ -124,6 +129,7 @@ const mockAuth = {
         }
       };
     } else {
+      console.error('Mock Auth - No matching user found for credentials:', { email, password });
       throw new Error('Invalid credentials');
     }
   },
