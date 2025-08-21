@@ -117,13 +117,3 @@ const App = () => (
 );
 
 export default App;
-
-// Only create root if it doesn't exist
-const container = document.getElementById("root")!;
-if (!container._reactRootContainer) {
-  createRoot(container).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-}
