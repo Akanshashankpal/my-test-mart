@@ -134,12 +134,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-4 pb-4 pt-0 space-y-4">
+    <div className="px-2 sm:px-4 pb-4 pt-0 space-y-3 sm:space-y-4">
       {/* Header with Notifications */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Business Dashboard</h2>
-          <p className="text-muted-foreground">Monitor your business performance and key metrics</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Business Dashboard</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Monitor your business performance and key metrics</p>
         </div>
         <div className="relative">
           <Button
