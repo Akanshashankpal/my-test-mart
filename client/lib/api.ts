@@ -84,33 +84,27 @@ export const authAPI = {
   },
 
   logout: async () => {
-    // Always handle logout locally since it's mainly about clearing storage
     return { success: true, message: 'Logged out successfully' };
   },
 
   getProfile: async () => {
-    try {
-      const response = await api.get('/api/auth/me');
-      return response.data;
-    } catch (error: any) {
-      if (!error.response || error.message.includes('Network Error')) {
-        return await mockAuth.getProfile();
-      }
-      throw error;
-    }
+    const response = await api.get('/api/auth/me');
+    return response.data;
   },
 
-  refreshToken: async () => {
-    // Mock implementation for token refresh
-    try {
-      const response = await api.post('/api/auth/refresh');
-      return response.data;
-    } catch (error: any) {
-      if (!error.response || error.message.includes('Network Error')) {
-        return { success: true, token: 'mock-refreshed-token-' + Date.now() };
-      }
-      throw error;
-    }
+  register: async (name: string, email: string, password: string, role?: string) => {
+    const response = await api.post('/api/auth/register', { name, email, password, role });
+    return response.data;
+  },
+
+  updateProfile: async (name?: string, email?: string, avatar?: string) => {
+    const response = await api.put('/api/auth/profile', { name, email, avatar });
+    return response.data;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await api.put('/api/auth/password', { currentPassword, newPassword });
+    return response.data;
   }
 };
 
