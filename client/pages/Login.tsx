@@ -157,16 +157,9 @@ export default function Login() {
             </form>
 
             <div className="text-center">
-              <button
-                onClick={() => setIsSignup(!isSignup)}
-                className="text-sm text-electric-blue hover:text-electric-blue/80 font-medium"
-                disabled={isLoading}
-              >
-                {isSignup 
-                  ? 'Already have an account? Sign in' 
-                  : "Don't have an account? Sign up"
-                }
-              </button>
+              <p className="text-sm text-gray-600">
+                Use the demo credentials below to test the application
+              </p>
             </div>
           </CardContent>
         </Card>
