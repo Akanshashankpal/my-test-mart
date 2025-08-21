@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Sidebar for large screens */}
       <div className="hidden lg:flex fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
         <div className="flex flex-col h-full">
@@ -112,9 +112,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="flex flex-col lg:pl-64">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 lg:py-2 fixed top-0 right-0 left-0 lg:left-64 z-40">
+        <header className="bg-white border-b border-gray-200 px-3 sm:px-4 lg:px-6 py-3 lg:py-2 fixed top-0 right-0 left-0 lg:left-64 z-40">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg lg:text-xl font-semibold text-gray-900">
+            <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 truncate pr-2">
               {navigation.find((item) => item.href === location.pathname)?.name ||
                 "Dashboard"}
             </h1>
@@ -168,13 +168,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Main area with smooth scroll */}
-        <main className="flex-1 overflow-y-auto scroll-smooth mt-16 px-4 lg:px-6 py-4">
-          {children}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth mt-16 px-2 sm:px-4 lg:px-6 py-2 sm:py-4 pb-24 lg:pb-4">
+          <div className="max-w-full">
+            {children}
+          </div>
         </main>
 
         {/* Bottom navigation for mobile */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
-          <div className="flex justify-around">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 z-50 safe-area-inset-bottom">
+          <div className="flex justify-around items-center">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -182,22 +184,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors",
+                    "flex flex-col items-center gap-0.5 py-1.5 px-1 sm:px-2 rounded-lg transition-colors min-w-0 flex-1",
                     isActive
                       ? "text-blue-600 bg-blue-50"
                       : "text-gray-500 hover:text-gray-700"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="text-xs font-medium">{item.name}</span>
+                  <item.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="text-xs font-medium truncate max-w-full">{item.name}</span>
                 </Link>
               );
             })}
           </div>
         </nav>
 
-        {/* Mobile bottom padding */}
-        <div className="h-20 lg:hidden" />
+        {/* Mobile bottom padding with safe area */}
+        <div className="h-20 lg:hidden safe-area-inset-bottom" />
       </div>
     </div>
   );
