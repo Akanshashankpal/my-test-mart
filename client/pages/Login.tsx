@@ -151,7 +151,7 @@ export default function Login() {
                     Signing In...
                   </>
                 ) : (
-                  isSignup ? 'Create Account' : 'Sign In'
+                  'Sign In'
                 )}
               </Button>
             </form>
