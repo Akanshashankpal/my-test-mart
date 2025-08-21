@@ -165,6 +165,11 @@ const mockAuth = {
 // Auth API functions with fallback
 export const authAPI = {
   login: async (email: string, password: string) => {
+    // Temporarily force mock authentication for debugging
+    console.log('Forcing mock authentication for debugging...');
+    return await mockAuth.login(email, password);
+
+    /* Original API call (temporarily disabled for debugging)
     try {
       console.log('Attempting API login...');
       const response = await api.post('/api/auth/login', { email, password });
@@ -179,6 +184,7 @@ export const authAPI = {
       console.warn('API unavailable, using mock authentication');
       return await mockAuth.login(email, password);
     }
+    */
   },
 
   logout: async () => {
