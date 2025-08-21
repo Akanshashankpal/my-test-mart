@@ -39,12 +39,38 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('electromart_token');
-      localStorage.removeItem('electromart_user');
-      window.location.href = '/login';
+    // Handle network errors
+    if (!error.response) {
+      error.message = 'Network Error: Please check your internet connection';
+      return Promise.reject(error);
     }
+
+    // Handle different HTTP status codes
+    switch (error.response?.status) {
+      case 401:
+        // Only redirect to login if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          localStorage.removeItem('electromart_token');
+          localStorage.removeItem('electromart_user');
+          window.location.href = '/login';
+        }
+        break;
+      case 403:
+        error.message = 'Access forbidden. You do not have permission.';
+        break;
+      case 404:
+        error.message = 'Resource not found.';
+        break;
+      case 500:
+        error.message = 'Internal server error. Please try again later.';
+        break;
+      case 503:
+        error.message = 'Service unavailable. Please try again later.';
+        break;
+      default:
+        error.message = error.response?.data?.message || 'An error occurred';
+    }
+
     return Promise.reject(error);
   }
 );
