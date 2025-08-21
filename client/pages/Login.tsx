@@ -171,10 +171,10 @@ export default function Login() {
                 </Alert>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-electric-blue hover:bg-electric-blue/90 text-white"
-                disabled={isLoading}
+              <Button
+                type="submit"
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isLoading || connectionStatus === 'disconnected'}
               >
                 {isLoading ? (
                   <>
