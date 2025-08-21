@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { BillingProvider } from "./contexts/BillingContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import DashboardLayout from "./components/DashboardLayout";
+import MockModeNotification from "./components/MockModeNotification";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import SimpleBilling from "./pages/SimpleBilling";
