@@ -11,24 +11,39 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
   const [isSignup, setIsSignup] = useState(false);
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, error: authError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setLocalError('');
 
+    // Validation
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setLocalError('Please fill in all fields');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setLocalError('Please enter a valid email address');
+      return;
+    }
+
+    if (password.length < 6) {
+      setLocalError('Password must be at least 6 characters');
       return;
     }
 
     const success = await login(email, password);
     if (!success) {
-      setError('Invalid email or password');
+      // Error is now handled in AuthContext
+      console.log('Login failed');
     }
   };
+
+  // Combined error from local validation and auth context
+  const displayError = localError || authError;
 
   const demoCredentials = [
     { email: 'admin@electromart.com', password: 'admin123', role: 'Admin' },
