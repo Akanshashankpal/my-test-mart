@@ -723,22 +723,71 @@ export default function EnhancedBilling() {
                 />
               </div>
 
-              {/* Payment Status */}
-              <div>
-                <Label htmlFor="paymentStatus">Payment Status</Label>
-                <Select value={bill.paymentStatus} onValueChange={(value: any) => 
-                  setBill(prev => ({ ...prev, paymentStatus: value }))
-                }>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Paid">Paid</SelectItem>
-                    <SelectItem value="Partial">Partial</SelectItem>
-                    <SelectItem value="Overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
+              {/* Payment Section */}
+              <div className="space-y-4 pt-4 border-t">
+                <h4 className="font-semibold">Payment Details</h4>
+
+                <div>
+                  <Label htmlFor="paymentStatus">Payment Status</Label>
+                  <Select value={bill.paymentStatus} onValueChange={(value: any) =>
+                    setBill(prev => ({ ...prev, paymentStatus: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                      <SelectItem value="Partial">Partial</SelectItem>
+                      <SelectItem value="Overdue">Overdue</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {bill.paymentStatus === 'Paid' && (
+                  <div>
+                    <Label htmlFor="paymentMethod">Payment Method</Label>
+                    <Select value={bill.paymentMethod || ''} onValueChange={(value) =>
+                      setBill(prev => ({ ...prev, paymentMethod: value }))
+                    }>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Cash">Cash</SelectItem>
+                        <SelectItem value="UPI">UPI</SelectItem>
+                        <SelectItem value="Credit Card">Credit Card</SelectItem>
+                        <SelectItem value="Debit Card">Debit Card</SelectItem>
+                        <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                        <SelectItem value="Cheque">Cheque</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Quick Payment Buttons for common amounts */}
+                <div className="space-y-2">
+                  <Label>Quick Payment</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBill(prev => ({ ...prev, paymentStatus: 'Paid', paymentMethod: 'Cash' }))}
+                      className="text-green-600 border-green-200 hover:bg-green-50"
+                    >
+                      <DollarSign className="h-4 w-4 mr-1" />
+                      Cash Payment
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBill(prev => ({ ...prev, paymentStatus: 'Paid', paymentMethod: 'UPI' }))}
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      📱 UPI Payment
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
