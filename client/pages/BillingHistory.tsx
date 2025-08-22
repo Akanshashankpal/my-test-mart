@@ -523,22 +523,22 @@ export default function BillingHistory() {
                 {currentBills.map((bill) => (
                   <tr key={bill.id} className="border-b hover:bg-muted/50">
                     <td className="p-4">
-                      <div className="font-medium">{bill.billNumber}</div>
+                      <div className="font-medium">{bill.billNumber || 'N/A'}</div>
                       <div className="text-sm text-muted-foreground">
-                        by {bill.createdBy}
+                        {formatDate(bill.createdAt)}
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{bill.customer.name}</div>
+                      <div className="font-medium">{bill.customerName || 'Unknown'}</div>
                       <div className="text-sm text-muted-foreground">
-                        {bill.customer.phone}
+                        {bill.customerPhone || 'No phone'}
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{formatDate(bill.billDate)}</div>
-                      {bill.dueDate && (
-                        <div className="text-sm text-muted-foreground">
-                          Due: {formatDate(bill.dueDate)}
+                      <div className="font-medium">{formatDate(bill.billDate || bill.createdAt)}</div>
+                      {(bill.remainingAmount || 0) > 0 && (
+                        <div className="text-sm text-red-600">
+                          Pending: {formatCurrency(bill.remainingAmount)}
                         </div>
                       )}
                     </td>
