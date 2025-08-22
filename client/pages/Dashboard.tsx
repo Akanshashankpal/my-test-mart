@@ -538,46 +538,67 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {recentTransactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-white rounded-lg border border-green-100 hover:shadow-md transition-shadow"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">{transaction.customer}</span>
-                  <Badge
-                    variant={transaction.type === "GST" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {transaction.type}
-                  </Badge>
-                  <Badge
-                    variant={transaction.status === "completed" ? "default" : "secondary"}
-                    className={cn(
-                      "text-xs",
-                      transaction.status === "completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading recent bills...</p>
+            </div>
+          ) : stats.recentBills.length === 0 ? (
+            <div className="text-center py-8">
+              <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No bills found</p>
+              <p className="text-sm text-muted-foreground">Create your first bill to see it here</p>
+            </div>
+          ) : (
+            stats.recentBills.map((bill) => {
+              const timeAgo = formatTime(new Date(bill.createdAt));
+              return (
+                <div
+                  key={bill.id}
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-white rounded-lg border border-green-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{bill.customerName || 'Unknown Customer'}</span>
+                      <Badge
+                        variant={bill.billType === "GST" ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {bill.billType}
+                      </Badge>
+                      <Badge
+                        variant={bill.paymentType === "Full" ? "default" : "secondary"}
+                        className={cn(
+                          "text-xs",
+                          bill.paymentType === "Full" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                        )}
+                      >
+                        {bill.paymentType === "Full" ? "Paid" : "Partial"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>{bill.billNumber || `BILL-${bill.id.slice(-4)}`}</span>
+                      <span>{bill.items?.length || 0} items</span>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {timeAgo}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-green-600">
+                      {formatCurrency(bill.totalAmount || 0)}
+                    </div>
+                    {(bill.remainingAmount || 0) > 0 && (
+                      <div className="text-xs text-orange-600">
+                        Pending: {formatCurrency(bill.remainingAmount)}
+                      </div>
                     )}
-                  >
-                    {transaction.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{transaction.id}</span>
-                  <span>{transaction.items} items</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {transaction.time}
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-green-600">
-                  {formatCurrency(transaction.amount)}
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </CardContent>
       </Card>
     </div>
