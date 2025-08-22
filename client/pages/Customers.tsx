@@ -169,30 +169,30 @@ export default function Customers() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const customerData: Customer = {
-      id: editingCustomer?.id || Date.now().toString(),
-      name: formData.name,
-      phone: formData.phone,
-      address: formData.address,
-      email: formData.email || undefined,
-      createdAt: editingCustomer?.createdAt || new Date(),
-      updatedAt: new Date(),
-      totalPurchases: editingCustomer?.totalPurchases || 0,
-      lastPurchase: editingCustomer?.lastPurchase,
-    };
 
-    if (editingCustomer) {
-      setCustomers(prev => prev.map(c => c.id === editingCustomer.id ? customerData : c));
-    } else {
-      setCustomers(prev => [...prev, customerData]);
+    try {
+      const customerData = {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        email: formData.email || undefined,
+      };
+
+      if (editingCustomer) {
+        await customersAPI.updateCustomer(editingCustomer.id, customerData);
+      } else {
+        await customersAPI.createCustomer(customerData);
+      }
+
+      resetForm();
+      setIsAddDialogOpen(false);
+      setEditingCustomer(null);
+      fetchCustomers(pagination.currentPage);
+    } catch (error) {
+      console.error('Error saving customer:', error);
     }
-
-    resetForm();
-    setIsAddDialogOpen(false);
-    setEditingCustomer(null);
   };
 
   const handleEdit = (customer: Customer) => {
@@ -206,17 +206,26 @@ export default function Customers() {
     setIsAddDialogOpen(true);
   };
 
-  const handleDelete = (customerId: string) => {
-    setCustomers(prev => prev.filter(c => c.id !== customerId));
-    setDeleteCustomerId(null);
+  const handleDelete = async (customerId: string) => {
+    try {
+      await customersAPI.deleteCustomer(customerId);
+      setDeleteCustomerId(null);
+      fetchCustomers(pagination.currentPage);
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+    }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-IN', {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-IN', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    fetchCustomers(newPage);
   };
 
   return (
