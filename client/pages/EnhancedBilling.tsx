@@ -812,17 +812,46 @@ export default function EnhancedBilling() {
       <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Select Customer</DialogTitle>
+            <DialogTitle>Select or Add Customer</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search customers by name or phone..."
-                value={searchCustomer}
-                onChange={(e) => setSearchCustomer(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search customers by name or phone..."
+                  value={searchCustomer}
+                  onChange={(e) => setSearchCustomer(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  // Add new customer functionality
+                  const name = prompt('Enter customer name:');
+                  const phone = prompt('Enter phone number:');
+                  const address = prompt('Enter address:');
+
+                  if (name && phone && address) {
+                    const newCustomer = {
+                      id: Date.now().toString(),
+                      name,
+                      phone,
+                      address,
+                      email: '',
+                      state: 'Karnataka',
+                      status: 'active' as const
+                    };
+
+                    setCustomers(prev => [...prev, newCustomer]);
+                    selectCustomer(newCustomer);
+                  }
+                }}
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add New
+              </Button>
             </div>
             <div className="max-h-96 overflow-y-auto space-y-2">
               {filteredCustomers.map((customer) => (
@@ -846,6 +875,36 @@ export default function EnhancedBilling() {
                   <div className="text-sm text-gray-600 mt-1">{customer.address}</div>
                 </div>
               ))}
+              {filteredCustomers.length === 0 && searchCustomer && (
+                <div className="p-4 text-center text-gray-500">
+                  <p>No customers found matching "{searchCustomer}"</p>
+                  <Button
+                    onClick={() => {
+                      const phone = prompt('Enter phone number:');
+                      const address = prompt('Enter address:');
+
+                      if (phone && address) {
+                        const newCustomer = {
+                          id: Date.now().toString(),
+                          name: searchCustomer,
+                          phone,
+                          address,
+                          email: '',
+                          state: 'Karnataka',
+                          status: 'active' as const
+                        };
+
+                        setCustomers(prev => [...prev, newCustomer]);
+                        selectCustomer(newCustomer);
+                      }
+                    }}
+                    variant="outline"
+                    className="mt-2"
+                  >
+                    Create "{searchCustomer}" as new customer
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>
