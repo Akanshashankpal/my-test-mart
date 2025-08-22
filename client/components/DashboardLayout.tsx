@@ -18,6 +18,9 @@ import {
   Store,
   LogOut,
   User,
+  Package,
+  Users,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
