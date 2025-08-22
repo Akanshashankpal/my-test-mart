@@ -27,112 +27,108 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Enhanced mock data for comprehensive dashboard
-const todayStats = {
-  sales: { amount: 23450, transactions: 12, change: 18.5 },
-  customers: { new: 8, returning: 15, change: 12.0 },
-  returnSales: { amount: 1200, count: 2, change: -5.2 },
-};
-
-const overallStats = {
-  sales: { amount: 1250420, transactions: 3247, change: 12.5 },
-  customers: { total: 892, active: 654, change: 8.3 },
-  products: { total: 1240, lowStock: 23, outOfStock: 5 },
-  revenue: { thisMonth: 345670, lastMonth: 298450, growth: 15.8 },
-};
-
-const chartData = {
-  salesTrend: [
-    { month: "Jan", sales: 85000, customers: 120 },
-    { month: "Feb", sales: 92000, customers: 135 },
-    { month: "Mar", sales: 108000, customers: 158 },
-    { month: "Apr", sales: 125000, customers: 180 },
-    { month: "May", sales: 134000, customers: 195 },
-    { month: "Jun", sales: 145000, customers: 210 },
-  ],
-  categoryBreakdown: [
-    { category: "Mobile", sales: 450000, percentage: 36 },
-    { category: "AC", sales: 320000, percentage: 26 },
-    { category: "TV", sales: 280000, percentage: 22 },
-    { category: "Laptop", sales: 200000, percentage: 16 },
-  ],
-};
-
+// Mock notifications (can be replaced with real notification system later)
 const notifications = [
   {
     id: "1",
-    type: "security",
-    title: "Multiple Login Detected",
-    message: "Admin account logged in from new device (Mobile - Mumbai)",
-    timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-    read: false,
-    severity: "high",
-  },
-  {
-    id: "2",
-    type: "deletion",
-    title: "Bill Deletion Request",
-    message: "Cashier requested deletion of invoice INV-2024-001234",
-    timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-    read: false,
-    severity: "medium",
-    actionRequired: true,
-  },
-  {
-    id: "3",
     type: "system",
-    title: "Low Stock Alert",
-    message: "23 products are running low on stock",
-    timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-    read: true,
+    title: "System Status",
+    message: "All systems are running normally",
+    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+    read: false,
     severity: "low",
-  },
-  {
-    id: "4",
-    type: "security",
-    title: "Admin Login",
-    message: "Main admin logged in from Desktop - Delhi",
-    timestamp: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-    read: true,
-    severity: "low",
-  },
-];
-
-const recentTransactions = [
-  {
-    id: "TXN001",
-    customer: "John Doe",
-    amount: 2450,
-    items: 3,
-    time: "2 min ago",
-    type: "GST",
-    status: "completed",
-  },
-  {
-    id: "TXN002",
-    customer: "Sarah Smith",
-    amount: 1200,
-    items: 1,
-    time: "15 min ago",
-    type: "Non-GST",
-    status: "completed",
-  },
-  {
-    id: "TXN003",
-    customer: "Mike Johnson",
-    amount: 850,
-    items: 2,
-    time: "1 hour ago",
-    type: "GST",
-    status: "pending",
   },
 ];
 
 export default function Dashboard() {
+  const { bills, isLoading } = useBilling();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(
-    notifications.filter(n => !n.read).length
-  );
+  const [unreadCount, setUnreadCount] = useState(1);
+
+  // Calculate real statistics from bill data
+  const calculateStats = () => {
+    if (!bills || bills.length === 0) {
+      return {
+        todayStats: {
+          sales: { amount: 0, transactions: 0, change: 0 },
+          customers: { total: 0, unique: 0, change: 0 },
+          returnSales: { amount: 0, count: 0, change: 0 },
+        },
+        overallStats: {
+          totalRevenue: 0,
+          totalCustomers: 0,
+          totalTransactions: 0,
+          paidRevenue: 0,
+          pendingRevenue: 0,
+        },
+        recentBills: [],
+        chartData: {
+          gstSales: 0,
+          nonGstSales: 0,
+          quotationSales: 0,
+          totalSales: 0,
+        }
+      };
+    }
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    // Filter today's bills
+    const todayBills = bills.filter(bill => {
+      const billDate = new Date(bill.billDate || bill.createdAt);
+      return billDate >= todayStart;
+    });
+
+    // Calculate today's stats
+    const todayRevenue = todayBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const todayCustomers = new Set(todayBills.map(bill => bill.customerPhone)).size;
+    const todayTransactions = todayBills.length;
+
+    // Calculate overall stats
+    const totalRevenue = bills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const paidRevenue = bills.filter(bill => bill.paymentType === "Full")
+                            .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const pendingRevenue = bills.reduce((sum, bill) => sum + (bill.remainingAmount || 0), 0);
+    const uniqueCustomers = new Set(bills.map(bill => bill.customerPhone)).size;
+
+    // Calculate sales by type
+    const gstSales = bills.filter(bill => bill.billType === "GST")
+                          .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const nonGstSales = bills.filter(bill => bill.billType === "Non-GST")
+                             .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const quotationSales = bills.filter(bill => bill.billType === "Quotation")
+                                .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+
+    // Get recent bills (last 5)
+    const recentBills = bills
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+
+    return {
+      todayStats: {
+        sales: { amount: todayRevenue, transactions: todayTransactions, change: 0 },
+        customers: { total: todayCustomers, unique: todayCustomers, change: 0 },
+        returnSales: { amount: 0, count: 0, change: 0 }, // Will need to track return sales separately
+      },
+      overallStats: {
+        totalRevenue,
+        totalCustomers: uniqueCustomers,
+        totalTransactions: bills.length,
+        paidRevenue,
+        pendingRevenue,
+      },
+      recentBills,
+      chartData: {
+        gstSales,
+        nonGstSales,
+        quotationSales,
+        totalSales: totalRevenue,
+      }
+    };
+  };
+
+  const stats = calculateStats();
 
   const formatCurrency = (amount: number) => {
     return `₹${amount.toLocaleString('en-IN')}`;
