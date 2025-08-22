@@ -49,14 +49,8 @@ const AppContent = () => {
         <DashboardLayout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/billing" element={<SimpleBilling />} />
-            <Route path="/enhanced-billing" element={<EnhancedBilling />} />
-            <Route path="/billing-history" element={<BillingHistory />} />
-            <Route path="/enhanced-billing-history" element={<EnhancedBillingHistory />} />
-            <Route path="/sales-returns" element={<SalesReturn />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/users" element={<UserManagement />} />
+            <Route path="/billing" element={<EnhancedBilling />} />
+            <Route path="/billing-history" element={<EnhancedBillingHistory />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
