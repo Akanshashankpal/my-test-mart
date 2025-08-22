@@ -267,4 +267,32 @@ export const billsAPI = {
   }
 };
 
+// Simple connectivity test function (can be called from browser console)
+export const testAPIConnection = async () => {
+  console.log('Testing API connection to:', api.defaults.baseURL);
+
+  try {
+    // Test with a basic fetch to bypass axios interceptors
+    const response = await fetch(`${api.defaults.baseURL}/api/auth/login`, {
+      method: 'OPTIONS'
+    });
+
+    console.log('Fetch test result:', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
+    return { success: true, status: response.status };
+  } catch (error) {
+    console.error('Fetch test failed:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Make test function available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).testAPIConnection = testAPIConnection;
+}
+
 export default api;
