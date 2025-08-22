@@ -320,9 +320,9 @@ export default function BillingHistory() {
       const pageHeight = doc.internal.pageSize.getHeight();
 
       // Color scheme
-      const primaryColor = [46, 125, 50]; // Green
-      const secondaryColor = [76, 175, 80]; // Light Green
-      const accentColor = [27, 94, 32]; // Dark Green
+      const primaryColor = [27, 94, 32]; // Dark Green
+      const secondaryColor = [117, 117, 117]; // Grey
+      const accentColor = [21, 71, 24]; // Very Dark Green
       const lightGray = [245, 245, 245];
       const darkGray = [66, 66, 66];
 
