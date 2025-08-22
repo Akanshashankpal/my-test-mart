@@ -82,7 +82,7 @@ interface Bill {
 // Using real API data from BillingContext
 
 export default function BillingHistory() {
-  const { bills, deleteBill } = useBilling();
+  const { bills, deleteBill, updateBill } = useBilling();
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -90,6 +90,7 @@ export default function BillingHistory() {
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+  const [editBill, setEditBill] = useState<Bill | null>(null);
   const [deleteBillId, setDeleteBillId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [billsPerPage] = useState(10);
