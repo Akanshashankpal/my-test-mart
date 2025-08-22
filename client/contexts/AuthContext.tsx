@@ -32,11 +32,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check if user is already logged in (from localStorage)
     const savedUser = localStorage.getItem('electromart_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('electromart_token');
+
+    if (savedUser && savedToken) {
       try {
         setUser(JSON.parse(savedUser));
+        // TODO: Optionally verify token with /api/auth/me endpoint
       } catch (error) {
         localStorage.removeItem('electromart_user');
+        localStorage.removeItem('electromart_token');
       }
     }
     setIsLoading(false);
@@ -84,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('electromart_user');
+    localStorage.removeItem('electromart_token');
   };
 
   return (
