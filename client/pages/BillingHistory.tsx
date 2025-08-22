@@ -377,7 +377,7 @@ export default function BillingHistory() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBills}</div>
             <div className="text-sm text-muted-foreground">
-              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Demo: {stats.demoBills}
+              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Quotation: {stats.quotationBills}
             </div>
           </CardContent>
         </Card>
