@@ -1661,9 +1661,9 @@ export default function SimpleBilling() {
                         <Receipt className="h-4 w-4 text-green-600" />
                       </div>
                       <div>
-                        <h4 className="font-medium">{bill.billNumber}</h4>
-                        <p className="text-sm text-gray-600">{bill.customerName}</p>
-                        <p className="text-xs text-gray-500">{bill.customerPhone}</p>
+                        <h4 className="font-medium">{bill.billNumber || 'N/A'}</h4>
+                        <p className="text-sm text-gray-600">{bill.customerName || 'Unknown Customer'}</p>
+                        <p className="text-xs text-gray-500">{bill.customerPhone || 'No phone'}</p>
                       </div>
                     </div>
                   </div>
