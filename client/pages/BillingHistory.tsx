@@ -91,6 +91,15 @@ export default function BillingHistory() {
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [editBill, setEditBill] = useState<Bill | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerAddress: "",
+    paymentType: "Full" as "Full" | "Partial",
+    paymentMethod: "cash" as "cash" | "online" | "mixed",
+    paidAmount: 0,
+    observation: "",
+  });
   const [deleteBillId, setDeleteBillId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [billsPerPage] = useState(10);
