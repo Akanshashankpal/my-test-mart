@@ -12,9 +12,28 @@ const api = axios.create({
 // Add API health check
 export const healthCheck = async () => {
   try {
-    const response = await api.post('/api/auth/login');
+    console.log('Health check - Testing API connectivity to:', api.defaults.baseURL);
+
+    // Try a simple GET request to test connectivity
+    const response = await api.get('/api/auth/me', {
+      headers: {
+        'Authorization': 'Bearer test-token' // This will fail but test connectivity
+      },
+      timeout: 5000
+    });
     return { success: true, data: response.data };
-  } catch (error) {
+  } catch (error: any) {
+    console.log('Health check - API test result:', {
+      status: error.response?.status,
+      message: error.message,
+      baseURL: api.defaults.baseURL
+    });
+
+    // If we get a 401, that means the server is responding (just unauthorized)
+    if (error.response?.status === 401) {
+      return { success: true, data: 'API is reachable' };
+    }
+
     return { success: false, error };
   }
 };
