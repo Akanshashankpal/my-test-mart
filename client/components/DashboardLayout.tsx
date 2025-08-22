@@ -17,11 +17,8 @@ import {
   Settings,
   Store,
   LogOut,
-  User,
-  Package,
-  Users,
-  UserCheck,
-  RotateCcw,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
