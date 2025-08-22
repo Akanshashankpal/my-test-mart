@@ -280,23 +280,23 @@ export default function SimpleBilling() {
       return;
     }
 
-    // Convert to API format
+    // Convert to API format with validation
     const billData = {
-      customerName: currentInvoice.customer.name,
-      customerPhone: currentInvoice.customer.phone,
-      customerAddress: currentInvoice.customer.address,
+      customerName: currentInvoice.customer.name || '',
+      customerPhone: currentInvoice.customer.phone || '',
+      customerAddress: currentInvoice.customer.address || '',
       pincode: '', // We can add pincode field later if needed
       items: currentInvoice.items.map(item => ({
-        itemName: item.productName,
-        itemPrice: item.price,
-        itemQuantity: item.quantity,
+        itemName: item.productName || 'Unknown Item',
+        itemPrice: Number(item.price) || 0,
+        itemQuantity: Number(item.quantity) || 1,
       })),
-      discount: currentInvoice.discountPercent,
+      discount: Number(currentInvoice.discountPercent) || 0,
       paymentType: currentInvoice.paymentMode === "full" ? "Full" as const : "Partial" as const,
-      paidAmount: currentInvoice.paidAmount,
-      paymentMethod: currentInvoice.paymentMethod,
-      observation: currentInvoice.observation,
-      termsAndConditions: currentInvoice.termsAndConditions,
+      paidAmount: Number(currentInvoice.paidAmount) || 0,
+      paymentMethod: currentInvoice.paymentMethod || 'cash',
+      observation: currentInvoice.observation || '',
+      termsAndConditions: currentInvoice.termsAndConditions || '',
       billType: billingMode,
     };
 
