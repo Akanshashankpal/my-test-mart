@@ -160,6 +160,21 @@ export default function Login() {
                   'Sign In'
                 )}
               </Button>
+
+              {/* Temporary debug button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11 mt-2"
+                onClick={async () => {
+                  console.log('Testing API connection...');
+                  const result = await testAPIConnection();
+                  alert(`API Test Result: ${result.success ? 'Success' : 'Failed'}\nCheck console for details`);
+                }}
+              >
+                <Wifi className="h-4 w-4 mr-2" />
+                Test API Connection (Debug)
+              </Button>
             </form>
 
           </CardContent>
