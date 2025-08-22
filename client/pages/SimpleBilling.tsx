@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useBilling } from "@/contexts/BillingContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProducts } from "@/contexts/ProductContext";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -180,7 +181,11 @@ export default function SimpleBilling() {
   // Create invoice from customer details
   const createInvoice = () => {
     if (!customer.name || !customer.phone) {
-      alert("Please fill in customer name and phone number");
+      toast({
+        title: "Missing Information",
+        description: "Please fill in customer name and phone number",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -218,7 +223,11 @@ export default function SimpleBilling() {
     const price = parseFloat(newItem.price) || 0;
 
     if (!newItem.productName || quantity <= 0 || price <= 0) {
-      alert("Please fill in all item details with valid values");
+      toast({
+        title: "Invalid Item Details",
+        description: "Please fill in all item details with valid values",
+        variant: "destructive"
+      });
       return;
     }
 
