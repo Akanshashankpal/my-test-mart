@@ -411,90 +411,172 @@ export default function Customers() {
 
       {/* Customers List */}
       <div className="space-y-4">
-        {filteredCustomers.map(customer => {
-          const customerPurchases = getCustomerPurchases(customer.id);
-          return (
-            <Card key={customer.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <Users className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-lg">{customer.name}</h4>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
-                            {customer.phone}
+        {isLoading ? (
+          <Card>
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Loading customers...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : customers.length === 0 ? (
+          <Card>
+            <CardContent className="p-8">
+              <div className="text-center text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No customers found</p>
+                {searchTerm && <p className="text-sm">Try adjusting your search criteria</p>}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          customers.map(customer => {
+            const customerPurchases = getCustomerPurchases(customer.id);
+            return (
+              <Card key={customer.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="bg-primary/10 p-2 rounded-lg">
+                          <Users className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-lg">{customer.name}</h4>
+                            <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
+                              {customer.status}
+                            </Badge>
                           </div>
-                          {customer.email && (
-                            <span>{customer.email}</span>
-                          )}
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {customer.phone}
+                            </div>
+                            {customer.email && (
+                              <span>{customer.email}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                        <MapPin className="h-3 w-3" />
+                        <span>{customer.address}</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Total Purchases:</span>
+                          <p className="font-semibold text-slate-700">₹{customer.totalPurchases.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Orders:</span>
+                          <p className="font-semibold">{customerPurchases.length}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Last Purchase:</span>
+                          <p className="font-semibold">
+                            {customer.lastPurchase ? formatDate(customer.lastPurchase) : "Never"}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Customer Since:</span>
+                          <p className="font-semibold">{formatDate(customer.createdAt)}</p>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                      <MapPin className="h-3 w-3" />
-                      <span>{customer.address}</span>
-                    </div>
 
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Total Purchases:</span>
-                        <p className="font-semibold text-slate-700">₹{customer.totalPurchases.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Orders:</span>
-                        <p className="font-semibold">{customerPurchases.length}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Last Purchase:</span>
-                        <p className="font-semibold">
-                          {customer.lastPurchase ? formatDate(customer.lastPurchase) : "Never"}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Customer Since:</span>
-                        <p className="font-semibold">{formatDate(customer.createdAt)}</p>
-                      </div>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setViewingCustomer(customer)}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(customer)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeleteCustomerId(customer.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setViewingCustomer(customer)}
-                    >
-                      <Eye className="h-4 w-4" />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(customer)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setDeleteCustomerId(customer.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
+
+      {/* Pagination */}
+      {!isLoading && customers.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{" "}
+                {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{" "}
+                {pagination.totalItems} customers
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrevPage}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {[...Array(Math.min(5, pagination.totalPages))].map((_, index) => {
+                    const pageNumber = Math.max(1, pagination.currentPage - 2) + index;
+                    if (pageNumber > pagination.totalPages) return null;
+
+                    return (
+                      <Button
+                        key={pageNumber}
+                        variant={pageNumber === pagination.currentPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNumber)}
+                        className="w-8"
+                      >
+                        {pageNumber}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNextPage}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Customer Details Dialog */}
       <Dialog open={!!viewingCustomer} onOpenChange={() => setViewingCustomer(null)}>
