@@ -290,17 +290,17 @@ export default function BillingHistory() {
         yPos += 6;
       }
 
-      if (bill.billType === 'GST' && bill.totalGst > 0) {
-        doc.text('CGST:', 130, yPos);
-        doc.text(`₹${bill.cgst.toLocaleString()}`, 175, yPos);
+      if (bill.billType === 'GST' && bill.gstAmount > 0) {
+        doc.text('CGST (9%):', 130, yPos);
+        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 175, yPos);
         yPos += 6;
 
-        doc.text('SGST:', 130, yPos);
-        doc.text(`₹${bill.sgst.toLocaleString()}`, 175, yPos);
+        doc.text('SGST (9%):', 130, yPos);
+        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 175, yPos);
         yPos += 6;
 
         doc.text('Total GST:', 130, yPos);
-        doc.text(`₹${bill.totalGst.toLocaleString()}`, 175, yPos);
+        doc.text(`₹${bill.gstAmount.toLocaleString()}`, 175, yPos);
         yPos += 8;
       }
 
@@ -310,7 +310,7 @@ export default function BillingHistory() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text('Final Amount:', 130, yPos);
-      doc.text(`₹${bill.finalAmount.toLocaleString()}`, 175, yPos);
+      doc.text(`₹${bill.totalAmount.toLocaleString()}`, 175, yPos);
 
       // Footer
       doc.setFontSize(8);
