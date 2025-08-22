@@ -316,6 +316,7 @@ export default function SimpleBilling() {
     
     addBill(billToSave);
     setCurrentStep("list");
+    setCreateStep(1);
     toast({
       title: "Success",
       description: "Invoice saved successfully!",
