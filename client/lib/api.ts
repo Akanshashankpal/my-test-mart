@@ -245,25 +245,116 @@ export const billsAPI = {
     const response = await api.get('/api/bills', { params });
     return response.data;
   },
-  
+
   getBill: async (id: string) => {
     const response = await api.get(`/api/bills/${id}`);
     return response.data;
   },
-  
+
   createBill: async (data: any) => {
     const response = await api.post('/api/bills', data);
     return response.data;
   },
-  
+
   updateBill: async (id: string, data: any) => {
     const response = await api.put(`/api/bills/${id}`, data);
     return response.data;
   },
-  
+
   deleteBill: async (id: string) => {
     const response = await api.delete(`/api/bills/${id}`);
     return response.data;
+  },
+
+  generatePDF: async (id: string) => {
+    const response = await api.get(`/api/bills/${id}/pdf`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  getDashboardStats: async () => {
+    const response = await api.get('/api/bills/dashboard');
+    return response.data;
+  },
+
+  // Sales Returns API
+  getSalesReturns: async (params?: any) => {
+    const response = await api.get('/api/sales-returns', { params });
+    return response.data;
+  },
+
+  createSalesReturn: async (data: any) => {
+    const response = await api.post('/api/sales-returns', data);
+    return response.data;
+  },
+
+  updateSalesReturnStatus: async (id: string, status: string) => {
+    const response = await api.put(`/api/sales-returns/${id}/status`, { status });
+    return response.data;
+  },
+
+  // Additional utility functions
+  calculateBillAmounts: (billData: any) => {
+    let subtotal = 0;
+    let cgstTotal = 0;
+    let sgstTotal = 0;
+    let igstTotal = 0;
+
+    const isInterState = billData.customer?.state !== billData.company?.state;
+
+    const calculatedItems = billData.items?.map((item: any) => {
+      const taxableAmount = item.quantity * item.rate;
+      const gstAmount = (taxableAmount * (item.gstRate || 0)) / 100;
+
+      let cgstAmount = 0;
+      let sgstAmount = 0;
+      let igstAmount = 0;
+
+      if (billData.billType === "GST") {
+        if (isInterState) {
+          igstAmount = gstAmount;
+        } else {
+          cgstAmount = gstAmount / 2;
+          sgstAmount = gstAmount / 2;
+        }
+      }
+
+      subtotal += taxableAmount;
+      cgstTotal += cgstAmount;
+      sgstTotal += sgstAmount;
+      igstTotal += igstAmount;
+
+      return {
+        ...item,
+        taxableAmount,
+        cgstAmount,
+        sgstAmount,
+        igstAmount,
+        totalAmount: taxableAmount + gstAmount,
+      };
+    }) || [];
+
+    const discountAmount = (subtotal * (billData.discountPercent || 0)) / 100;
+    const taxableAmountAfterDiscount = subtotal - discountAmount;
+    const totalTax = cgstTotal + sgstTotal + igstTotal;
+    const beforeRounding = taxableAmountAfterDiscount + totalTax;
+    const finalAmount = Math.round(beforeRounding);
+    const roundOffAmount = finalAmount - beforeRounding;
+
+    return {
+      ...billData,
+      items: calculatedItems,
+      subtotal,
+      discountAmount,
+      taxableAmount: taxableAmountAfterDiscount,
+      cgstTotal,
+      sgstTotal,
+      igstTotal,
+      totalTax,
+      roundOffAmount,
+      finalAmount,
+    };
   }
 };
 
