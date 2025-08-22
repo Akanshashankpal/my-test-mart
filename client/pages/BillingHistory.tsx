@@ -166,8 +166,9 @@ export default function BillingHistory() {
     return `₹${amount.toLocaleString('en-IN')}`;
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-IN', {
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-IN', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
