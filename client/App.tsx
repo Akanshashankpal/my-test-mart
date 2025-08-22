@@ -13,6 +13,7 @@ import DashboardLayout from "./components/DashboardLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import SimpleBilling from "./pages/SimpleBilling";
+import EnhancedBilling from "./pages/EnhancedBilling";
 import BillingHistory from "./pages/BillingHistory";
 import Products from "./pages/Products";
 import Customers from "./pages/Customers";
