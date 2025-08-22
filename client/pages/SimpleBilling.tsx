@@ -1501,7 +1501,7 @@ export default function SimpleBilling() {
                           <th className="border border-gray-300 p-2 text-right">GST Amt (₹)</th>
                         </>
                       )}
-                      <th className="border border-gray-300 p-2 text-right">Total (₹)</th>
+                      <th className="border border-gray-300 p-2 text-right">Total (��)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1639,7 +1639,19 @@ export default function SimpleBilling() {
           <CardTitle>Recent Invoices</CardTitle>
         </CardHeader>
         <CardContent>
-          {bills && bills.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading invoices...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">Error loading invoices</p>
+                <p className="text-red-600 text-sm mt-1">{error}</p>
+              </div>
+            </div>
+          ) : bills && bills.length > 0 ? (
             <div className="space-y-3">
               {bills.slice(0, 10).map((bill) => (
                 <div key={bill.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
@@ -1650,25 +1662,43 @@ export default function SimpleBilling() {
                       </div>
                       <div>
                         <h4 className="font-medium">{bill.billNumber}</h4>
-                        <p className="text-sm text-gray-600">{bill.customer.name}</p>
+                        <p className="text-sm text-gray-600">{bill.customerName}</p>
+                        <p className="text-xs text-gray-500">{bill.customerPhone}</p>
                       </div>
                     </div>
                   </div>
                   <div className="text-right mr-4">
-                    <div className="font-medium">{formatCurrency(bill.finalAmount || 0)}</div>
+                    <div className="font-medium">{formatCurrency(bill.totalAmount || 0)}</div>
                     <div className="text-xs text-gray-500">
                       <Calendar className="h-3 w-3 inline mr-1" />
-                      {formatDate(bill.billDate)}
+                      {new Date(bill.billDate || bill.createdAt).toLocaleDateString('en-IN')}
                     </div>
-                  </div>
-                  <Badge 
-                    variant="outline"
-                    className={cn(
-                      bill.billType === "GST" ? "border-green-200 text-green-800" : "border-blue-200 text-blue-800"
+                    {bill.remainingAmount > 0 && (
+                      <div className="text-xs text-red-600">
+                        Pending: {formatCurrency(bill.remainingAmount)}
+                      </div>
                     )}
-                  >
-                    {bill.billType}
-                  </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        bill.billType === "GST" ? "border-green-200 text-green-800" :
+                        bill.billType === "Non-GST" ? "border-blue-200 text-blue-800" :
+                        "border-purple-200 text-purple-800"
+                      )}
+                    >
+                      {bill.billType}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteBill(bill.id)}
+                      className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
