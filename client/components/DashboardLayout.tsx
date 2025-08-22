@@ -36,6 +36,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => logout();
 
@@ -46,6 +47,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
