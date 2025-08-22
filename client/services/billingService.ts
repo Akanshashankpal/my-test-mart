@@ -88,21 +88,42 @@ function calculateBill(data: any) {
 // API Helper function
 async function apiCall(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem('electromart_token');
-  
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  });
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    // Try to parse JSON response even for errors
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      responseData = { message: response.statusText };
+    }
+
+    if (!response.ok) {
+      const errorMessage = responseData.message || `HTTP ${response.status}: ${response.statusText}`;
+      console.error(`API Error for ${endpoint}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        data: responseData
+      });
+      throw new Error(errorMessage);
+    }
+
+    return responseData;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to server');
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 // Bill Service Interface
