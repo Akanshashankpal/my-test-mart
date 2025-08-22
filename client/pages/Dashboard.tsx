@@ -418,53 +418,90 @@ export default function Dashboard() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales Trend Chart */}
+        {/* Bill Type Breakdown */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              Sales Trend (6 Months)
+              Bill Type Breakdown
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {chartData.salesTrend.map((data, index) => (
-                <div key={data.month} className="flex items-center justify-between">
-                  <span className="text-sm font-medium w-12">{data.month}</span>
-                  <div className="flex-1 mx-4">
-                    <div className="bg-gray-200 rounded-full h-3 relative">
-                      <div
-                        className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
-                        style={{
-                          width: `${(data.sales / Math.max(...chartData.salesTrend.map(d => d.sales))) * 100}%`
-                        }}
-                      ></div>
-                    </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium w-16">GST</span>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3 relative">
+                    <div
+                      className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
+                      style={{
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.gstSales / stats.chartData.totalSales) * 100 : 0}%`
+                      }}
+                    ></div>
                   </div>
-                  <span className="text-sm text-muted-foreground w-20 text-right">
-                    {formatCurrency(data.sales)}
-                  </span>
                 </div>
-              ))}
+                <span className="text-sm text-muted-foreground w-20 text-right">
+                  {formatCurrency(stats.chartData.gstSales)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium w-16">Non-GST</span>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3 relative">
+                    <div
+                      className="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
+                      style={{
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.nonGstSales / stats.chartData.totalSales) * 100 : 0}%`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="text-sm text-muted-foreground w-20 text-right">
+                  {formatCurrency(stats.chartData.nonGstSales)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium w-16">Quote</span>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3 relative">
+                    <div
+                      className="bg-gradient-to-r from-purple-400 to-purple-600 h-3 rounded-full"
+                      style={{
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.quotationSales / stats.chartData.totalSales) * 100 : 0}%`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="text-sm text-muted-foreground w-20 text-right">
+                  {formatCurrency(stats.chartData.quotationSales)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Sales Donut Chart */}
+        {/* Sales Distribution */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PieChart className="h-5 w-5 text-primary" />
-              Sales Distribution
+              Revenue Distribution
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center mb-6">
               <div className="relative w-32 h-32">
-                <div className="w-32 h-32 rounded-full border-8 border-green-500 border-t-blue-500 border-r-purple-500 border-b-orange-500 animate-pulse"></div>
+                <div className="w-32 h-32 rounded-full border-8 border-green-500 border-t-blue-500 border-r-purple-500 border-b-orange-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-lg font-bold">₹12.5L</div>
+                    <div className="text-lg font-bold">
+                      {stats.chartData.totalSales > 1000000
+                        ? `₹${(stats.chartData.totalSales / 100000).toFixed(1)}L`
+                        : formatCurrency(stats.chartData.totalSales)
+                      }
+                    </div>
                     <div className="text-xs text-muted-foreground">Total Sales</div>
                   </div>
                 </div>
@@ -473,7 +510,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>GST Sales</span>
+                <span>GST Bills</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
@@ -481,7 +518,7 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                <span>Returns</span>
+                <span>Quotations</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
