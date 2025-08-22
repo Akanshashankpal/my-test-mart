@@ -869,6 +869,40 @@ export default function SimpleBilling() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Customer Search Input */}
+              <div className="space-y-2">
+                <Label htmlFor="customerSearch">Search Customer</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="customerSearch"
+                    placeholder="Type customer name or phone to search existing customers..."
+                    className="h-12 pl-10"
+                    onChange={(e) => {
+                      const searchValue = e.target.value;
+                      // If customer types something, show suggestions
+                      if (searchValue) {
+                        // Mock customer search - you can replace with actual search logic
+                        const mockCustomers = [
+                          { name: "John Doe", phone: "+91 9876543210", address: "123 Main St, Mumbai" },
+                          { name: "Sarah Smith", phone: "+91 9876543211", address: "456 Park Ave, Delhi" },
+                          { name: "Mike Johnson", phone: "+91 9876543212", address: "789 Oak St, Bangalore" }
+                        ];
+
+                        const filtered = mockCustomers.filter(c =>
+                          c.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                          c.phone.includes(searchValue)
+                        );
+
+                        // If matches found, you could show dropdown suggestions here
+                        // For now, we'll just allow manual input
+                      }
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Start typing to search existing customers, or fill in details below for new customer</p>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="customerName">Customer Name *</Label>
                 <Input
@@ -879,7 +913,7 @@ export default function SimpleBilling() {
                   className="h-12"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="customerPhone">Phone Number *</Label>
                 <Input
@@ -890,7 +924,7 @@ export default function SimpleBilling() {
                   className="h-12"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="customerAddress">Address</Label>
                 <Input
