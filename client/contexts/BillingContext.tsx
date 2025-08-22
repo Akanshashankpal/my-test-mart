@@ -1,49 +1,50 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { billingService, Bill as ApiBill, BillData } from '@/services/billingService';
+import { useToast } from '@/hooks/use-toast';
 
+// Updated interface to match API structure
 export interface BillItem {
-  productName: string;
-  quantity: number;
-  price: number;
-  gstPercent: number;
-  totalAmount: number;
-  gstAmount: number;
+  itemName: string;
+  itemPrice: number;
+  itemQuantity: number;
+  itemTotal?: number;
 }
 
 export interface Bill {
   id: string;
   billNumber: string;
-  billType: "GST" | "Non-GST" | "Demo";
-  billDate: Date;
-  dueDate?: Date;
-  customer: {
-    id: string;
-    name: string;
-    phone: string;
-    email?: string;
-    address?: string;
-  };
+  billType: "GST" | "Non-GST" | "Quotation";
+  billDate: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress?: string;
+  pincode?: string;
   items: BillItem[];
   subtotal: number;
   discountAmount: number;
-  discountPercent: number;
-  taxAmount: number;
-  cgst: number;
-  sgst: number;
-  igst: number;
-  totalGst: number;
-  finalAmount: number;
-  paymentStatus: "Paid" | "Pending" | "Partial" | "Overdue";
-  paymentMethod?: string;
-  createdBy: string;
-  createdAt: Date;
-  status: "Draft" | "Sent" | "Paid" | "Cancelled";
+  afterDiscount: number;
+  gstPercent: number;
+  gstAmount: number;
+  totalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  paymentType: 'Full' | 'Partial';
+  paymentMethod: 'cash' | 'online' | 'mixed';
+  observation?: string;
+  termsAndConditions?: string;
+  stateKey: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 interface BillingContextType {
   bills: Bill[];
-  addBill: (bill: Bill) => void;
-  updateBill: (billId: string, updates: Partial<Bill>) => void;
-  deleteBill: (billId: string) => void;
+  isLoading: boolean;
+  error: string | null;
+  fetchBills: () => Promise<void>;
+  addBill: (billData: BillData) => Promise<Bill | null>;
+  updateBill: (billId: string, updates: Partial<BillData>) => Promise<Bill | null>;
+  deleteBill: (billId: string) => Promise<boolean>;
   getBillById: (billId: string) => Bill | undefined;
 }
 
