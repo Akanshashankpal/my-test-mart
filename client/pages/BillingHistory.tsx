@@ -228,17 +228,17 @@ export default function BillingHistory() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text(`Invoice No: ${bill.billNumber}`, 20, 45);
-      doc.text(`Date: ${bill.billDate.toLocaleDateString()}`, 20, 52);
+      doc.text(`Date: ${formatDate(bill.billDate || bill.createdAt)}`, 20, 52);
       doc.text(`Mode: ${bill.billType} Billing`, 20, 59);
 
       // Customer Info
       doc.setFont('helvetica', 'bold');
       doc.text('Bill To:', 20, 75);
       doc.setFont('helvetica', 'normal');
-      doc.text(bill.customer.name, 20, 82);
-      doc.text(`Phone: ${bill.customer.phone}`, 20, 89);
-      if (bill.customer.address) {
-        doc.text(`Address: ${bill.customer.address}`, 20, 96);
+      doc.text(bill.customerName, 20, 82);
+      doc.text(`Phone: ${bill.customerPhone}`, 20, 89);
+      if (bill.customerAddress) {
+        doc.text(`Address: ${bill.customerAddress}`, 20, 96);
       }
 
       // Table Headers
