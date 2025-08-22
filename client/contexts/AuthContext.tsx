@@ -91,18 +91,26 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       }
     } catch (error: any) {
       console.error('Login error:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        code: error.code
+      });
 
       // Handle different error scenarios
-      if (error.response?.status === 401) {
+      if (!error.response) {
+        setError('Cannot connect to server. Please check your internet connection.');
+      } else if (error.response?.status === 401) {
         setError('Invalid email or password');
       } else if (error.response?.status === 404) {
-        setError('User not found');
+        setError('Authentication endpoint not found. Please contact support.');
       } else if (error.response?.status >= 500) {
         setError('Server error. Please try again later.');
-      } else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
-        setError('Network error. Please check your connection.');
+      } else if (error.response?.status === 400) {
+        setError(error.response?.data?.message || 'Invalid request. Please check your input.');
       } else {
-        setError(error.response?.data?.message || 'Login failed. Please try again.');
+        setError(error.message || 'Login failed. Please try again.');
       }
 
       setIsLoading(false);
