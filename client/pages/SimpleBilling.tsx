@@ -1688,7 +1688,7 @@ export default function SimpleBilling() {
                         "border-purple-200 text-purple-800"
                       )}
                     >
-                      {bill.billType}
+                      {bill.billType || 'Unknown'}
                     </Badge>
                     <Button
                       variant="ghost"
