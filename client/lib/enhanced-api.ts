@@ -87,13 +87,13 @@ api.interceptors.response.use(
         break;
     }
 
-    console.error('API Error:', JSON.stringify({
+    console.error('API Error:', {
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
       data: error.response?.data,
       message: error.message
-    }, null, 2));
+    });
 
     return Promise.reject(error);
   }
@@ -935,20 +935,16 @@ export const utilityAPI = {
 // Error handling utilities
 export const handleAPIError = (error: any): string => {
   if (!error.response) {
-    return error?.message || 'Network error. Please check your connection.';
+    return 'Network error. Please check your connection.';
   }
 
   const { status, data } = error.response;
-
+  
   if (data?.message) {
     return data.message;
   }
 
-  if (data?.error) {
-    return data.error;
-  }
-
-  if (data?.errors && typeof data.errors === 'object') {
+  if (data?.errors) {
     const errorMessages = Object.values(data.errors).flat();
     return errorMessages.join(', ');
   }
@@ -971,14 +967,8 @@ export const handleAPIError = (error: any): string => {
     case 503:
       return 'Service unavailable. Please try again later.';
     default:
-      return `HTTP ${status}: ${error.response?.statusText || 'An unexpected error occurred.'}`;
+      return 'An unexpected error occurred.';
   }
-};
-
-// Show user-friendly error message
-export const showAPIError = (error: any, context: string = 'Operation') => {
-  const message = handleAPIError(error);
-  alert(`${context} failed: ${message}`);
 };
 
 // Connection test

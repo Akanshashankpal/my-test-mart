@@ -52,85 +52,67 @@ api.interceptors.request.use(
   }
 );
 
-// Utility function to extract meaningful error message
-const getErrorMessage = (error: any): string => {
-  if (!error.response) {
-    return 'Network Error: Please check your internet connection';
-  }
-
-  const { status, data } = error.response;
-
-  // Check for specific error message in response data
-  if (data?.message) {
-    return data.message;
-  }
-
-  if (data?.error) {
-    return data.error;
-  }
-
-  // Handle validation errors
-  if (data?.errors && typeof data.errors === 'object') {
-    const errorMessages = Object.values(data.errors).flat();
-    return errorMessages.join(', ');
-  }
-
-  // Default status-based messages
-  switch (status) {
-    case 400:
-      return 'Bad request. Please check your input.';
-    case 401:
-      return 'Authentication failed. Please check your credentials.';
-    case 403:
-      return 'Access forbidden. You do not have permission.';
-    case 404:
-      return 'Resource not found. Please check the URL.';
-    case 422:
-      return 'Validation error. Please check your input.';
-    case 500:
-      return 'Internal server error. Please try again later.';
-    case 502:
-      return 'Bad gateway. Server is temporarily unavailable.';
-    case 503:
-      return 'Service unavailable. Please try again later.';
-    case 504:
-      return 'Gateway timeout. Server is taking too long to respond.';
-    default:
-      return `HTTP ${status}: ${error.response?.statusText || 'Unknown error'}`;
-  }
-};
-
 // Response interceptor to handle errors and token refresh
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Extract meaningful error message
-    const errorMessage = getErrorMessage(error);
-
-    // Log detailed error for debugging (stringify to avoid [object Object])
-    console.error('API Error Details:', JSON.stringify({
+    console.error('API Error Details:', {
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      originalMessage: error.message,
-      extractedMessage: errorMessage
-    }, null, 2));
+      message: error.message
+    });
 
-    // Set the error message for user display
-    error.message = errorMessage;
+    // Handle network errors
+    if (!error.response) {
+      error.message = 'Network Error: Please check your internet connection';
+      return Promise.reject(error);
+    }
 
-    // Handle authentication errors
-    if (error.response?.status === 401) {
-      // Only redirect to login if not already on login page
-      if (!window.location.pathname.includes('/login')) {
-        localStorage.removeItem('electromart_token');
-        localStorage.removeItem('electromart_user');
-        window.location.href = '/login';
-      }
+    // Handle different HTTP status codes
+    switch (error.response?.status) {
+      case 400:
+        error.message = error.response?.data?.message || 'Bad request. Please check your input.';
+        break;
+      case 401:
+        error.message = error.response?.data?.message || 'Invalid credentials';
+        // Only redirect to login if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          localStorage.removeItem('electromart_token');
+          localStorage.removeItem('electromart_user');
+          window.location.href = '/login';
+        }
+        break;
+      case 403:
+        error.message = 'Access forbidden. You do not have permission.';
+        break;
+      case 404:
+        error.message = 'Resource not found. Please check the URL.';
+        break;
+      case 422:
+        error.message = error.response?.data?.message || 'Validation error. Please check your input.';
+        break;
+      case 500:
+        error.message = 'Internal server error. Please try again later.';
+        break;
+      case 502:
+        error.message = 'Bad gateway. Server is temporarily unavailable.';
+        break;
+      case 503:
+        error.message = 'Service unavailable. Please try again later.';
+        break;
+      case 504:
+        error.message = 'Gateway timeout. Server is taking too long to respond.';
+        break;
+      default:
+        const detailedMessage = error.response?.data?.message ||
+                              error.response?.data?.error ||
+                              `HTTP ${error.response?.status}: ${error.response?.statusText}`;
+        error.message = detailedMessage;
     }
 
     return Promise.reject(error);
@@ -399,21 +381,9 @@ export const testAPIConnection = async () => {
   }
 };
 
-// Error handling utility for components
-export const handleAPIError = (error: any, defaultMessage: string = 'An error occurred'): string => {
-  return error?.message || defaultMessage;
-};
-
-// Show user-friendly error message
-export const showAPIError = (error: any, context: string = 'Operation') => {
-  const message = handleAPIError(error, `${context} failed`);
-  alert(message);
-};
-
 // Make test function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).testAPIConnection = testAPIConnection;
-  (window as any).handleAPIError = handleAPIError;
 }
 
 export default api;

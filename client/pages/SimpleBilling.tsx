@@ -495,9 +495,9 @@ export default function SimpleBilling() {
                       `Invoice_${currentInvoice.billNumber}.pdf`;
 
       doc.save(filename);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error generating PDF:', error);
-      alert(`Error generating PDF: ${error.message || 'Please try again.'}`);
+      alert('Error generating PDF. Please try again.');
     }
   };
   
