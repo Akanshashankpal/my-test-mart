@@ -85,90 +85,27 @@ interface CustomersResponse {
   pagination: Pagination;
 }
 
-// Mock data
-const mockCustomers: Customer[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    phone: "+91 9876543210",
-    address: "123 Main Street, Mumbai, Maharashtra 400001",
-    email: "john@example.com",
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date(),
-    totalPurchases: 45250,
-    lastPurchase: new Date("2024-01-20"),
-  },
-  {
-    id: "2",
-    name: "Sarah Smith",
-    phone: "+91 9876543211",
-    address: "456 Park Avenue, Delhi, Delhi 110001",
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date(),
-    totalPurchases: 23400,
-    lastPurchase: new Date("2024-01-18"),
-  },
-  {
-    id: "3",
-    name: "Mike Johnson",
-    phone: "+91 9876543212",
-    address: "789 Oak Road, Bangalore, Karnataka 560001",
-    email: "mike@example.com",
-    createdAt: new Date("2024-01-05"),
-    updatedAt: new Date(),
-    totalPurchases: 67890,
-    lastPurchase: new Date("2024-01-19"),
-  },
-];
-
-const mockPurchases: Purchase[] = [
-  {
-    id: "1",
-    customerId: "1",
-    amount: 2450,
-    date: new Date("2024-01-20"),
-    items: 3,
-    invoiceNumber: "INV-001",
-    type: "GST",
-  },
-  {
-    id: "2",
-    customerId: "1",
-    amount: 1200,
-    date: new Date("2024-01-15"),
-    items: 1,
-    invoiceNumber: "INV-002",
-    type: "Non-GST",
-  },
-  {
-    id: "3",
-    customerId: "2",
-    amount: 3200,
-    date: new Date("2024-01-18"),
-    items: 5,
-    invoiceNumber: "INV-003",
-    type: "GST",
-  },
-  {
-    id: "4",
-    customerId: "3",
-    amount: 15600,
-    date: new Date("2024-01-19"),
-    items: 2,
-    invoiceNumber: "INV-004",
-    type: "GST",
-  },
-];
-
 export default function Customers() {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [purchases] = useState<Purchase[]>(mockPurchases);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [purchases] = useState<Purchase[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isLoading, setIsLoading] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [deleteCustomerId, setDeleteCustomerId] = useState<string | null>(null);
   const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -176,11 +113,48 @@ export default function Customers() {
     email: "",
   });
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm) ||
-    customer.address.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch customers from API
+  const fetchCustomers = async (page: number = 1) => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pagination.itemsPerPage.toString(),
+        sortBy,
+        sortOrder,
+      });
+
+      if (searchTerm) params.append('search', searchTerm);
+      if (statusFilter !== 'all') params.append('isActive', statusFilter);
+
+      const response = await customersAPI.getCustomers(params);
+
+      if (response.success) {
+        setCustomers(response.data.customers);
+        setPagination(response.data.pagination);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch customers on component mount and when filters change
+  useEffect(() => {
+    fetchCustomers(1);
+  }, [searchTerm, statusFilter, sortBy, sortOrder]);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm !== '') {
+        fetchCustomers(1);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const getCustomerPurchases = (customerId: string) => {
     return purchases.filter(p => p.customerId === customerId);
