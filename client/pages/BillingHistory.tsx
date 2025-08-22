@@ -548,7 +548,7 @@ export default function BillingHistory() {
                       </Badge>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{formatCurrency(bill.finalAmount)}</div>
+                      <div className="font-medium">{formatCurrency(bill.totalAmount)}</div>
                       {(bill.discountAmount || 0) > 0 && (
                         <div className="text-sm text-muted-foreground">
                           Discount: {formatCurrency(bill.discountAmount)}
@@ -556,8 +556,8 @@ export default function BillingHistory() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Badge className={cn("text-xs", getPaymentBadge(bill.paymentStatus))}>
-                        {bill.paymentStatus}
+                      <Badge className={cn("text-xs", getPaymentBadge(bill.paymentType === "Full" ? "paid" : "pending"))}>
+                        {bill.paymentType === "Full" ? "Paid" : "Pending"}
                       </Badge>
                       {bill.paymentMethod && (
                         <div className="text-sm text-muted-foreground">
@@ -566,8 +566,8 @@ export default function BillingHistory() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Badge className={cn("text-xs", getStatusBadge(bill.status))}>
-                        {bill.status}
+                      <Badge className={cn("text-xs", getStatusBadge(bill.paymentType === "Full" ? "paid" : "sent"))}>
+                        {bill.paymentType === "Full" ? "Paid" : "Sent"}
                       </Badge>
                     </td>
                     <td className="p-4">
