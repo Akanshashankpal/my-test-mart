@@ -7,7 +7,7 @@ import {
   getAllBills,
   getBillById,
   updateBill,
-  deleteBill
+  deleteBill,
 } from "./routes/billing";
 
 export function createServer() {

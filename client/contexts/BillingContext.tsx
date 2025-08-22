@@ -1,6 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { billingService, Bill as ApiBill, BillData } from '@/services/billingService';
-import { useToast } from '@/hooks/use-toast';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import {
+  billingService,
+  Bill as ApiBill,
+  BillData,
+} from "@/services/billingService";
+import { useToast } from "@/hooks/use-toast";
 
 // Updated interface to match API structure
 export interface BillItem {
@@ -28,8 +38,8 @@ export interface Bill {
   totalAmount: number;
   paidAmount: number;
   remainingAmount: number;
-  paymentType: 'Full' | 'Partial';
-  paymentMethod: 'cash' | 'online' | 'mixed';
+  paymentType: "Full" | "Partial";
+  paymentMethod: "cash" | "online" | "mixed";
   observation?: string;
   termsAndConditions?: string;
   stateKey: string;
@@ -43,7 +53,10 @@ interface BillingContextType {
   error: string | null;
   fetchBills: () => Promise<void>;
   addBill: (billData: BillData) => Promise<Bill | null>;
-  updateBill: (billId: string, updates: Partial<BillData>) => Promise<Bill | null>;
+  updateBill: (
+    billId: string,
+    updates: Partial<BillData>,
+  ) => Promise<Bill | null>;
   deleteBill: (billId: string) => Promise<boolean>;
   getBillById: (billId: string) => Bill | undefined;
 }
@@ -64,12 +77,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       const apiBills = await billingService.getAllBills();
       setBills(apiBills);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch bills';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch bills";
       setError(errorMessage);
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -87,22 +101,23 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       const billWithNumber = { ...billData, billNumber };
 
       const newBill = await billingService.createBill(billWithNumber);
-      setBills(prev => [newBill, ...prev]);
+      setBills((prev) => [newBill, ...prev]);
 
       toast({
         title: "Success",
         description: "Bill created successfully!",
-        variant: "default"
+        variant: "default",
       });
 
       return newBill;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create bill';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create bill";
       setError(errorMessage);
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
       return null;
     } finally {
@@ -111,30 +126,34 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   };
 
   // Update bill
-  const updateBill = async (billId: string, updates: Partial<BillData>): Promise<Bill | null> => {
+  const updateBill = async (
+    billId: string,
+    updates: Partial<BillData>,
+  ): Promise<Bill | null> => {
     try {
       setIsLoading(true);
       setError(null);
 
       const updatedBill = await billingService.updateBill(billId, updates);
-      setBills(prev => prev.map(bill =>
-        bill.id === billId ? updatedBill : bill
-      ));
+      setBills((prev) =>
+        prev.map((bill) => (bill.id === billId ? updatedBill : bill)),
+      );
 
       toast({
         title: "Success",
         description: "Bill updated successfully!",
-        variant: "default"
+        variant: "default",
       });
 
       return updatedBill;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update bill';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update bill";
       setError(errorMessage);
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
       return null;
     } finally {
@@ -149,22 +168,23 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       await billingService.deleteBill(billId);
-      setBills(prev => prev.filter(bill => bill.id !== billId));
+      setBills((prev) => prev.filter((bill) => bill.id !== billId));
 
       toast({
         title: "Success",
         description: "Bill deleted successfully!",
-        variant: "default"
+        variant: "default",
       });
 
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete bill';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete bill";
       setError(errorMessage);
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     } finally {
@@ -174,7 +194,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
 
   // Get bill by ID
   const getBillById = (billId: string) => {
-    return bills.find(bill => bill.id === billId);
+    return bills.find((bill) => bill.id === billId);
   };
 
   // Fetch bills on component mount
@@ -194,16 +214,14 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <BillingContext.Provider value={value}>
-      {children}
-    </BillingContext.Provider>
+    <BillingContext.Provider value={value}>{children}</BillingContext.Provider>
   );
 }
 
 export function useBilling() {
   const context = useContext(BillingContext);
   if (context === undefined) {
-    throw new Error('useBilling must be used within a BillingProvider');
+    throw new Error("useBilling must be used within a BillingProvider");
   }
   return context;
 }

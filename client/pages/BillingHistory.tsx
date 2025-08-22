@@ -46,7 +46,7 @@ import {
   TrendingDown,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -73,8 +73,8 @@ interface Bill {
   totalAmount: number;
   paidAmount: number;
   remainingAmount: number;
-  paymentType: 'Full' | 'Partial';
-  paymentMethod: 'cash' | 'online' | 'mixed';
+  paymentType: "Full" | "Partial";
+  paymentMethod: "cash" | "online" | "mixed";
   observation?: string;
   termsAndConditions?: string;
   stateKey: string;
@@ -126,42 +126,60 @@ export default function BillingHistory() {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(bill =>
-        (bill.billNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (bill.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (bill.customerPhone || '').includes(searchTerm)
+      filtered = filtered.filter(
+        (bill) =>
+          (bill.billNumber || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (bill.customerName || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (bill.customerPhone || "").includes(searchTerm),
       );
     }
 
     // Status filter - using payment type as status since new structure doesn't have status
     if (statusFilter !== "all") {
       if (statusFilter === "paid") {
-        filtered = filtered.filter(bill => bill.paymentType === "Full");
+        filtered = filtered.filter((bill) => bill.paymentType === "Full");
       } else if (statusFilter === "pending") {
-        filtered = filtered.filter(bill => bill.paymentType === "Partial" || (bill.remainingAmount || 0) > 0);
+        filtered = filtered.filter(
+          (bill) =>
+            bill.paymentType === "Partial" || (bill.remainingAmount || 0) > 0,
+        );
       }
     }
 
     // Type filter
     if (typeFilter !== "all") {
-      filtered = filtered.filter(bill => bill.billType === typeFilter);
+      filtered = filtered.filter((bill) => bill.billType === typeFilter);
     }
 
     // Payment filter - using payment type
     if (paymentFilter !== "all") {
       if (paymentFilter === "paid") {
-        filtered = filtered.filter(bill => bill.paymentType === "Full");
+        filtered = filtered.filter((bill) => bill.paymentType === "Full");
       } else if (paymentFilter === "pending") {
-        filtered = filtered.filter(bill => bill.paymentType === "Partial" || (bill.remainingAmount || 0) > 0);
+        filtered = filtered.filter(
+          (bill) =>
+            bill.paymentType === "Partial" || (bill.remainingAmount || 0) > 0,
+        );
       }
     }
 
     // Date range filter
     if (dateRange.start) {
-      filtered = filtered.filter(bill => new Date(bill.billDate || bill.createdAt) >= new Date(dateRange.start));
+      filtered = filtered.filter(
+        (bill) =>
+          new Date(bill.billDate || bill.createdAt) >=
+          new Date(dateRange.start),
+      );
     }
     if (dateRange.end) {
-      filtered = filtered.filter(bill => new Date(bill.billDate || bill.createdAt) <= new Date(dateRange.end));
+      filtered = filtered.filter(
+        (bill) =>
+          new Date(bill.billDate || bill.createdAt) <= new Date(dateRange.end),
+      );
     }
 
     // Apply sorting
@@ -211,7 +229,16 @@ export default function BillingHistory() {
 
     setFilteredBills(filtered);
     setCurrentPage(1);
-  }, [bills, searchTerm, statusFilter, typeFilter, paymentFilter, dateRange, sortField, sortDirection]);
+  }, [
+    bills,
+    searchTerm,
+    statusFilter,
+    typeFilter,
+    paymentFilter,
+    dateRange,
+    sortField,
+    sortDirection,
+  ]);
 
   // Pagination
   const indexOfLastBill = currentPage * billsPerPage;
@@ -221,17 +248,17 @@ export default function BillingHistory() {
 
   const formatCurrency = (amount: number | undefined | null) => {
     if (amount === undefined || amount === null || isNaN(amount)) {
-      return '₹0';
+      return "₹0";
     }
-    return `₹${amount.toLocaleString('en-IN')}`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
   const formatDate = (date: string | Date) => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    return dateObj.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -252,7 +279,9 @@ export default function BillingHistory() {
       partial: "bg-orange-100 text-orange-800 border-orange-200",
       overdue: "bg-red-100 text-red-800 border-red-200",
     };
-    return styles[status.toLowerCase() as keyof typeof styles] || styles.pending;
+    return (
+      styles[status.toLowerCase() as keyof typeof styles] || styles.pending
+    );
   };
 
   const getTypeBadge = (type: string) => {
@@ -313,7 +342,7 @@ export default function BillingHistory() {
   const downloadBillPDF = async (bill: Bill) => {
     try {
       // Dynamic import of jsPDF
-      const { default: jsPDF } = await import('jspdf');
+      const { default: jsPDF } = await import("jspdf");
 
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -328,35 +357,40 @@ export default function BillingHistory() {
 
       // Header Background
       doc.setFillColor(...primaryColor);
-      doc.rect(0, 0, pageWidth, 40, 'F');
+      doc.rect(0, 0, pageWidth, 40, "F");
 
       // Company Name
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SAVERA ELECTRONIC', pageWidth / 2, 20, { align: 'center' });
+      doc.setFont("helvetica", "bold");
+      doc.text("SAVERA ELECTRONIC", pageWidth / 2, 20, { align: "center" });
 
       // Tagline
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Quality Electronics & Professional Service', pageWidth / 2, 28, { align: 'center' });
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        "Quality Electronics & Professional Service",
+        pageWidth / 2,
+        28,
+        { align: "center" },
+      );
 
       // Invoice Title
       doc.setTextColor(...accentColor);
       doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('INVOICE', pageWidth / 2, 50, { align: 'center' });
+      doc.setFont("helvetica", "bold");
+      doc.text("INVOICE", pageWidth / 2, 50, { align: "center" });
 
       // Invoice Details Box
       doc.setFillColor(...lightGray);
-      doc.roundedRect(15, 60, 80, 35, 3, 3, 'F');
+      doc.roundedRect(15, 60, 80, 35, 3, 3, "F");
 
       doc.setTextColor(...darkGray);
       doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Invoice Details:', 20, 70);
+      doc.setFont("helvetica", "bold");
+      doc.text("Invoice Details:", 20, 70);
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.text(`Invoice No: ${bill.billNumber}`, 20, 77);
       doc.text(`Date: ${formatDate(bill.billDate || bill.createdAt)}`, 20, 84);
@@ -364,77 +398,93 @@ export default function BillingHistory() {
 
       // Customer Details Box
       doc.setFillColor(...lightGray);
-      doc.roundedRect(110, 60, 80, 35, 3, 3, 'F');
+      doc.roundedRect(110, 60, 80, 35, 3, 3, "F");
 
       doc.setTextColor(...darkGray);
       doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Bill To:', 115, 70);
+      doc.setFont("helvetica", "bold");
+      doc.text("Bill To:", 115, 70);
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.text(bill.customerName, 115, 77);
       doc.text(`Phone: ${bill.customerPhone}`, 115, 84);
       if (bill.customerAddress) {
-        const addressLines = bill.customerAddress.match(/.{1,30}/g) || [bill.customerAddress];
+        const addressLines = bill.customerAddress.match(/.{1,30}/g) || [
+          bill.customerAddress,
+        ];
         doc.text(addressLines[0], 115, 91);
       }
 
       // Items Table Header
       let yPos = 110;
       doc.setFillColor(...secondaryColor);
-      doc.rect(15, yPos, 175, 15, 'F');
+      doc.rect(15, yPos, 175, 15, "F");
 
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
 
       // Table headers based on bill type
-      if (bill.billType === 'GST') {
-        doc.text('Item Description', 20, yPos + 10);
-        doc.text('Qty', 100, yPos + 10, { align: 'center' });
-        doc.text('Rate (₹)', 120, yPos + 10, { align: 'center' });
-        doc.text('GST%', 140, yPos + 10, { align: 'center' });
-        doc.text('GST Amt (₹)', 160, yPos + 10, { align: 'center' });
-        doc.text('Total (₹)', 180, yPos + 10, { align: 'right' });
+      if (bill.billType === "GST") {
+        doc.text("Item Description", 20, yPos + 10);
+        doc.text("Qty", 100, yPos + 10, { align: "center" });
+        doc.text("Rate (₹)", 120, yPos + 10, { align: "center" });
+        doc.text("GST%", 140, yPos + 10, { align: "center" });
+        doc.text("GST Amt (₹)", 160, yPos + 10, { align: "center" });
+        doc.text("Total (₹)", 180, yPos + 10, { align: "right" });
       } else {
-        doc.text('Item Description', 20, yPos + 10);
-        doc.text('Qty', 110, yPos + 10, { align: 'center' });
-        doc.text('Rate (₹)', 140, yPos + 10, { align: 'center' });
-        doc.text('Total (₹)', 180, yPos + 10, { align: 'right' });
+        doc.text("Item Description", 20, yPos + 10);
+        doc.text("Qty", 110, yPos + 10, { align: "center" });
+        doc.text("Rate (₹)", 140, yPos + 10, { align: "center" });
+        doc.text("Total (₹)", 180, yPos + 10, { align: "right" });
       }
 
       yPos += 20;
 
       // Items
       doc.setTextColor(...darkGray);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
 
       bill.items.forEach((item, index) => {
         // Alternating row colors
         if (index % 2 === 0) {
           doc.setFillColor(250, 250, 250);
-          doc.rect(15, yPos - 5, 175, 12, 'F');
+          doc.rect(15, yPos - 5, 175, 12, "F");
         }
 
         const itemTotal = item.itemPrice * item.itemQuantity;
 
-        if (bill.billType === 'GST') {
+        if (bill.billType === "GST") {
           const gstAmount = (itemTotal * bill.gstPercent) / 100;
           const totalWithGst = itemTotal + gstAmount;
 
           doc.text(item.itemName.substring(0, 35), 20, yPos);
-          doc.text(item.itemQuantity.toString(), 100, yPos, { align: 'center' });
-          doc.text(`₹${item.itemPrice.toLocaleString()}`, 120, yPos, { align: 'center' });
-          doc.text(`${bill.gstPercent}%`, 140, yPos, { align: 'center' });
-          doc.text(`₹${gstAmount.toLocaleString()}`, 160, yPos, { align: 'center' });
-          doc.text(`₹${totalWithGst.toLocaleString()}`, 180, yPos, { align: 'right' });
+          doc.text(item.itemQuantity.toString(), 100, yPos, {
+            align: "center",
+          });
+          doc.text(`₹${item.itemPrice.toLocaleString()}`, 120, yPos, {
+            align: "center",
+          });
+          doc.text(`${bill.gstPercent}%`, 140, yPos, { align: "center" });
+          doc.text(`₹${gstAmount.toLocaleString()}`, 160, yPos, {
+            align: "center",
+          });
+          doc.text(`₹${totalWithGst.toLocaleString()}`, 180, yPos, {
+            align: "right",
+          });
         } else {
           doc.text(item.itemName.substring(0, 45), 20, yPos);
-          doc.text(item.itemQuantity.toString(), 110, yPos, { align: 'center' });
-          doc.text(`₹${item.itemPrice.toLocaleString()}`, 140, yPos, { align: 'center' });
-          doc.text(`₹${itemTotal.toLocaleString()}`, 180, yPos, { align: 'right' });
+          doc.text(item.itemQuantity.toString(), 110, yPos, {
+            align: "center",
+          });
+          doc.text(`₹${item.itemPrice.toLocaleString()}`, 140, yPos, {
+            align: "center",
+          });
+          doc.text(`₹${itemTotal.toLocaleString()}`, 180, yPos, {
+            align: "right",
+          });
         }
 
         yPos += 12;
@@ -451,114 +501,146 @@ export default function BillingHistory() {
 
       // Totals box background
       doc.setFillColor(...lightGray);
-      doc.roundedRect(totalsStartX - 5, yPos - 5, 70, 55, 3, 3, 'F');
+      doc.roundedRect(totalsStartX - 5, yPos - 5, 70, 55, 3, 3, "F");
 
       doc.setTextColor(...darkGray);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
 
       // Subtotal
-      doc.text('Subtotal:', totalsStartX, yPos);
-      doc.text(`₹${bill.subtotal.toLocaleString()}`, 185, yPos, { align: 'right' });
+      doc.text("Subtotal:", totalsStartX, yPos);
+      doc.text(`₹${bill.subtotal.toLocaleString()}`, 185, yPos, {
+        align: "right",
+      });
       yPos += 8;
 
       // Discount
       if (bill.discountAmount > 0) {
         doc.setTextColor(220, 38, 127); // Pink for discount
-        doc.text('Discount:', totalsStartX, yPos);
-        doc.text(`-₹${bill.discountAmount.toLocaleString()}`, 185, yPos, { align: 'right' });
+        doc.text("Discount:", totalsStartX, yPos);
+        doc.text(`-₹${bill.discountAmount.toLocaleString()}`, 185, yPos, {
+          align: "right",
+        });
         doc.setTextColor(...darkGray);
         yPos += 8;
       }
 
       // GST breakdown
-      if (bill.billType === 'GST' && bill.gstAmount > 0) {
-        doc.text('CGST (9%):', totalsStartX, yPos);
-        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 185, yPos, { align: 'right' });
+      if (bill.billType === "GST" && bill.gstAmount > 0) {
+        doc.text("CGST (9%):", totalsStartX, yPos);
+        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 185, yPos, {
+          align: "right",
+        });
         yPos += 6;
 
-        doc.text('SGST (9%):', totalsStartX, yPos);
-        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 185, yPos, { align: 'right' });
+        doc.text("SGST (9%):", totalsStartX, yPos);
+        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 185, yPos, {
+          align: "right",
+        });
         yPos += 6;
 
-        doc.setFont('helvetica', 'bold');
-        doc.text('Total GST:', totalsStartX, yPos);
-        doc.text(`₹${bill.gstAmount.toLocaleString()}`, 185, yPos, { align: 'right' });
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "bold");
+        doc.text("Total GST:", totalsStartX, yPos);
+        doc.text(`₹${bill.gstAmount.toLocaleString()}`, 185, yPos, {
+          align: "right",
+        });
+        doc.setFont("helvetica", "normal");
         yPos += 10;
       }
 
       // Final Amount
       doc.setFillColor(...primaryColor);
-      doc.roundedRect(totalsStartX - 5, yPos - 3, 70, 12, 3, 3, 'F');
+      doc.roundedRect(totalsStartX - 5, yPos - 3, 70, 12, 3, 3, "F");
 
       doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text('Final Amount:', totalsStartX, yPos + 5);
-      doc.text(`₹${bill.totalAmount.toLocaleString()}`, 185, yPos + 5, { align: 'right' });
+      doc.text("Final Amount:", totalsStartX, yPos + 5);
+      doc.text(`₹${bill.totalAmount.toLocaleString()}`, 185, yPos + 5, {
+        align: "right",
+      });
 
       // Payment Status
       yPos += 20;
       if (bill.paymentType === "Full") {
         doc.setFillColor(76, 175, 80); // Green
         doc.setTextColor(255, 255, 255);
-        doc.roundedRect(15, yPos, 50, 10, 2, 2, 'F');
+        doc.roundedRect(15, yPos, 50, 10, 2, 2, "F");
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('PAID', 40, yPos + 7, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("PAID", 40, yPos + 7, { align: "center" });
       } else {
         doc.setFillColor(255, 152, 0); // Orange
         doc.setTextColor(255, 255, 255);
-        doc.roundedRect(15, yPos, 50, 10, 2, 2, 'F');
+        doc.roundedRect(15, yPos, 50, 10, 2, 2, "F");
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('PENDING', 40, yPos + 7, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("PENDING", 40, yPos + 7, { align: "center" });
 
         if (bill.remainingAmount > 0) {
           doc.setTextColor(...darkGray);
-          doc.setFont('helvetica', 'normal');
-          doc.text(`Remaining: ₹${bill.remainingAmount.toLocaleString()}`, 70, yPos + 7);
+          doc.setFont("helvetica", "normal");
+          doc.text(
+            `Remaining: ₹${bill.remainingAmount.toLocaleString()}`,
+            70,
+            yPos + 7,
+          );
         }
       }
 
       // Footer
       yPos = pageHeight - 30;
       doc.setFillColor(...primaryColor);
-      doc.rect(0, yPos, pageWidth, 30, 'F');
+      doc.rect(0, yPos, pageWidth, 30, "F");
 
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Thank you for your business!', pageWidth / 2, yPos + 15, { align: 'center' });
+      doc.setFont("helvetica", "bold");
+      doc.text("Thank you for your business!", pageWidth / 2, yPos + 15, {
+        align: "center",
+      });
 
       doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Savera Electronic - Your trusted electronics partner', pageWidth / 2, yPos + 22, { align: 'center' });
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        "Savera Electronic - Your trusted electronics partner",
+        pageWidth / 2,
+        yPos + 22,
+        { align: "center" },
+      );
 
       // Save the PDF
       doc.save(`Savera_Electronic_Invoice_${bill.billNumber}.pdf`);
-
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
     }
   };
 
   const calculateStats = () => {
-    const totalRevenue = filteredBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const paidBills = filteredBills.filter(b => b.paymentType === "Full");
-    const paidRevenue = paidBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const pendingRevenue = filteredBills.reduce((sum, bill) => sum + (bill.remainingAmount || 0), 0);
+    const totalRevenue = filteredBills.reduce(
+      (sum, bill) => sum + (bill.totalAmount || 0),
+      0,
+    );
+    const paidBills = filteredBills.filter((b) => b.paymentType === "Full");
+    const paidRevenue = paidBills.reduce(
+      (sum, bill) => sum + (bill.totalAmount || 0),
+      0,
+    );
+    const pendingRevenue = filteredBills.reduce(
+      (sum, bill) => sum + (bill.remainingAmount || 0),
+      0,
+    );
 
     return {
       totalBills: filteredBills.length,
       totalRevenue,
       paidRevenue,
       pendingRevenue,
-      gstBills: filteredBills.filter(b => b.billType === "GST").length,
-      nonGstBills: filteredBills.filter(b => b.billType === "Non-GST").length,
-      quotationBills: filteredBills.filter(b => b.billType === "Quotation").length,
+      gstBills: filteredBills.filter((b) => b.billType === "GST").length,
+      nonGstBills: filteredBills.filter((b) => b.billType === "Non-GST").length,
+      quotationBills: filteredBills.filter((b) => b.billType === "Quotation")
+        .length,
     };
   };
 
@@ -577,9 +659,11 @@ export default function BillingHistory() {
     if (sortField !== field) {
       return <ArrowUpDown className="h-4 w-4 ml-1 opacity-50" />;
     }
-    return sortDirection === "asc" ?
-      <ArrowUp className="h-4 w-4 ml-1" /> :
-      <ArrowDown className="h-4 w-4 ml-1" />;
+    return sortDirection === "asc" ? (
+      <ArrowUp className="h-4 w-4 ml-1" />
+    ) : (
+      <ArrowDown className="h-4 w-4 ml-1" />
+    );
   };
 
   return (
@@ -587,8 +671,12 @@ export default function BillingHistory() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Billing History</h2>
-          <p className="text-muted-foreground">View and manage all generated invoices</p>
+          <h2 className="text-2xl font-bold text-foreground">
+            Billing History
+          </h2>
+          <p className="text-muted-foreground">
+            View and manage all generated invoices
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
@@ -614,7 +702,8 @@ export default function BillingHistory() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBills}</div>
             <div className="text-sm text-muted-foreground">
-              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Quotation: {stats.quotationBills}
+              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Quotation:{" "}
+              {stats.quotationBills}
             </div>
           </CardContent>
         </Card>
@@ -627,7 +716,9 @@ export default function BillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(stats.totalRevenue)}
+            </div>
             <div className="flex items-center gap-1 text-sm">
               <TrendingUp className="h-3 w-3 text-green-500" />
               <span className="text-green-500">+12.5%</span>
@@ -644,9 +735,12 @@ export default function BillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.paidRevenue)}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(stats.paidRevenue)}
+            </div>
             <div className="text-sm text-muted-foreground">
-              {((stats.paidRevenue / stats.totalRevenue) * 100).toFixed(1)}% of total
+              {((stats.paidRevenue / stats.totalRevenue) * 100).toFixed(1)}% of
+              total
             </div>
           </CardContent>
         </Card>
@@ -659,9 +753,12 @@ export default function BillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{formatCurrency(stats.pendingRevenue)}</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {formatCurrency(stats.pendingRevenue)}
+            </div>
             <div className="text-sm text-muted-foreground">
-              {((stats.pendingRevenue / stats.totalRevenue) * 100).toFixed(1)}% of total
+              {((stats.pendingRevenue / stats.totalRevenue) * 100).toFixed(1)}%
+              of total
             </div>
           </CardContent>
         </Card>
@@ -722,14 +819,18 @@ export default function BillingHistory() {
             <Input
               type="date"
               value={dateRange.start}
-              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+              onChange={(e) =>
+                setDateRange((prev) => ({ ...prev, start: e.target.value }))
+              }
               placeholder="Start date"
             />
 
             <Input
               type="date"
               value={dateRange.end}
-              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+              onChange={(e) =>
+                setDateRange((prev) => ({ ...prev, end: e.target.value }))
+              }
               placeholder="End date"
             />
           </div>
@@ -808,19 +909,25 @@ export default function BillingHistory() {
                 {currentBills.map((bill) => (
                   <tr key={bill.id} className="border-b hover:bg-muted/50">
                     <td className="p-4">
-                      <div className="font-medium">{bill.billNumber || 'N/A'}</div>
+                      <div className="font-medium">
+                        {bill.billNumber || "N/A"}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {formatDate(bill.createdAt)}
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{bill.customerName || 'Unknown'}</div>
+                      <div className="font-medium">
+                        {bill.customerName || "Unknown"}
+                      </div>
                       <div className="text-sm text-muted-foreground">
-                        {bill.customerPhone || 'No phone'}
+                        {bill.customerPhone || "No phone"}
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{formatDate(bill.billDate || bill.createdAt)}</div>
+                      <div className="font-medium">
+                        {formatDate(bill.billDate || bill.createdAt)}
+                      </div>
                       {(bill.remainingAmount || 0) > 0 && (
                         <div className="text-sm text-red-600">
                           Pending: {formatCurrency(bill.remainingAmount)}
@@ -828,12 +935,16 @@ export default function BillingHistory() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Badge className={cn("text-xs", getTypeBadge(bill.billType))}>
+                      <Badge
+                        className={cn("text-xs", getTypeBadge(bill.billType))}
+                      >
                         {bill.billType}
                       </Badge>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{formatCurrency(bill.totalAmount)}</div>
+                      <div className="font-medium">
+                        {formatCurrency(bill.totalAmount)}
+                      </div>
                       {(bill.discountAmount || 0) > 0 && (
                         <div className="text-sm text-muted-foreground">
                           Discount: {formatCurrency(bill.discountAmount)}
@@ -841,7 +952,14 @@ export default function BillingHistory() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Badge className={cn("text-xs", getPaymentBadge(bill.paymentType === "Full" ? "paid" : "pending"))}>
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getPaymentBadge(
+                            bill.paymentType === "Full" ? "paid" : "pending",
+                          ),
+                        )}
+                      >
                         {bill.paymentType === "Full" ? "Paid" : "Pending"}
                       </Badge>
                       {bill.paymentMethod && (
@@ -851,7 +969,14 @@ export default function BillingHistory() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Badge className={cn("text-xs", getStatusBadge(bill.paymentType === "Full" ? "paid" : "sent"))}>
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getStatusBadge(
+                            bill.paymentType === "Full" ? "paid" : "sent",
+                          ),
+                        )}
+                      >
                         {bill.paymentType === "Full" ? "Paid" : "Sent"}
                       </Badge>
                     </td>
@@ -897,13 +1022,15 @@ export default function BillingHistory() {
           {/* Pagination */}
           <div className="flex items-center justify-between p-4 border-t">
             <div className="text-sm text-muted-foreground">
-              Showing {indexOfFirstBill + 1} to {Math.min(indexOfLastBill, filteredBills.length)} of {filteredBills.length} bills
+              Showing {indexOfFirstBill + 1} to{" "}
+              {Math.min(indexOfLastBill, filteredBills.length)} of{" "}
+              {filteredBills.length} bills
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -911,7 +1038,9 @@ export default function BillingHistory() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -936,22 +1065,44 @@ export default function BillingHistory() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Bill Number:</span>
-                      <span className="font-medium">{selectedBill.billNumber}</span>
+                      <span className="font-medium">
+                        {selectedBill.billNumber}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Type:</span>
-                      <Badge className={cn("text-xs", getTypeBadge(selectedBill.billType))}>
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getTypeBadge(selectedBill.billType),
+                        )}
+                      >
                         {selectedBill.billType}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Date:</span>
-                      <span className="font-medium">{formatDate(selectedBill.billDate || selectedBill.createdAt)}</span>
+                      <span className="font-medium">
+                        {formatDate(
+                          selectedBill.billDate || selectedBill.createdAt,
+                        )}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Payment:</span>
-                      <Badge className={cn("text-xs", getPaymentBadge(selectedBill.paymentType === "Full" ? "paid" : "pending"))}>
-                        {selectedBill.paymentType === "Full" ? "Paid" : "Pending"}
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getPaymentBadge(
+                            selectedBill.paymentType === "Full"
+                              ? "paid"
+                              : "pending",
+                          ),
+                        )}
+                      >
+                        {selectedBill.paymentType === "Full"
+                          ? "Paid"
+                          : "Pending"}
                       </Badge>
                     </div>
                   </div>
@@ -962,16 +1113,22 @@ export default function BillingHistory() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Name:</span>
-                      <span className="font-medium">{selectedBill.customerName}</span>
+                      <span className="font-medium">
+                        {selectedBill.customerName}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Phone:</span>
-                      <span className="font-medium">{selectedBill.customerPhone}</span>
+                      <span className="font-medium">
+                        {selectedBill.customerPhone}
+                      </span>
                     </div>
                     {selectedBill.customerAddress && (
                       <div className="flex justify-between">
                         <span>Address:</span>
-                        <span className="font-medium">{selectedBill.customerAddress}</span>
+                        <span className="font-medium">
+                          {selectedBill.customerAddress}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -995,8 +1152,12 @@ export default function BillingHistory() {
                       <tr key={index} className="border-t">
                         <td className="p-3">{item.itemName}</td>
                         <td className="p-3 text-right">{item.itemQuantity}</td>
-                        <td className="p-3 text-right">{formatCurrency(item.itemPrice)}</td>
-                        <td className="p-3 text-right">{formatCurrency(item.itemPrice * item.itemQuantity)}</td>
+                        <td className="p-3 text-right">
+                          {formatCurrency(item.itemPrice)}
+                        </td>
+                        <td className="p-3 text-right">
+                          {formatCurrency(item.itemPrice * item.itemQuantity)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1013,7 +1174,9 @@ export default function BillingHistory() {
                   {(selectedBill.discountAmount || 0) > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount:</span>
-                      <span>-{formatCurrency(selectedBill.discountAmount)}</span>
+                      <span>
+                        -{formatCurrency(selectedBill.discountAmount)}
+                      </span>
                     </div>
                   )}
                   {(selectedBill.gstAmount || 0) > 0 && (
@@ -1029,7 +1192,9 @@ export default function BillingHistory() {
                   {(selectedBill.remainingAmount || 0) > 0 && (
                     <div className="flex justify-between text-red-600">
                       <span>Remaining:</span>
-                      <span>{formatCurrency(selectedBill.remainingAmount)}</span>
+                      <span>
+                        {formatCurrency(selectedBill.remainingAmount)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1041,7 +1206,10 @@ export default function BillingHistory() {
                   <Printer className="h-4 w-4" />
                   Print
                 </Button>
-                <Button variant="outline" onClick={() => selectedBill && downloadBillPDF(selectedBill)}>
+                <Button
+                  variant="outline"
+                  onClick={() => selectedBill && downloadBillPDF(selectedBill)}
+                >
                   <Download className="h-4 w-4" />
                   Download PDF
                 </Button>
@@ -1080,7 +1248,12 @@ export default function BillingHistory() {
                     <Input
                       id="edit-customerName"
                       value={editFormData.customerName}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, customerName: e.target.value }))}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          customerName: e.target.value,
+                        }))
+                      }
                       placeholder="Enter customer name"
                     />
                   </div>
@@ -1089,7 +1262,12 @@ export default function BillingHistory() {
                     <Input
                       id="edit-customerPhone"
                       value={editFormData.customerPhone}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, customerPhone: e.target.value }))}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          customerPhone: e.target.value,
+                        }))
+                      }
                       placeholder="Enter phone number"
                     />
                   </div>
@@ -1099,7 +1277,12 @@ export default function BillingHistory() {
                   <Input
                     id="edit-customerAddress"
                     value={editFormData.customerAddress}
-                    onChange={(e) => setEditFormData(prev => ({ ...prev, customerAddress: e.target.value }))}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        customerAddress: e.target.value,
+                      }))
+                    }
                     placeholder="Enter customer address"
                   />
                 </div>
@@ -1114,7 +1297,10 @@ export default function BillingHistory() {
                     <Select
                       value={editFormData.paymentType}
                       onValueChange={(value: "Full" | "Partial") =>
-                        setEditFormData(prev => ({ ...prev, paymentType: value }))
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          paymentType: value,
+                        }))
                       }
                     >
                       <SelectTrigger>
@@ -1131,7 +1317,10 @@ export default function BillingHistory() {
                     <Select
                       value={editFormData.paymentMethod}
                       onValueChange={(value: "cash" | "online" | "mixed") =>
-                        setEditFormData(prev => ({ ...prev, paymentMethod: value }))
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          paymentMethod: value,
+                        }))
                       }
                     >
                       <SelectTrigger>
@@ -1154,10 +1343,12 @@ export default function BillingHistory() {
                       min="0"
                       max={editBill?.totalAmount || 0}
                       value={editFormData.paidAmount}
-                      onChange={(e) => setEditFormData(prev => ({
-                        ...prev,
-                        paidAmount: parseFloat(e.target.value) || 0
-                      }))}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          paidAmount: parseFloat(e.target.value) || 0,
+                        }))
+                      }
                       placeholder="Enter paid amount"
                     />
                   </div>
@@ -1172,7 +1363,12 @@ export default function BillingHistory() {
                   <textarea
                     id="edit-observation"
                     value={editFormData.observation}
-                    onChange={(e) => setEditFormData(prev => ({ ...prev, observation: e.target.value }))}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        observation: e.target.value,
+                      }))
+                    }
                     placeholder="Add any notes or observations..."
                     className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none text-sm"
                   />
@@ -1206,7 +1402,11 @@ export default function BillingHistory() {
                   {editFormData.paymentType === "Partial" && (
                     <div className="flex justify-between text-red-600">
                       <span>Remaining:</span>
-                      <span>{formatCurrency((editBill.totalAmount || 0) - editFormData.paidAmount)}</span>
+                      <span>
+                        {formatCurrency(
+                          (editBill.totalAmount || 0) - editFormData.paidAmount,
+                        )}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1214,10 +1414,17 @@ export default function BillingHistory() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
-                <Button onClick={() => setEditBill(null)} variant="outline" className="flex-1">
+                <Button
+                  onClick={() => setEditBill(null)}
+                  variant="outline"
+                  className="flex-1"
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleUpdateBill} className="flex-1 bg-green-600 hover:bg-green-700">
+                <Button
+                  onClick={handleUpdateBill}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
                   Update Bill
                 </Button>
               </div>
@@ -1227,12 +1434,16 @@ export default function BillingHistory() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteBillId} onOpenChange={() => setDeleteBillId(null)}>
+      <AlertDialog
+        open={!!deleteBillId}
+        onOpenChange={() => setDeleteBillId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Bill</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this bill? This action cannot be undone and will remove all associated data.
+              Are you sure you want to delete this bill? This action cannot be
+              undone and will remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

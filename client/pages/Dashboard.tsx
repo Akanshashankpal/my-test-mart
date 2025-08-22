@@ -23,7 +23,7 @@ import {
   Target,
   Star,
   ShieldAlert,
-  Receipt
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,17 +49,20 @@ export default function Dashboard() {
   // Handle click outside to close notification dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
         setShowNotifications(false);
       }
     };
 
     if (showNotifications) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showNotifications]);
 
@@ -85,47 +88,73 @@ export default function Dashboard() {
           nonGstSales: 0,
           quotationSales: 0,
           totalSales: 0,
-        }
+        },
       };
     }
 
     const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
 
     // Filter today's bills
-    const todayBills = bills.filter(bill => {
+    const todayBills = bills.filter((bill) => {
       const billDate = new Date(bill.billDate || bill.createdAt);
       return billDate >= todayStart;
     });
 
     // Calculate today's stats
-    const todayRevenue = todayBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const todayCustomers = new Set(todayBills.map(bill => bill.customerPhone)).size;
+    const todayRevenue = todayBills.reduce(
+      (sum, bill) => sum + (bill.totalAmount || 0),
+      0,
+    );
+    const todayCustomers = new Set(todayBills.map((bill) => bill.customerPhone))
+      .size;
     const todayTransactions = todayBills.length;
 
     // Calculate overall stats
-    const totalRevenue = bills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const paidRevenue = bills.filter(bill => bill.paymentType === "Full")
-                            .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const pendingRevenue = bills.reduce((sum, bill) => sum + (bill.remainingAmount || 0), 0);
-    const uniqueCustomers = new Set(bills.map(bill => bill.customerPhone)).size;
+    const totalRevenue = bills.reduce(
+      (sum, bill) => sum + (bill.totalAmount || 0),
+      0,
+    );
+    const paidRevenue = bills
+      .filter((bill) => bill.paymentType === "Full")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const pendingRevenue = bills.reduce(
+      (sum, bill) => sum + (bill.remainingAmount || 0),
+      0,
+    );
+    const uniqueCustomers = new Set(bills.map((bill) => bill.customerPhone))
+      .size;
 
     // Calculate sales by type
-    const gstSales = bills.filter(bill => bill.billType === "GST")
-                          .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const nonGstSales = bills.filter(bill => bill.billType === "Non-GST")
-                             .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
-    const quotationSales = bills.filter(bill => bill.billType === "Quotation")
-                                .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const gstSales = bills
+      .filter((bill) => bill.billType === "GST")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const nonGstSales = bills
+      .filter((bill) => bill.billType === "Non-GST")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const quotationSales = bills
+      .filter((bill) => bill.billType === "Quotation")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
 
     // Get recent bills (last 5)
     const recentBills = bills
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
       .slice(0, 5);
 
     return {
       todayStats: {
-        sales: { amount: todayRevenue, transactions: todayTransactions, change: 0 },
+        sales: {
+          amount: todayRevenue,
+          transactions: todayTransactions,
+          change: 0,
+        },
         customers: { total: todayCustomers, unique: todayCustomers, change: 0 },
         returnSales: { amount: 0, count: 0, change: 0 }, // Will need to track return sales separately
       },
@@ -142,23 +171,25 @@ export default function Dashboard() {
         nonGstSales,
         quotationSales,
         totalSales: totalRevenue,
-      }
+      },
     };
   };
 
   const stats = calculateStats();
 
   const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN')}`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
   const formatTime = (date: Date | string) => {
     const now = new Date();
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    const diffInMinutes = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60));
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    const diffInMinutes = Math.floor(
+      (now.getTime() - dateObj.getTime()) / (1000 * 60),
+    );
 
     if (diffInMinutes < 1) {
-      return 'Just now';
+      return "Just now";
     } else if (diffInMinutes < 60) {
       return `${diffInMinutes}m ago`;
     } else if (diffInMinutes < 1440) {
@@ -199,8 +230,12 @@ export default function Dashboard() {
       {/* Header with Notifications */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Business Dashboard</h2>
-          <p className="text-muted-foreground">Monitor your business performance and key metrics</p>
+          <h2 className="text-3xl font-bold text-foreground">
+            Business Dashboard
+          </h2>
+          <p className="text-muted-foreground">
+            Monitor your business performance and key metrics
+          </p>
         </div>
         <div className="relative" ref={notificationRef}>
           <Button
@@ -228,19 +263,23 @@ export default function Dashboard() {
                     key={notification.id}
                     className={cn(
                       "p-4 border-b hover:bg-muted/50 transition-colors",
-                      !notification.read && "bg-primary/5"
+                      !notification.read && "bg-primary/5",
                     )}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        getSeverityColor(notification.severity)
-                      )}>
+                      <div
+                        className={cn(
+                          "p-2 rounded-full",
+                          getSeverityColor(notification.severity),
+                        )}
+                      >
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm">{notification.title}</h4>
+                          <h4 className="font-medium text-sm">
+                            {notification.title}
+                          </h4>
                           <span className="text-xs text-muted-foreground">
                             {formatTime(notification.timestamp)}
                           </span>
@@ -250,11 +289,19 @@ export default function Dashboard() {
                         </p>
                         {notification.actionRequired && (
                           <div className="flex gap-2 mt-2">
-                            <Button size="sm" variant="outline" className="text-xs">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            >
                               <CheckCircle className="h-3 w-3" />
                               Approve
                             </Button>
-                            <Button size="sm" variant="outline" className="text-xs">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            >
                               <X className="h-3 w-3" />
                               Deny
                             </Button>
@@ -272,7 +319,9 @@ export default function Dashboard() {
 
       {/* Today's Statistics */}
       <div>
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
+          Today's Performance
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
@@ -347,19 +396,30 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">
                 {stats.overallStats.totalRevenue > 0
-                  ? ((stats.overallStats.paidRevenue / stats.overallStats.totalRevenue) * 100).toFixed(1)
-                  : 0}%
+                  ? (
+                      (stats.overallStats.paidRevenue /
+                        stats.overallStats.totalRevenue) *
+                      100
+                    ).toFixed(1)
+                  : 0}
+                %
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <span className="text-muted-foreground">Payment success rate</span>
+                <span className="text-muted-foreground">
+                  Payment success rate
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                 <div
                   className="bg-purple-500 h-2 rounded-full"
                   style={{
-                    width: `${stats.overallStats.totalRevenue > 0
-                      ? (stats.overallStats.paidRevenue / stats.overallStats.totalRevenue) * 100
-                      : 0}%`
+                    width: `${
+                      stats.overallStats.totalRevenue > 0
+                        ? (stats.overallStats.paidRevenue /
+                            stats.overallStats.totalRevenue) *
+                          100
+                        : 0
+                    }%`,
                   }}
                 ></div>
               </div>
@@ -368,9 +428,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Overall Statistics */} 
+      {/* Overall Statistics */}
       <div>
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Overall Performance</h3>
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
+          Overall Performance
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
@@ -380,7 +442,9 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.overallStats.totalRevenue)}</div>
+              <div className="text-2xl font-bold">
+                {formatCurrency(stats.overallStats.totalRevenue)}
+              </div>
               <div className="flex items-center gap-1 text-sm">
                 <TrendingUp className="h-3 w-3 text-green-500" />
                 <span className="text-green-500">All time revenue</span>
@@ -396,7 +460,9 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.overallStats.totalCustomers}</div>
+              <div className="text-2xl font-bold">
+                {stats.overallStats.totalCustomers}
+              </div>
               <div className="flex items-center gap-1 text-sm">
                 <Users className="h-3 w-3 text-blue-500" />
                 <span className="text-blue-500">Unique customers</span>
@@ -412,7 +478,9 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.overallStats.totalTransactions}</div>
+              <div className="text-2xl font-bold">
+                {stats.overallStats.totalTransactions}
+              </div>
               <div className="flex items-center gap-1 text-sm">
                 <Receipt className="h-3 w-3 text-purple-500" />
                 <span className="text-purple-500">All transactions</span>
@@ -428,7 +496,9 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.overallStats.paidRevenue)}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(stats.overallStats.paidRevenue)}
+              </div>
               <div className="text-sm text-muted-foreground">
                 Collected payments
               </div>
@@ -456,7 +526,7 @@ export default function Dashboard() {
                     <div
                       className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
                       style={{
-                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.gstSales / stats.chartData.totalSales) * 100 : 0}%`
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.gstSales / stats.chartData.totalSales) * 100 : 0}%`,
                       }}
                     ></div>
                   </div>
@@ -473,7 +543,7 @@ export default function Dashboard() {
                     <div
                       className="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
                       style={{
-                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.nonGstSales / stats.chartData.totalSales) * 100 : 0}%`
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.nonGstSales / stats.chartData.totalSales) * 100 : 0}%`,
                       }}
                     ></div>
                   </div>
@@ -490,7 +560,7 @@ export default function Dashboard() {
                     <div
                       className="bg-gradient-to-r from-purple-400 to-purple-600 h-3 rounded-full"
                       style={{
-                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.quotationSales / stats.chartData.totalSales) * 100 : 0}%`
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.quotationSales / stats.chartData.totalSales) * 100 : 0}%`,
                       }}
                     ></div>
                   </div>
@@ -520,10 +590,11 @@ export default function Dashboard() {
                     <div className="text-lg font-bold">
                       {stats.chartData.totalSales > 1000000
                         ? `₹${(stats.chartData.totalSales / 100000).toFixed(1)}L`
-                        : formatCurrency(stats.chartData.totalSales)
-                      }
+                        : formatCurrency(stats.chartData.totalSales)}
                     </div>
-                    <div className="text-xs text-muted-foreground">Total Sales</div>
+                    <div className="text-xs text-muted-foreground">
+                      Total Sales
+                    </div>
                   </div>
                 </div>
               </div>
@@ -568,7 +639,9 @@ export default function Dashboard() {
             <div className="text-center py-8">
               <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No bills found</p>
-              <p className="text-sm text-muted-foreground">Create your first bill to see it here</p>
+              <p className="text-sm text-muted-foreground">
+                Create your first bill to see it here
+              </p>
             </div>
           ) : (
             stats.recentBills.map((bill) => {
@@ -580,25 +653,35 @@ export default function Dashboard() {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{bill.customerName || 'Unknown Customer'}</span>
+                      <span className="font-medium text-sm">
+                        {bill.customerName || "Unknown Customer"}
+                      </span>
                       <Badge
-                        variant={bill.billType === "GST" ? "default" : "secondary"}
+                        variant={
+                          bill.billType === "GST" ? "default" : "secondary"
+                        }
                         className="text-xs"
                       >
                         {bill.billType}
                       </Badge>
                       <Badge
-                        variant={bill.paymentType === "Full" ? "default" : "secondary"}
+                        variant={
+                          bill.paymentType === "Full" ? "default" : "secondary"
+                        }
                         className={cn(
                           "text-xs",
-                          bill.paymentType === "Full" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                          bill.paymentType === "Full"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800",
                         )}
                       >
                         {bill.paymentType === "Full" ? "Paid" : "Partial"}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>{bill.billNumber || `BILL-${bill.id.slice(-4)}`}</span>
+                      <span>
+                        {bill.billNumber || `BILL-${bill.id.slice(-4)}`}
+                      </span>
                       <span>{bill.items?.length || 0} items</span>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />

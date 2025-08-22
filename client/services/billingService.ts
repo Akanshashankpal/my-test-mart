@@ -6,31 +6,31 @@ const gstConfig = {
   DELHI: {
     names: ["delhi", "new delhi"],
     codes: ["110", "11"],
-    gst: 18
+    gst: 18,
   },
   MUMBAI: {
     names: ["mumbai", "maharashtra"],
     codes: ["400", "401", "402", "403"],
-    gst: 18
+    gst: 18,
   },
   BANGALORE: {
     names: ["bangalore", "bengaluru", "karnataka"],
     codes: ["560"],
-    gst: 18
+    gst: 18,
   },
   OTHER: {
     names: [],
     codes: [],
-    gst: 18
-  }
+    gst: 18,
+  },
 };
 
 // Calculate Bill function as provided
 function calculateBill(data: any) {
   // 1️⃣ Subtotal
   let subtotal = data.items.reduce(
-    (acc: number, item: any) => acc + (item.itemPrice * item.itemQuantity),
-    0
+    (acc: number, item: any) => acc + item.itemPrice * item.itemQuantity,
+    0,
   );
 
   // 2️⃣ Discount
@@ -44,7 +44,10 @@ function calculateBill(data: any) {
     const cfg = gstConfig[key];
 
     // Match by pincode prefix
-    if (data.pincode && cfg.codes.some(code => data.pincode.startsWith(code))) {
+    if (
+      data.pincode &&
+      cfg.codes.some((code) => data.pincode.startsWith(code))
+    ) {
       stateKey = key;
       break;
     }
@@ -52,7 +55,9 @@ function calculateBill(data: any) {
     // Match by state name in address
     if (
       data.customerAddress &&
-      cfg.names.some(name => data.customerAddress.toLowerCase().includes(name.toLowerCase()))
+      cfg.names.some((name) =>
+        data.customerAddress.toLowerCase().includes(name.toLowerCase()),
+      )
     ) {
       stateKey = key;
       break;
@@ -90,7 +95,7 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -105,19 +110,21 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
     }
 
     if (!response.ok) {
-      const errorMessage = responseData.message || `HTTP ${response.status}: ${response.statusText}`;
+      const errorMessage =
+        responseData.message ||
+        `HTTP ${response.status}: ${response.statusText}`;
       console.error(`API Error for ${endpoint}:`, {
         status: response.status,
         statusText: response.statusText,
-        data: responseData
+        data: responseData,
       });
       throw new Error(errorMessage);
     }
 
     return responseData;
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Network error: Unable to connect to server');
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error("Network error: Unable to connect to server");
     }
     throw error;
   }
@@ -138,12 +145,12 @@ export interface BillData {
   pincode?: string;
   items: BillItem[];
   discount?: number;
-  paymentType: 'Full' | 'Partial';
+  paymentType: "Full" | "Partial";
   paidAmount?: number;
-  paymentMethod: 'cash' | 'online' | 'mixed';
+  paymentMethod: "cash" | "online" | "mixed";
   observation?: string;
   termsAndConditions?: string;
-  billType: 'GST' | 'Non-GST' | 'Quotation';
+  billType: "GST" | "Non-GST" | "Quotation";
 }
 
 export interface Bill extends BillData {
@@ -176,8 +183,8 @@ export const billingService = {
       createdAt: new Date().toISOString(),
     };
 
-    const response = await apiCall('/api/newbill', {
-      method: 'POST',
+    const response = await apiCall("/api/newbill", {
+      method: "POST",
       body: JSON.stringify(billPayload),
     });
 
@@ -190,7 +197,7 @@ export const billingService = {
 
   // Get all bills
   async getAllBills(): Promise<Bill[]> {
-    const response = await apiCall('/getBills');
+    const response = await apiCall("/getBills");
 
     // Handle different response formats
     if (response && Array.isArray(response.data)) {
@@ -216,7 +223,9 @@ export const billingService = {
   // Update bill
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
     // Recalculate if items or discount changed
-    const calculations = billData.items ? calculateBill(billData as BillData) : {};
+    const calculations = billData.items
+      ? calculateBill(billData as BillData)
+      : {};
 
     const billPayload = {
       ...billData,
@@ -225,7 +234,7 @@ export const billingService = {
     };
 
     const response = await apiCall(`/updateBills/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(billPayload),
     });
 
@@ -239,7 +248,7 @@ export const billingService = {
   // Delete bill
   async deleteBill(id: string): Promise<void> {
     await apiCall(`/deleteBills/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 
@@ -247,11 +256,12 @@ export const billingService = {
   calculateBill,
 
   // Generate bill number
-  generateBillNumber(billType: string = 'GST'): string {
+  generateBillNumber(billType: string = "GST"): string {
     const timestamp = Date.now();
-    const prefix = billType === "GST" ? "GST" : billType === "Non-GST" ? "NGST" : "QUO";
+    const prefix =
+      billType === "GST" ? "GST" : billType === "Non-GST" ? "NGST" : "QUO";
     return `${prefix}/24/${timestamp.toString().slice(-6)}`;
-  }
+  },
 };
 
 export default billingService;

@@ -25,11 +25,11 @@ interface Bill {
   totalAmount: number;
   paidAmount: number;
   remainingAmount: number;
-  paymentType: 'Full' | 'Partial';
-  paymentMethod: 'cash' | 'online' | 'mixed';
+  paymentType: "Full" | "Partial";
+  paymentMethod: "cash" | "online" | "mixed";
   observation?: string;
   termsAndConditions?: string;
-  billType: 'GST' | 'Non-GST' | 'Quotation';
+  billType: "GST" | "Non-GST" | "Quotation";
   stateKey: string;
   createdAt: string;
   updatedAt?: string;
@@ -43,10 +43,12 @@ let billCounter = 1;
 export const createBill: RequestHandler = (req, res) => {
   try {
     const billData = req.body;
-    
+
     const newBill: Bill = {
       id: Date.now().toString(),
-      billNumber: billData.billNumber || `BILL/${new Date().getFullYear()}/${String(billCounter++).padStart(4, '0')}`,
+      billNumber:
+        billData.billNumber ||
+        `BILL/${new Date().getFullYear()}/${String(billCounter++).padStart(4, "0")}`,
       billDate: billData.billDate || new Date().toISOString(),
       ...billData,
       createdAt: new Date().toISOString(),
@@ -56,15 +58,15 @@ export const createBill: RequestHandler = (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Bill created successfully',
-      data: newBill
+      message: "Bill created successfully",
+      data: newBill,
     });
   } catch (error) {
-    console.error('Create bill error:', error);
+    console.error("Create bill error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error creating bill',
-      error: (error as Error).message
+      message: "Error creating bill",
+      error: (error as Error).message,
     });
   }
 };
@@ -74,14 +76,14 @@ export const getAllBills: RequestHandler = (req, res) => {
   try {
     res.json({
       success: true,
-      data: bills
+      data: bills,
     });
   } catch (error) {
-    console.error('Get bills error:', error);
+    console.error("Get bills error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching bills',
-      error: (error as Error).message
+      message: "Error fetching bills",
+      error: (error as Error).message,
     });
   }
 };
@@ -90,25 +92,25 @@ export const getAllBills: RequestHandler = (req, res) => {
 export const getBillById: RequestHandler = (req, res) => {
   try {
     const { id } = req.params;
-    const bill = bills.find(b => b.id === id);
+    const bill = bills.find((b) => b.id === id);
 
     if (!bill) {
       return res.status(404).json({
         success: false,
-        message: 'Bill not found'
+        message: "Bill not found",
       });
     }
 
     res.json({
       success: true,
-      data: bill
+      data: bill,
     });
   } catch (error) {
-    console.error('Get bill error:', error);
+    console.error("Get bill error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching bill',
-      error: (error as Error).message
+      message: "Error fetching bill",
+      error: (error as Error).message,
     });
   }
 };
@@ -118,33 +120,33 @@ export const updateBill: RequestHandler = (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    
-    const billIndex = bills.findIndex(b => b.id === id);
-    
+
+    const billIndex = bills.findIndex((b) => b.id === id);
+
     if (billIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: 'Bill not found'
+        message: "Bill not found",
       });
     }
 
     bills[billIndex] = {
       ...bills[billIndex],
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     res.json({
       success: true,
-      message: 'Bill updated successfully',
-      data: bills[billIndex]
+      message: "Bill updated successfully",
+      data: bills[billIndex],
     });
   } catch (error) {
-    console.error('Update bill error:', error);
+    console.error("Update bill error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error updating bill',
-      error: (error as Error).message
+      message: "Error updating bill",
+      error: (error as Error).message,
     });
   }
 };
@@ -153,12 +155,12 @@ export const updateBill: RequestHandler = (req, res) => {
 export const deleteBill: RequestHandler = (req, res) => {
   try {
     const { id } = req.params;
-    const billIndex = bills.findIndex(b => b.id === id);
-    
+    const billIndex = bills.findIndex((b) => b.id === id);
+
     if (billIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: 'Bill not found'
+        message: "Bill not found",
       });
     }
 
@@ -166,14 +168,14 @@ export const deleteBill: RequestHandler = (req, res) => {
 
     res.json({
       success: true,
-      message: 'Bill deleted successfully'
+      message: "Bill deleted successfully",
     });
   } catch (error) {
-    console.error('Delete bill error:', error);
+    console.error("Delete bill error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting bill',
-      error: (error as Error).message
+      message: "Error deleting bill",
+      error: (error as Error).message,
     });
   }
 };
