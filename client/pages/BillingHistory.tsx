@@ -811,7 +811,15 @@ export default function BillingHistory() {
                   <Download className="h-4 w-4" />
                   Download PDF
                 </Button>
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (selectedBill) {
+                      openEditDialog(selectedBill);
+                      setSelectedBill(null); // Close the details dialog
+                    }
+                  }}
+                >
                   <Edit2 className="h-4 w-4" />
                   Edit
                 </Button>
