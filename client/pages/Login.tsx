@@ -30,10 +30,6 @@ export default function Login() {
     }
   };
 
-  const demoCredentials = [
-    { email: 'admin@electromart.com', password: 'admin123', role: 'Admin' },
-    { email: 'manager@electromart.com', password: 'manager123', role: 'Manager' },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center p-4">
@@ -79,7 +75,7 @@ export default function Login() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin@electromart.com"
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 h-11"
@@ -155,44 +151,6 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        {/* Demo Credentials */}
-        <Card className="shadow-lg border-green-200 bg-green-50/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-green-800">Demo Credentials</CardTitle>
-            <CardDescription className="text-green-700">
-              Use these credentials to test the application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {demoCredentials.map((cred, index) => (
-              <div 
-                key={index}
-                className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200 cursor-pointer hover:bg-green-50 transition-colors"
-                onClick={() => {
-                  setEmail(cred.email);
-                  setPassword(cred.password);
-                }}
-              >
-                <div>
-                  <p className="font-medium text-green-800">{cred.role}</p>
-                  <p className="text-sm text-green-600">{cred.email}</p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-green-600 hover:text-green-700 hover:bg-green-100"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEmail(cred.email);
-                    setPassword(cred.password);
-                  }}
-                >
-                  Use
-                </Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-600">
