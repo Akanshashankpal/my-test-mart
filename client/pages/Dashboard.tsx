@@ -262,15 +262,14 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(todayStats.sales.amount)}
+                {formatCurrency(stats.todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
                 <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.sales.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
+                <span className="text-green-500">Real-time data</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.sales.transactions} transactions
+                {stats.todayStats.sales.transactions} transactions today
               </div>
             </CardContent>
           </Card>
@@ -284,37 +283,14 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
-                {todayStats.customers.new + todayStats.customers.returning}
+                {stats.todayStats.customers.total}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.customers.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
+                <Users className="h-3 w-3 text-blue-500" />
+                <span className="text-blue-500">Unique customers</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.customers.new} new, {todayStats.customers.returning} returning
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-red-600" />
-                Today Return Sale
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(todayStats.returnSales.amount)}
-              </div>
-              <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingDown className="h-3 w-3 text-red-500" />
-                <span className="text-red-500">{todayStats.returnSales.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.returnSales.count} return transactions
+                {stats.todayStats.customers.total} served today
               </div>
             </CardContent>
           </Card>
@@ -322,17 +298,49 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-orange-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-orange-600" />
-                Daily Target
+                <Receipt className="h-4 w-4 text-orange-600" />
+                Pending Amount
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">78%</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {formatCurrency(stats.overallStats.pendingRevenue)}
+              </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <span className="text-muted-foreground">₹30,000 target</span>
+                <TrendingDown className="h-3 w-3 text-orange-500" />
+                <span className="text-orange-500">Outstanding</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                From partial payments
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Target className="h-4 w-4 text-purple-600" />
+                Collection Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">
+                {stats.overallStats.totalRevenue > 0
+                  ? ((stats.overallStats.paidRevenue / stats.overallStats.totalRevenue) * 100).toFixed(1)
+                  : 0}%
+              </div>
+              <div className="flex items-center gap-1 text-sm mt-2">
+                <span className="text-muted-foreground">Payment success rate</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-orange-500 h-2 rounded-full" style={{ width: "78%" }}></div>
+                <div
+                  className="bg-purple-500 h-2 rounded-full"
+                  style={{
+                    width: `${stats.overallStats.totalRevenue > 0
+                      ? (stats.overallStats.paidRevenue / stats.overallStats.totalRevenue) * 100
+                      : 0}%`
+                  }}
+                ></div>
               </div>
             </CardContent>
           </Card>
