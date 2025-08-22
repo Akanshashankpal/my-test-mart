@@ -80,7 +80,7 @@ interface Invoice {
 }
 
 export default function SimpleBilling() {
-  const { addBill, bills } = useBilling();
+  const { addBill, bills, isLoading, error, deleteBill } = useBilling();
   const { user } = useAuth();
   const { products } = useProducts();
   const { toast } = useToast();
