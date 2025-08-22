@@ -914,17 +914,54 @@ export default function EnhancedBilling() {
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Add Product</DialogTitle>
+            <DialogTitle>Add or Create Product</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search products by name or category..."
-                value={searchProduct}
-                onChange={(e) => setSearchProduct(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search products by name or category..."
+                  value={searchProduct}
+                  onChange={(e) => setSearchProduct(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  // Add new product functionality
+                  const name = prompt('Enter product name:');
+                  const priceStr = prompt('Enter price (₹):');
+                  const unit = prompt('Enter unit (e.g., pcs, kg, meter):') || 'pcs';
+                  const gstRateStr = prompt('Enter GST rate (%):') || '18';
+                  const category = prompt('Enter category:') || 'General';
+
+                  if (name && priceStr) {
+                    const price = parseFloat(priceStr);
+                    const gstRate = parseFloat(gstRateStr);
+
+                    if (!isNaN(price) && !isNaN(gstRate)) {
+                      const newProduct = {
+                        id: Date.now().toString(),
+                        name,
+                        price,
+                        unit,
+                        gstRate,
+                        category,
+                        stock: 100
+                      };
+
+                      setProducts(prev => [...prev, newProduct]);
+                      setSelectedProduct(newProduct);
+                      setCustomRate(price);
+                    }
+                  }
+                }}
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Product
+              </Button>
             </div>
             
             {selectedProduct ? (
