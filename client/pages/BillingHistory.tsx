@@ -821,6 +821,169 @@ export default function BillingHistory() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Bill Dialog */}
+      <Dialog open={!!editBill} onOpenChange={() => setEditBill(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Bill - {editBill?.billNumber}</DialogTitle>
+          </DialogHeader>
+          {editBill && (
+            <div className="space-y-6">
+              {/* Customer Information */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Customer Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-customerName">Customer Name *</Label>
+                    <Input
+                      id="edit-customerName"
+                      value={editFormData.customerName}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, customerName: e.target.value }))}
+                      placeholder="Enter customer name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-customerPhone">Phone Number *</Label>
+                    <Input
+                      id="edit-customerPhone"
+                      value={editFormData.customerPhone}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, customerPhone: e.target.value }))}
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="edit-customerAddress">Address</Label>
+                  <Input
+                    id="edit-customerAddress"
+                    value={editFormData.customerAddress}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, customerAddress: e.target.value }))}
+                    placeholder="Enter customer address"
+                  />
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Payment Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-paymentType">Payment Type</Label>
+                    <Select
+                      value={editFormData.paymentType}
+                      onValueChange={(value: "Full" | "Partial") =>
+                        setEditFormData(prev => ({ ...prev, paymentType: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Full">Full Payment</SelectItem>
+                        <SelectItem value="Partial">Partial Payment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-paymentMethod">Payment Method</Label>
+                    <Select
+                      value={editFormData.paymentMethod}
+                      onValueChange={(value: "cash" | "online" | "mixed") =>
+                        setEditFormData(prev => ({ ...prev, paymentMethod: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="online">Online</SelectItem>
+                        <SelectItem value="mixed">Mixed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {editFormData.paymentType === "Partial" && (
+                  <div>
+                    <Label htmlFor="edit-paidAmount">Paid Amount (₹)</Label>
+                    <Input
+                      id="edit-paidAmount"
+                      type="number"
+                      min="0"
+                      max={editBill?.totalAmount || 0}
+                      value={editFormData.paidAmount}
+                      onChange={(e) => setEditFormData(prev => ({
+                        ...prev,
+                        paidAmount: parseFloat(e.target.value) || 0
+                      }))}
+                      placeholder="Enter paid amount"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Information */}
+              <div className="space-y-4">
+                <h4 className="font-semibold">Additional Information</h4>
+                <div>
+                  <Label htmlFor="edit-observation">Observation</Label>
+                  <textarea
+                    id="edit-observation"
+                    value={editFormData.observation}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, observation: e.target.value }))}
+                    placeholder="Add any notes or observations..."
+                    className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Bill Summary (Read-only) */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Bill Summary</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>{formatCurrency(editBill.subtotal)}</span>
+                  </div>
+                  {(editBill.discountAmount || 0) > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount:</span>
+                      <span>-{formatCurrency(editBill.discountAmount)}</span>
+                    </div>
+                  )}
+                  {(editBill.gstAmount || 0) > 0 && (
+                    <div className="flex justify-between">
+                      <span>GST ({editBill.gstPercent}%):</span>
+                      <span>{formatCurrency(editBill.gstAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold border-t pt-2">
+                    <span>Total Amount:</span>
+                    <span>{formatCurrency(editBill.totalAmount)}</span>
+                  </div>
+                  {editFormData.paymentType === "Partial" && (
+                    <div className="flex justify-between text-red-600">
+                      <span>Remaining:</span>
+                      <span>{formatCurrency((editBill.totalAmount || 0) - editFormData.paidAmount)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button onClick={() => setEditBill(null)} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateBill} className="flex-1 bg-green-600 hover:bg-green-700">
+                  Update Bill
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteBillId} onOpenChange={() => setDeleteBillId(null)}>
         <AlertDialogContent>
