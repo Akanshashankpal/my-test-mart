@@ -21,20 +21,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
   Users,
   Phone,
   MapPin,
   ShoppingBag,
   History,
   Calendar,
-  Eye
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { customersAPI } from "@/lib/api";
 
 interface Customer {
   id: string;
