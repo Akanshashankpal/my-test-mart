@@ -83,6 +83,7 @@ export default function SimpleBilling() {
   const { addBill, bills } = useBilling();
   const { user } = useAuth();
   const { products } = useProducts();
+  const { toast } = useToast();
   
   // Current workflow state
   const [currentStep, setCurrentStep] = useState<"customer" | "invoice" | "list">("list");
@@ -269,7 +270,11 @@ export default function SimpleBilling() {
   // Save invoice
   const saveInvoice = () => {
     if (currentInvoice.items.length === 0) {
-      alert("Please add at least one item to the invoice");
+      toast({
+        title: "Empty Invoice",
+        description: "Please add at least one item to the invoice",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -309,7 +314,11 @@ export default function SimpleBilling() {
     
     addBill(billToSave);
     setCurrentStep("list");
-    alert("Invoice saved successfully!");
+    toast({
+      title: "Success",
+      description: "Invoice saved successfully!",
+      variant: "default"
+    });
   };
   
   // Download PDF
@@ -506,7 +515,11 @@ export default function SimpleBilling() {
       doc.save(filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+      toast({
+        title: "PDF Generation Failed",
+        description: "Error generating PDF. Please try again.",
+        variant: "destructive"
+      });
     }
   };
   
