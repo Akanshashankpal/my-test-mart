@@ -219,6 +219,47 @@ export default function BillingHistory() {
     setDeleteBillId(null);
   };
 
+  const openEditDialog = (bill: Bill) => {
+    setEditBill(bill);
+    setEditFormData({
+      customerName: bill.customerName || "",
+      customerPhone: bill.customerPhone || "",
+      customerAddress: bill.customerAddress || "",
+      paymentType: bill.paymentType || "Full",
+      paymentMethod: bill.paymentMethod || "cash",
+      paidAmount: bill.paidAmount || 0,
+      observation: bill.observation || "",
+    });
+  };
+
+  const handleUpdateBill = async () => {
+    if (!editBill) return;
+
+    const updates = {
+      customerName: editFormData.customerName,
+      customerPhone: editFormData.customerPhone,
+      customerAddress: editFormData.customerAddress,
+      paymentType: editFormData.paymentType,
+      paymentMethod: editFormData.paymentMethod,
+      paidAmount: editFormData.paidAmount,
+      observation: editFormData.observation,
+    };
+
+    const success = await updateBill(editBill.id, updates);
+    if (success) {
+      setEditBill(null);
+      setEditFormData({
+        customerName: "",
+        customerPhone: "",
+        customerAddress: "",
+        paymentType: "Full",
+        paymentMethod: "cash",
+        paidAmount: 0,
+        observation: "",
+      });
+    }
+  };
+
   const downloadBillPDF = async (bill: Bill) => {
     try {
       // Dynamic import of jsPDF
