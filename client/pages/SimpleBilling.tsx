@@ -177,7 +177,8 @@ export default function SimpleBilling() {
   // Start new invoice
   const startNewInvoice = () => {
     setCustomer({ name: "", phone: "", address: "" });
-    setCurrentStep("customer");
+    setCreateStep(1);
+    setCurrentStep("create");
   };
   
   // Create invoice from customer details
