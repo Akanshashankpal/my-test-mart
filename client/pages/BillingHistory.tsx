@@ -707,10 +707,10 @@ export default function BillingHistory() {
                   <tbody>
                     {selectedBill.items.map((item, index) => (
                       <tr key={index} className="border-t">
-                        <td className="p-3">{item.productName}</td>
-                        <td className="p-3 text-right">{item.quantity}</td>
-                        <td className="p-3 text-right">{formatCurrency(item.rate)}</td>
-                        <td className="p-3 text-right">{formatCurrency(item.totalAmount)}</td>
+                        <td className="p-3">{item.itemName}</td>
+                        <td className="p-3 text-right">{item.itemQuantity}</td>
+                        <td className="p-3 text-right">{formatCurrency(item.itemPrice)}</td>
+                        <td className="p-3 text-right">{formatCurrency(item.itemPrice * item.itemQuantity)}</td>
                       </tr>
                     ))}
                   </tbody>
