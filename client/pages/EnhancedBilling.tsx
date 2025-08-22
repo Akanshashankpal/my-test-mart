@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useBilling } from "@/contexts/BillingContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProducts } from "@/contexts/ProductContext";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -82,6 +83,7 @@ interface Invoice {
 
 export default function EnhancedBilling() {
   const { addBill } = useBilling();
+  const { toast } = useToast();
   const { user } = useAuth();
   const { products, updateStock } = useProducts();
   const [billingMode, setBillingMode] = useState<"GST" | "Non-GST" | "Demo" | null>(null);
@@ -342,7 +344,11 @@ export default function EnhancedBilling() {
 
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+      toast({
+        title: "PDF Generation Failed",
+        description: "Error generating PDF. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
