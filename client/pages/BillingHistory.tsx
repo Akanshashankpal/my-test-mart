@@ -316,110 +316,228 @@ export default function BillingHistory() {
       const { default: jsPDF } = await import('jspdf');
 
       const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Company Header
-      doc.setFontSize(20);
+      // Color scheme
+      const primaryColor = [46, 125, 50]; // Green
+      const secondaryColor = [76, 175, 80]; // Light Green
+      const accentColor = [27, 94, 32]; // Dark Green
+      const lightGray = [245, 245, 245];
+      const darkGray = [66, 66, 66];
+
+      // Header Background
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, pageWidth, 40, 'F');
+
+      // Company Name
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
-      doc.text('ElectroMart', 105, 20, { align: 'center' });
+      doc.text('SAVERA ELECTRONIC', pageWidth / 2, 20, { align: 'center' });
 
-      doc.setFontSize(16);
-      doc.text('INVOICE', 105, 30, { align: 'center' });
-
-      // Invoice details
+      // Tagline
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Invoice No: ${bill.billNumber}`, 20, 45);
-      doc.text(`Date: ${formatDate(bill.billDate || bill.createdAt)}`, 20, 52);
-      doc.text(`Mode: ${bill.billType} Billing`, 20, 59);
+      doc.text('Quality Electronics & Professional Service', pageWidth / 2, 28, { align: 'center' });
 
-      // Customer Info
+      // Invoice Title
+      doc.setTextColor(...accentColor);
+      doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
-      doc.text('Bill To:', 20, 75);
+      doc.text('INVOICE', pageWidth / 2, 50, { align: 'center' });
+
+      // Invoice Details Box
+      doc.setFillColor(...lightGray);
+      doc.roundedRect(15, 60, 80, 35, 3, 3, 'F');
+
+      doc.setTextColor(...darkGray);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Invoice Details:', 20, 70);
+
       doc.setFont('helvetica', 'normal');
-      doc.text(bill.customerName, 20, 82);
-      doc.text(`Phone: ${bill.customerPhone}`, 20, 89);
-      if (bill.customerAddress) {
-        doc.text(`Address: ${bill.customerAddress}`, 20, 96);
-      }
+      doc.setFontSize(10);
+      doc.text(`Invoice No: ${bill.billNumber}`, 20, 77);
+      doc.text(`Date: ${formatDate(bill.billDate || bill.createdAt)}`, 20, 84);
+      doc.text(`Type: ${bill.billType} Billing`, 20, 91);
 
-      // Table Headers
-      let yPos = 115;
+      // Customer Details Box
+      doc.setFillColor(...lightGray);
+      doc.roundedRect(110, 60, 80, 35, 3, 3, 'F');
+
+      doc.setTextColor(...darkGray);
+      doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text('Item', 20, yPos);
-      doc.text('Qty', 80, yPos);
-      doc.text('Rate (₹)', 100, yPos);
-      if (bill.billType === 'GST') {
-        doc.text('GST%', 130, yPos);
-        doc.text('GST Amt (₹)', 150, yPos);
-        doc.text('Total (₹)', 175, yPos);
-      } else {
-        doc.text('Total (₹)', 150, yPos);
+      doc.text('Bill To:', 115, 70);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(bill.customerName, 115, 77);
+      doc.text(`Phone: ${bill.customerPhone}`, 115, 84);
+      if (bill.customerAddress) {
+        const addressLines = bill.customerAddress.match(/.{1,30}/g) || [bill.customerAddress];
+        doc.text(addressLines[0], 115, 91);
       }
 
-      // Draw line under headers
-      doc.line(20, yPos + 2, 190, yPos + 2);
-      yPos += 10;
+      // Items Table Header
+      let yPos = 110;
+      doc.setFillColor(...secondaryColor);
+      doc.rect(15, yPos, 175, 15, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+
+      // Table headers based on bill type
+      if (bill.billType === 'GST') {
+        doc.text('Item Description', 20, yPos + 10);
+        doc.text('Qty', 100, yPos + 10, { align: 'center' });
+        doc.text('Rate (₹)', 120, yPos + 10, { align: 'center' });
+        doc.text('GST%', 140, yPos + 10, { align: 'center' });
+        doc.text('GST Amt (₹)', 160, yPos + 10, { align: 'center' });
+        doc.text('Total (₹)', 180, yPos + 10, { align: 'right' });
+      } else {
+        doc.text('Item Description', 20, yPos + 10);
+        doc.text('Qty', 110, yPos + 10, { align: 'center' });
+        doc.text('Rate (₹)', 140, yPos + 10, { align: 'center' });
+        doc.text('Total (₹)', 180, yPos + 10, { align: 'right' });
+      }
+
+      yPos += 20;
 
       // Items
+      doc.setTextColor(...darkGray);
       doc.setFont('helvetica', 'normal');
-      bill.items.forEach(item => {
-        doc.text(item.itemName.substring(0, 25), 20, yPos);
-        doc.text(item.itemQuantity.toString(), 80, yPos);
-        doc.text(item.itemPrice.toLocaleString(), 100, yPos);
-        if (bill.billType === 'GST') {
-          doc.text(`${bill.gstPercent}%`, 130, yPos);
-          doc.text((item.itemPrice * item.itemQuantity * bill.gstPercent / 100).toLocaleString(), 150, yPos);
-          doc.text((item.itemPrice * item.itemQuantity * (1 + bill.gstPercent / 100)).toLocaleString(), 175, yPos);
-        } else {
-          doc.text((item.itemPrice * item.itemQuantity).toLocaleString(), 150, yPos);
+      doc.setFontSize(10);
+
+      bill.items.forEach((item, index) => {
+        // Alternating row colors
+        if (index % 2 === 0) {
+          doc.setFillColor(250, 250, 250);
+          doc.rect(15, yPos - 5, 175, 12, 'F');
         }
-        yPos += 8;
+
+        const itemTotal = item.itemPrice * item.itemQuantity;
+
+        if (bill.billType === 'GST') {
+          const gstAmount = (itemTotal * bill.gstPercent) / 100;
+          const totalWithGst = itemTotal + gstAmount;
+
+          doc.text(item.itemName.substring(0, 35), 20, yPos);
+          doc.text(item.itemQuantity.toString(), 100, yPos, { align: 'center' });
+          doc.text(`₹${item.itemPrice.toLocaleString()}`, 120, yPos, { align: 'center' });
+          doc.text(`${bill.gstPercent}%`, 140, yPos, { align: 'center' });
+          doc.text(`₹${gstAmount.toLocaleString()}`, 160, yPos, { align: 'center' });
+          doc.text(`₹${totalWithGst.toLocaleString()}`, 180, yPos, { align: 'right' });
+        } else {
+          doc.text(item.itemName.substring(0, 45), 20, yPos);
+          doc.text(item.itemQuantity.toString(), 110, yPos, { align: 'center' });
+          doc.text(`₹${item.itemPrice.toLocaleString()}`, 140, yPos, { align: 'center' });
+          doc.text(`₹${itemTotal.toLocaleString()}`, 180, yPos, { align: 'right' });
+        }
+
+        yPos += 12;
       });
 
-      // Totals section
-      yPos += 10;
-      doc.line(100, yPos, 190, yPos);
+      // Table border
+      doc.setDrawColor(...primaryColor);
+      doc.setLineWidth(1);
+      doc.rect(15, 110, 175, yPos - 110);
+
+      // Totals Section
+      yPos += 15;
+      const totalsStartX = 120;
+
+      // Totals box background
+      doc.setFillColor(...lightGray);
+      doc.roundedRect(totalsStartX - 5, yPos - 5, 70, 55, 3, 3, 'F');
+
+      doc.setTextColor(...darkGray);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+
+      // Subtotal
+      doc.text('Subtotal:', totalsStartX, yPos);
+      doc.text(`₹${bill.subtotal.toLocaleString()}`, 185, yPos, { align: 'right' });
       yPos += 8;
 
-      doc.text('Subtotal:', 130, yPos);
-      doc.text(`₹${bill.subtotal.toLocaleString()}`, 175, yPos);
-      yPos += 6;
-
+      // Discount
       if (bill.discountAmount > 0) {
-        doc.text(`Discount:`, 130, yPos);
-        doc.text(`-₹${bill.discountAmount.toLocaleString()}`, 175, yPos);
-        yPos += 6;
-      }
-
-      if (bill.billType === 'GST' && bill.gstAmount > 0) {
-        doc.text('CGST (9%):', 130, yPos);
-        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 175, yPos);
-        yPos += 6;
-
-        doc.text('SGST (9%):', 130, yPos);
-        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 175, yPos);
-        yPos += 6;
-
-        doc.text('Total GST:', 130, yPos);
-        doc.text(`₹${bill.gstAmount.toLocaleString()}`, 175, yPos);
+        doc.setTextColor(220, 38, 127); // Pink for discount
+        doc.text('Discount:', totalsStartX, yPos);
+        doc.text(`-₹${bill.discountAmount.toLocaleString()}`, 185, yPos, { align: 'right' });
+        doc.setTextColor(...darkGray);
         yPos += 8;
       }
 
-      // Final total
-      doc.line(130, yPos, 190, yPos);
-      yPos += 6;
+      // GST breakdown
+      if (bill.billType === 'GST' && bill.gstAmount > 0) {
+        doc.text('CGST (9%):', totalsStartX, yPos);
+        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 185, yPos, { align: 'right' });
+        yPos += 6;
+
+        doc.text('SGST (9%):', totalsStartX, yPos);
+        doc.text(`₹${(bill.gstAmount / 2).toLocaleString()}`, 185, yPos, { align: 'right' });
+        yPos += 6;
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Total GST:', totalsStartX, yPos);
+        doc.text(`₹${bill.gstAmount.toLocaleString()}`, 185, yPos, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        yPos += 10;
+      }
+
+      // Final Amount
+      doc.setFillColor(...primaryColor);
+      doc.roundedRect(totalsStartX - 5, yPos - 3, 70, 12, 3, 3, 'F');
+
+      doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
-      doc.text('Final Amount:', 130, yPos);
-      doc.text(`₹${bill.totalAmount.toLocaleString()}`, 175, yPos);
+      doc.text('Final Amount:', totalsStartX, yPos + 5);
+      doc.text(`₹${bill.totalAmount.toLocaleString()}`, 185, yPos + 5, { align: 'right' });
+
+      // Payment Status
+      yPos += 20;
+      if (bill.paymentType === "Full") {
+        doc.setFillColor(76, 175, 80); // Green
+        doc.setTextColor(255, 255, 255);
+        doc.roundedRect(15, yPos, 50, 10, 2, 2, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PAID', 40, yPos + 7, { align: 'center' });
+      } else {
+        doc.setFillColor(255, 152, 0); // Orange
+        doc.setTextColor(255, 255, 255);
+        doc.roundedRect(15, yPos, 50, 10, 2, 2, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PENDING', 40, yPos + 7, { align: 'center' });
+
+        if (bill.remainingAmount > 0) {
+          doc.setTextColor(...darkGray);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Remaining: ₹${bill.remainingAmount.toLocaleString()}`, 70, yPos + 7);
+        }
+      }
 
       // Footer
-      doc.setFontSize(8);
+      yPos = pageHeight - 30;
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, yPos, pageWidth, 30, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Thank you for your business!', pageWidth / 2, yPos + 15, { align: 'center' });
+
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text('Thank you for your business!', 105, 280, { align: 'center' });
+      doc.text('Savera Electronic - Your trusted electronics partner', pageWidth / 2, yPos + 22, { align: 'center' });
 
       // Save the PDF
-      doc.save(`Invoice_${bill.billNumber}.pdf`);
+      doc.save(`Savera_Electronic_Invoice_${bill.billNumber}.pdf`);
 
     } catch (error) {
       console.error('Error generating PDF:', error);
