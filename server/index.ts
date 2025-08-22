@@ -2,6 +2,13 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import {
+  createBill,
+  getAllBills,
+  getBillById,
+  updateBill,
+  deleteBill
+} from "./routes/billing";
 
 export function createServer() {
   const app = express();
@@ -18,6 +25,13 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Billing API routes
+  app.post("/api/newbill", createBill);
+  app.get("/getBills", getAllBills);
+  app.get("/getBillsbyid/:id", getBillById);
+  app.put("/updateBills/:id", updateBill);
+  app.delete("/deleteBills/:id", deleteBill);
 
   return app;
 }
