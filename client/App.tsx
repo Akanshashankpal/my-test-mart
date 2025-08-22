@@ -52,6 +52,8 @@ const AppContent = () => {
             <Route path="/billing" element={<SimpleBilling />} />
             <Route path="/enhanced-billing" element={<EnhancedBilling />} />
             <Route path="/billing-history" element={<BillingHistory />} />
+            <Route path="/enhanced-billing-history" element={<EnhancedBillingHistory />} />
+            <Route path="/sales-returns" element={<SalesReturn />} />
             <Route path="/products" element={<Products />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/users" element={<UserManagement />} />
