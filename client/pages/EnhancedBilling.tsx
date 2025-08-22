@@ -513,7 +513,10 @@ export default function EnhancedBilling() {
                         <p className="text-gray-600">{bill.customer.email}</p>
                       )}
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => setIsCustomerDialogOpen(true)}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      setBill(prev => ({ ...prev, customer: { id: '', name: '', phone: '', address: '', state: 'Karnataka', stateCode: '29' } }));
+                      setSearchCustomer('');
+                    }}>
                       <Edit className="h-4 w-4 mr-2" />
                       Change
                     </Button>
@@ -527,14 +530,106 @@ export default function EnhancedBilling() {
                   </div>
                 </div>
               ) : (
-                <Button 
-                  variant="outline" 
-                  className="w-full h-20 border-dashed"
-                  onClick={() => setIsCustomerDialogOpen(true)}
-                >
-                  <User className="h-6 w-6 mr-2" />
-                  Select Customer
-                </Button>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Type customer name or phone to search, or type new name to create..."
+                      value={searchCustomer}
+                      onChange={(e) => setSearchCustomer(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+
+                  {/* Customer search results */}
+                  {searchCustomer && (
+                    <div className="max-h-40 overflow-y-auto border rounded-lg bg-white">
+                      {filteredCustomers.length > 0 ? (
+                        <div className="space-y-1 p-2">
+                          {filteredCustomers.slice(0, 3).map((customer) => (
+                            <div
+                              key={customer.id}
+                              className="p-2 border rounded cursor-pointer hover:bg-gray-50"
+                              onClick={() => selectCustomer(customer)}
+                            >
+                              <div className="font-medium text-sm">{customer.name}</div>
+                              <div className="text-xs text-gray-600">{customer.phone}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-3 text-center">
+                          <p className="text-sm text-gray-500 mb-2">No customer found</p>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              const phone = prompt('Enter phone number:');
+                              const address = prompt('Enter address:');
+                              const state = prompt('Enter state:') || 'Karnataka';
+
+                              if (phone && address) {
+                                const newCustomer = {
+                                  id: Date.now().toString(),
+                                  name: searchCustomer,
+                                  phone,
+                                  address,
+                                  email: '',
+                                  state,
+                                  status: 'active' as const
+                                };
+
+                                setCustomers(prev => [...prev, newCustomer]);
+                                selectCustomer(newCustomer);
+                                setSearchCustomer('');
+                              }
+                            }}
+                            className="w-full"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Create "{searchCustomer}" as new customer
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setIsCustomerDialogOpen(true)}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Browse All Customers
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const name = prompt('Enter customer name:');
+                        const phone = prompt('Enter phone number:');
+                        const address = prompt('Enter address:');
+                        const state = prompt('Enter state:') || 'Karnataka';
+
+                        if (name && phone && address) {
+                          const newCustomer = {
+                            id: Date.now().toString(),
+                            name,
+                            phone,
+                            address,
+                            email: '',
+                            state,
+                            status: 'active' as const
+                          };
+
+                          setCustomers(prev => [...prev, newCustomer]);
+                          selectCustomer(newCustomer);
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
