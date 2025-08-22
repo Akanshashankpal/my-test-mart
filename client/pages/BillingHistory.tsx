@@ -660,12 +660,12 @@ export default function BillingHistory() {
                     </div>
                     <div className="flex justify-between">
                       <span>Date:</span>
-                      <span className="font-medium">{formatDate(selectedBill.billDate)}</span>
+                      <span className="font-medium">{formatDate(selectedBill.billDate || selectedBill.createdAt)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Status:</span>
-                      <Badge className={cn("text-xs", getStatusBadge(selectedBill.status))}>
-                        {selectedBill.status}
+                      <span>Payment:</span>
+                      <Badge className={cn("text-xs", getPaymentBadge(selectedBill.paymentType === "Full" ? "paid" : "pending"))}>
+                        {selectedBill.paymentType === "Full" ? "Paid" : "Pending"}
                       </Badge>
                     </div>
                   </div>
@@ -676,16 +676,16 @@ export default function BillingHistory() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Name:</span>
-                      <span className="font-medium">{selectedBill.customer.name}</span>
+                      <span className="font-medium">{selectedBill.customerName}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Phone:</span>
-                      <span className="font-medium">{selectedBill.customer.phone}</span>
+                      <span className="font-medium">{selectedBill.customerPhone}</span>
                     </div>
-                    {selectedBill.customer.email && (
+                    {selectedBill.customerAddress && (
                       <div className="flex justify-between">
-                        <span>Email:</span>
-                        <span className="font-medium">{selectedBill.customer.email}</span>
+                        <span>Address:</span>
+                        <span className="font-medium">{selectedBill.customerAddress}</span>
                       </div>
                     )}
                   </div>
