@@ -1,30 +1,25 @@
-import { useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+import { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,8 +29,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 import {
   Building2,
   Save,
@@ -70,9 +65,9 @@ import {
   Moon,
   Zap,
   AlertCircle,
-  CheckCircle
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  CheckCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Types
 interface CompanyProfile {
@@ -98,7 +93,7 @@ interface CompanyProfile {
     ifscCode: string;
     bankName: string;
     branch: string;
-    accountType: 'Savings' | 'Current' | 'Overdraft';
+    accountType: "Savings" | "Current" | "Overdraft";
   };
   socialMedia: {
     facebook: string;
@@ -109,7 +104,7 @@ interface CompanyProfile {
 }
 
 interface UserPreferences {
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   language: string;
   timezone: string;
   dateFormat: string;
@@ -128,12 +123,12 @@ interface UserPreferences {
     compactMode: boolean;
     showAnimations: boolean;
     highContrast: boolean;
-    fontSize: 'small' | 'medium' | 'large';
+    fontSize: "small" | "medium" | "large";
   };
 }
 
 interface BillingSettings {
-  defaultBillType: 'GST' | 'Non-GST';
+  defaultBillType: "GST" | "Non-GST";
   autoGenerateBillNumbers: boolean;
   billNumberPrefix: string;
   billNumberSuffix: string;
@@ -161,7 +156,7 @@ interface SecuritySettings {
   loginNotifications: boolean;
   dataBackup: {
     enabled: boolean;
-    frequency: 'daily' | 'weekly' | 'monthly';
+    frequency: "daily" | "weekly" | "monthly";
     retention: number;
   };
   apiAccess: {
@@ -173,61 +168,88 @@ interface SecuritySettings {
 
 // State codes mapping
 const stateCodes: { [key: string]: string } = {
-  'Andhra Pradesh': '37', 'Arunachal Pradesh': '12', 'Assam': '18', 'Bihar': '10',
-  'Chhattisgarh': '22', 'Goa': '30', 'Gujarat': '24', 'Haryana': '06',
-  'Himachal Pradesh': '02', 'Jharkhand': '20', 'Karnataka': '29', 'Kerala': '32',
-  'Madhya Pradesh': '23', 'Maharashtra': '27', 'Manipur': '14', 'Meghalaya': '17',
-  'Mizoram': '15', 'Nagaland': '13', 'Odisha': '21', 'Punjab': '03',
-  'Rajasthan': '08', 'Sikkim': '11', 'Tamil Nadu': '33', 'Telangana': '36',
-  'Tripura': '16', 'Uttar Pradesh': '09', 'Uttarakhand': '05', 'West Bengal': '19',
-  'Delhi': '07', 'Jammu and Kashmir': '01', 'Ladakh': '02', 'Lakshadweep': '31',
-  'Puducherry': '34', 'Andaman and Nicobar Islands': '35', 'Chandigarh': '04',
-  'Dadra and Nagar Haveli and Daman and Diu': '26'
+  "Andhra Pradesh": "37",
+  "Arunachal Pradesh": "12",
+  Assam: "18",
+  Bihar: "10",
+  Chhattisgarh: "22",
+  Goa: "30",
+  Gujarat: "24",
+  Haryana: "06",
+  "Himachal Pradesh": "02",
+  Jharkhand: "20",
+  Karnataka: "29",
+  Kerala: "32",
+  "Madhya Pradesh": "23",
+  Maharashtra: "27",
+  Manipur: "14",
+  Meghalaya: "17",
+  Mizoram: "15",
+  Nagaland: "13",
+  Odisha: "21",
+  Punjab: "03",
+  Rajasthan: "08",
+  Sikkim: "11",
+  "Tamil Nadu": "33",
+  Telangana: "36",
+  Tripura: "16",
+  "Uttar Pradesh": "09",
+  Uttarakhand: "05",
+  "West Bengal": "19",
+  Delhi: "07",
+  "Jammu and Kashmir": "01",
+  Ladakh: "02",
+  Lakshadweep: "31",
+  Puducherry: "34",
+  "Andaman and Nicobar Islands": "35",
+  Chandigarh: "04",
+  "Dadra and Nagar Haveli and Daman and Diu": "26",
 };
 
 const indianStates = Object.keys(stateCodes);
 
 // Mock data
 const defaultCompanyProfile: CompanyProfile = {
-  name: 'ElectroMart Pvt Ltd',
-  address: '123 Business Park, Electronic City',
-  city: 'Bangalore',
-  state: 'Karnataka',
-  stateCode: '29',
-  pincode: '560100',
-  country: 'India',
-  gstNumber: '29ABCDE1234F1Z5',
-  panNumber: 'ABCDE1234F',
-  phone: '+91 80 2345 6789',
-  email: 'info@electromart.com',
-  website: 'www.electromart.com',
+  name: "ElectroMart Pvt Ltd",
+  address: "123 Business Park, Electronic City",
+  city: "Bangalore",
+  state: "Karnataka",
+  stateCode: "29",
+  pincode: "560100",
+  country: "India",
+  gstNumber: "29ABCDE1234F1Z5",
+  panNumber: "ABCDE1234F",
+  phone: "+91 80 2345 6789",
+  email: "info@electromart.com",
+  website: "www.electromart.com",
   logo: null,
-  description: 'Leading electronics retailer providing quality products and excellent customer service.',
-  establishedYear: '2015',
-  registrationNumber: 'CIN123456789',
+  description:
+    "Leading electronics retailer providing quality products and excellent customer service.",
+  establishedYear: "2015",
+  registrationNumber: "CIN123456789",
   bankAccount: {
-    accountNumber: '1234567890',
-    accountHolderName: 'ElectroMart Pvt Ltd',
-    ifscCode: 'HDFC0001234',
-    bankName: 'HDFC Bank',
-    branch: 'Electronic City',
-    accountType: 'Current'
+    accountNumber: "1234567890",
+    accountHolderName: "ElectroMart Pvt Ltd",
+    ifscCode: "HDFC0001234",
+    bankName: "HDFC Bank",
+    branch: "Electronic City",
+    accountType: "Current",
   },
   socialMedia: {
-    facebook: 'https://facebook.com/electromart',
-    twitter: 'https://twitter.com/electromart',
-    linkedin: 'https://linkedin.com/company/electromart',
-    instagram: 'https://instagram.com/electromart'
-  }
+    facebook: "https://facebook.com/electromart",
+    twitter: "https://twitter.com/electromart",
+    linkedin: "https://linkedin.com/company/electromart",
+    instagram: "https://instagram.com/electromart",
+  },
 };
 
 const defaultUserPreferences: UserPreferences = {
-  theme: 'light',
-  language: 'en',
-  timezone: 'Asia/Kolkata',
-  dateFormat: 'DD/MM/YYYY',
-  currencyFormat: 'INR',
-  numberFormat: 'en-IN',
+  theme: "light",
+  language: "en",
+  timezone: "Asia/Kolkata",
+  dateFormat: "DD/MM/YYYY",
+  currencyFormat: "INR",
+  numberFormat: "en-IN",
   notifications: {
     email: true,
     sms: false,
@@ -235,36 +257,36 @@ const defaultUserPreferences: UserPreferences = {
     billReminders: true,
     paymentAlerts: true,
     lowStockAlerts: true,
-    monthlyReports: false
+    monthlyReports: false,
   },
   display: {
     compactMode: false,
     showAnimations: true,
     highContrast: false,
-    fontSize: 'medium'
-  }
+    fontSize: "medium",
+  },
 };
 
 const defaultBillingSettings: BillingSettings = {
-  defaultBillType: 'GST',
+  defaultBillType: "GST",
   autoGenerateBillNumbers: true,
-  billNumberPrefix: 'GST/24/',
-  billNumberSuffix: '',
+  billNumberPrefix: "GST/24/",
+  billNumberSuffix: "",
   startingNumber: 1,
   taxSettings: {
     defaultGSTRate: 18,
     enableCess: false,
     cessRate: 0,
     enableTCS: false,
-    tcsRate: 0.1
+    tcsRate: 0.1,
   },
-  paymentTerms: 'Payment due within 30 days',
+  paymentTerms: "Payment due within 30 days",
   defaultDueDays: 30,
   lateFeePercentage: 2,
-  discountTerms: 'No discount applicable',
-  footerText: 'Thank you for your business!',
+  discountTerms: "No discount applicable",
+  footerText: "Thank you for your business!",
   includeQRCode: true,
-  includeBankDetails: true
+  includeBankDetails: true,
 };
 
 const defaultSecuritySettings: SecuritySettings = {
@@ -274,22 +296,30 @@ const defaultSecuritySettings: SecuritySettings = {
   loginNotifications: true,
   dataBackup: {
     enabled: true,
-    frequency: 'daily',
-    retention: 30
+    frequency: "daily",
+    retention: 30,
   },
   apiAccess: {
     enabled: false,
-    apiKey: 'sk_test_' + Math.random().toString(36).substring(2, 15),
-    lastRegenerated: new Date()
-  }
+    apiKey: "sk_test_" + Math.random().toString(36).substring(2, 15),
+    lastRegenerated: new Date(),
+  },
 };
 
 export default function Settings() {
-  const [companyProfile, setCompanyProfile] = useState<CompanyProfile>(defaultCompanyProfile);
-  const [userPreferences, setUserPreferences] = useState<UserPreferences>(defaultUserPreferences);
-  const [billingSettings, setBillingSettings] = useState<BillingSettings>(defaultBillingSettings);
-  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(defaultSecuritySettings);
-  const [activeTab, setActiveTab] = useState('company');
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile>(
+    defaultCompanyProfile,
+  );
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>(
+    defaultUserPreferences,
+  );
+  const [billingSettings, setBillingSettings] = useState<BillingSettings>(
+    defaultBillingSettings,
+  );
+  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(
+    defaultSecuritySettings,
+  );
+  const [activeTab, setActiveTab] = useState("company");
   const [isLoading, setIsLoading] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -301,15 +331,15 @@ export default function Settings() {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size should be less than 5MB');
+        alert("File size should be less than 5MB");
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        setCompanyProfile(prev => ({
+        setCompanyProfile((prev) => ({
           ...prev,
-          logo: e.target?.result as string
+          logo: e.target?.result as string,
         }));
         setUnsavedChanges(true);
       };
@@ -321,21 +351,21 @@ export default function Settings() {
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Here you would save to your backend
-      console.log('Saving settings:', {
+      console.log("Saving settings:", {
         companyProfile,
         userPreferences,
         billingSettings,
-        securitySettings
+        securitySettings,
       });
-      
+
       setUnsavedChanges(false);
-      alert('Settings saved successfully!');
+      alert("Settings saved successfully!");
     } catch (error) {
-      console.error('Error saving settings:', error);
-      alert('Error saving settings. Please try again.');
+      console.error("Error saving settings:", error);
+      alert("Error saving settings. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -351,14 +381,17 @@ export default function Settings() {
   };
 
   const generateNewApiKey = () => {
-    const newApiKey = 'sk_test_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    setSecuritySettings(prev => ({
+    const newApiKey =
+      "sk_test_" +
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+    setSecuritySettings((prev) => ({
       ...prev,
       apiAccess: {
         ...prev.apiAccess,
         apiKey: newApiKey,
-        lastRegenerated: new Date()
-      }
+        lastRegenerated: new Date(),
+      },
     }));
     setUnsavedChanges(true);
   };
@@ -378,17 +411,19 @@ export default function Settings() {
         ...securitySettings,
         apiAccess: {
           ...securitySettings.apiAccess,
-          apiKey: '[REDACTED]'
-        }
+          apiKey: "[REDACTED]",
+        },
       },
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
 
-    const blob = new Blob([JSON.stringify(settingsData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(settingsData, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `electromart_settings_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `electromart_settings_${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -400,8 +435,12 @@ export default function Settings() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-1">Manage your company profile and system preferences</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Settings
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Manage your company profile and system preferences
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={exportSettings}>
@@ -414,7 +453,7 @@ export default function Settings() {
           </Button>
           <Button onClick={handleSave} disabled={isLoading || !unsavedChanges}>
             <Save className="h-4 w-4 mr-2" />
-            {isLoading ? 'Saving...' : 'Save Changes'}
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
@@ -425,7 +464,9 @@ export default function Settings() {
           <CardContent className="py-3">
             <div className="flex items-center gap-2 text-orange-800">
               <AlertCircle className="h-4 w-4" />
-              <span className="text-sm">You have unsaved changes. Don't forget to save!</span>
+              <span className="text-sm">
+                You have unsaved changes. Don't forget to save!
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -471,7 +512,10 @@ export default function Settings() {
                       id="companyName"
                       value={companyProfile.name}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, name: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="Your company name"
@@ -483,7 +527,10 @@ export default function Settings() {
                       id="establishedYear"
                       value={companyProfile.establishedYear}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, establishedYear: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          establishedYear: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="2015"
@@ -497,7 +544,10 @@ export default function Settings() {
                     id="description"
                     value={companyProfile.description}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({ ...prev, description: e.target.value }));
+                      setCompanyProfile((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="Brief description of your company"
@@ -512,7 +562,10 @@ export default function Settings() {
                       id="gstNumber"
                       value={companyProfile.gstNumber}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, gstNumber: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          gstNumber: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="29ABCDE1234F1Z5"
@@ -524,7 +577,10 @@ export default function Settings() {
                       id="panNumber"
                       value={companyProfile.panNumber}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, panNumber: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          panNumber: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="ABCDE1234F"
@@ -533,12 +589,17 @@ export default function Settings() {
                 </div>
 
                 <div>
-                  <Label htmlFor="registrationNumber">Registration Number</Label>
+                  <Label htmlFor="registrationNumber">
+                    Registration Number
+                  </Label>
                   <Input
                     id="registrationNumber"
                     value={companyProfile.registrationNumber}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({ ...prev, registrationNumber: e.target.value }));
+                      setCompanyProfile((prev) => ({
+                        ...prev,
+                        registrationNumber: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="CIN or registration number"
@@ -567,11 +628,13 @@ export default function Settings() {
                     ) : (
                       <div className="text-center">
                         <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">No logo uploaded</p>
+                        <p className="text-sm text-gray-500">
+                          No logo uploaded
+                        </p>
                       </div>
                     )}
                   </div>
-                  
+
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -579,7 +642,7 @@ export default function Settings() {
                     onChange={handleLogoUpload}
                     className="hidden"
                   />
-                  
+
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -593,7 +656,10 @@ export default function Settings() {
                       <Button
                         variant="outline"
                         onClick={() => {
-                          setCompanyProfile(prev => ({ ...prev, logo: null }));
+                          setCompanyProfile((prev) => ({
+                            ...prev,
+                            logo: null,
+                          }));
                           setUnsavedChanges(true);
                         }}
                         className="text-sm"
@@ -603,9 +669,10 @@ export default function Settings() {
                       </Button>
                     )}
                   </div>
-                  
+
                   <p className="text-xs text-gray-500 text-center">
-                    Recommended: 300x300px, Max: 5MB<br />
+                    Recommended: 300x300px, Max: 5MB
+                    <br />
                     Formats: JPG, PNG, SVG
                   </p>
                 </div>
@@ -629,7 +696,10 @@ export default function Settings() {
                     id="phone"
                     value={companyProfile.phone}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({ ...prev, phone: e.target.value }));
+                      setCompanyProfile((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="+91 80 2345 6789"
@@ -642,7 +712,10 @@ export default function Settings() {
                     type="email"
                     value={companyProfile.email}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({ ...prev, email: e.target.value }));
+                      setCompanyProfile((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="info@company.com"
@@ -654,7 +727,10 @@ export default function Settings() {
                     id="website"
                     value={companyProfile.website}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({ ...prev, website: e.target.value }));
+                      setCompanyProfile((prev) => ({
+                        ...prev,
+                        website: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="www.company.com"
@@ -680,7 +756,10 @@ export default function Settings() {
                     id="address"
                     value={companyProfile.address}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({ ...prev, address: e.target.value }));
+                      setCompanyProfile((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="Complete address"
@@ -694,7 +773,10 @@ export default function Settings() {
                       id="city"
                       value={companyProfile.city}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, city: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          city: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="City name"
@@ -702,19 +784,22 @@ export default function Settings() {
                   </div>
                   <div>
                     <Label htmlFor="state">State *</Label>
-                    <Select value={companyProfile.state} onValueChange={(value) => {
-                      setCompanyProfile(prev => ({ 
-                        ...prev, 
-                        state: value,
-                        stateCode: stateCodes[value] || ''
-                      }));
-                      setUnsavedChanges(true);
-                    }}>
+                    <Select
+                      value={companyProfile.state}
+                      onValueChange={(value) => {
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          state: value,
+                          stateCode: stateCodes[value] || "",
+                        }));
+                        setUnsavedChanges(true);
+                      }}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent>
-                        {indianStates.map(state => (
+                        {indianStates.map((state) => (
                           <SelectItem key={state} value={state}>
                             {state}
                           </SelectItem>
@@ -728,7 +813,10 @@ export default function Settings() {
                       id="pincode"
                       value={companyProfile.pincode}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, pincode: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          pincode: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="560100"
@@ -742,7 +830,10 @@ export default function Settings() {
                       id="country"
                       value={companyProfile.country}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({ ...prev, country: e.target.value }));
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          country: e.target.value,
+                        }));
                         setUnsavedChanges(true);
                       }}
                       placeholder="India"
@@ -773,14 +864,19 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="accountHolderName">Account Holder Name</Label>
+                    <Label htmlFor="accountHolderName">
+                      Account Holder Name
+                    </Label>
                     <Input
                       id="accountHolderName"
                       value={companyProfile.bankAccount.accountHolderName}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({
+                        setCompanyProfile((prev) => ({
                           ...prev,
-                          bankAccount: { ...prev.bankAccount, accountHolderName: e.target.value }
+                          bankAccount: {
+                            ...prev.bankAccount,
+                            accountHolderName: e.target.value,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -793,9 +889,12 @@ export default function Settings() {
                       id="accountNumber"
                       value={companyProfile.bankAccount.accountNumber}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({
+                        setCompanyProfile((prev) => ({
                           ...prev,
-                          bankAccount: { ...prev.bankAccount, accountNumber: e.target.value }
+                          bankAccount: {
+                            ...prev.bankAccount,
+                            accountNumber: e.target.value,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -810,9 +909,12 @@ export default function Settings() {
                       id="ifscCode"
                       value={companyProfile.bankAccount.ifscCode}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({
+                        setCompanyProfile((prev) => ({
                           ...prev,
-                          bankAccount: { ...prev.bankAccount, ifscCode: e.target.value }
+                          bankAccount: {
+                            ...prev.bankAccount,
+                            ifscCode: e.target.value,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -825,9 +927,12 @@ export default function Settings() {
                       id="bankName"
                       value={companyProfile.bankAccount.bankName}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({
+                        setCompanyProfile((prev) => ({
                           ...prev,
-                          bankAccount: { ...prev.bankAccount, bankName: e.target.value }
+                          bankAccount: {
+                            ...prev.bankAccount,
+                            bankName: e.target.value,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -842,9 +947,12 @@ export default function Settings() {
                       id="branch"
                       value={companyProfile.bankAccount.branch}
                       onChange={(e) => {
-                        setCompanyProfile(prev => ({
+                        setCompanyProfile((prev) => ({
                           ...prev,
-                          bankAccount: { ...prev.bankAccount, branch: e.target.value }
+                          bankAccount: {
+                            ...prev.bankAccount,
+                            branch: e.target.value,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -853,13 +961,21 @@ export default function Settings() {
                   </div>
                   <div>
                     <Label htmlFor="accountType">Account Type</Label>
-                    <Select value={companyProfile.bankAccount.accountType} onValueChange={(value: 'Savings' | 'Current' | 'Overdraft') => {
-                      setCompanyProfile(prev => ({
-                        ...prev,
-                        bankAccount: { ...prev.bankAccount, accountType: value }
-                      }));
-                      setUnsavedChanges(true);
-                    }}>
+                    <Select
+                      value={companyProfile.bankAccount.accountType}
+                      onValueChange={(
+                        value: "Savings" | "Current" | "Overdraft",
+                      ) => {
+                        setCompanyProfile((prev) => ({
+                          ...prev,
+                          bankAccount: {
+                            ...prev.bankAccount,
+                            accountType: value,
+                          },
+                        }));
+                        setUnsavedChanges(true);
+                      }}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -891,9 +1007,12 @@ export default function Settings() {
                     id="facebook"
                     value={companyProfile.socialMedia.facebook}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({
+                      setCompanyProfile((prev) => ({
                         ...prev,
-                        socialMedia: { ...prev.socialMedia, facebook: e.target.value }
+                        socialMedia: {
+                          ...prev.socialMedia,
+                          facebook: e.target.value,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -906,9 +1025,12 @@ export default function Settings() {
                     id="twitter"
                     value={companyProfile.socialMedia.twitter}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({
+                      setCompanyProfile((prev) => ({
                         ...prev,
-                        socialMedia: { ...prev.socialMedia, twitter: e.target.value }
+                        socialMedia: {
+                          ...prev.socialMedia,
+                          twitter: e.target.value,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -921,9 +1043,12 @@ export default function Settings() {
                     id="linkedin"
                     value={companyProfile.socialMedia.linkedin}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({
+                      setCompanyProfile((prev) => ({
                         ...prev,
-                        socialMedia: { ...prev.socialMedia, linkedin: e.target.value }
+                        socialMedia: {
+                          ...prev.socialMedia,
+                          linkedin: e.target.value,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -936,9 +1061,12 @@ export default function Settings() {
                     id="instagram"
                     value={companyProfile.socialMedia.instagram}
                     onChange={(e) => {
-                      setCompanyProfile(prev => ({
+                      setCompanyProfile((prev) => ({
                         ...prev,
-                        socialMedia: { ...prev.socialMedia, instagram: e.target.value }
+                        socialMedia: {
+                          ...prev.socialMedia,
+                          instagram: e.target.value,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -964,10 +1092,16 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="defaultBillType">Default Bill Type</Label>
-                  <Select value={billingSettings.defaultBillType} onValueChange={(value: 'GST' | 'Non-GST') => {
-                    setBillingSettings(prev => ({ ...prev, defaultBillType: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={billingSettings.defaultBillType}
+                    onValueChange={(value: "GST" | "Non-GST") => {
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        defaultBillType: value,
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -982,11 +1116,16 @@ export default function Settings() {
                     id="autoGenerateBillNumbers"
                     checked={billingSettings.autoGenerateBillNumbers}
                     onCheckedChange={(checked) => {
-                      setBillingSettings(prev => ({ ...prev, autoGenerateBillNumbers: checked }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        autoGenerateBillNumbers: checked,
+                      }));
                       setUnsavedChanges(true);
                     }}
                   />
-                  <Label htmlFor="autoGenerateBillNumbers">Auto-generate bill numbers</Label>
+                  <Label htmlFor="autoGenerateBillNumbers">
+                    Auto-generate bill numbers
+                  </Label>
                 </div>
               </div>
 
@@ -997,7 +1136,10 @@ export default function Settings() {
                     id="billNumberPrefix"
                     value={billingSettings.billNumberPrefix}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({ ...prev, billNumberPrefix: e.target.value }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        billNumberPrefix: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="GST/24/"
@@ -1010,7 +1152,10 @@ export default function Settings() {
                     type="number"
                     value={billingSettings.startingNumber}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({ ...prev, startingNumber: Number(e.target.value) }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        startingNumber: Number(e.target.value),
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="1"
@@ -1022,7 +1167,10 @@ export default function Settings() {
                     id="billNumberSuffix"
                     value={billingSettings.billNumberSuffix}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({ ...prev, billNumberSuffix: e.target.value }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        billNumberSuffix: e.target.value,
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="Optional suffix"
@@ -1034,7 +1182,7 @@ export default function Settings() {
                 <Label className="text-sm font-medium">Preview:</Label>
                 <p className="text-sm text-gray-600 mt-1">
                   {billingSettings.billNumberPrefix}
-                  {String(billingSettings.startingNumber).padStart(4, '0')}
+                  {String(billingSettings.startingNumber).padStart(4, "0")}
                   {billingSettings.billNumberSuffix}
                 </p>
               </div>
@@ -1058,9 +1206,12 @@ export default function Settings() {
                     type="number"
                     value={billingSettings.taxSettings.defaultGSTRate}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({
+                      setBillingSettings((prev) => ({
                         ...prev,
-                        taxSettings: { ...prev.taxSettings, defaultGSTRate: Number(e.target.value) }
+                        taxSettings: {
+                          ...prev.taxSettings,
+                          defaultGSTRate: Number(e.target.value),
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1072,9 +1223,12 @@ export default function Settings() {
                     id="enableCess"
                     checked={billingSettings.taxSettings.enableCess}
                     onCheckedChange={(checked) => {
-                      setBillingSettings(prev => ({
+                      setBillingSettings((prev) => ({
                         ...prev,
-                        taxSettings: { ...prev.taxSettings, enableCess: checked }
+                        taxSettings: {
+                          ...prev.taxSettings,
+                          enableCess: checked,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1091,9 +1245,12 @@ export default function Settings() {
                     type="number"
                     value={billingSettings.taxSettings.cessRate}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({
+                      setBillingSettings((prev) => ({
                         ...prev,
-                        taxSettings: { ...prev.taxSettings, cessRate: Number(e.target.value) }
+                        taxSettings: {
+                          ...prev.taxSettings,
+                          cessRate: Number(e.target.value),
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1108,9 +1265,12 @@ export default function Settings() {
                     id="enableTCS"
                     checked={billingSettings.taxSettings.enableTCS}
                     onCheckedChange={(checked) => {
-                      setBillingSettings(prev => ({
+                      setBillingSettings((prev) => ({
                         ...prev,
-                        taxSettings: { ...prev.taxSettings, enableTCS: checked }
+                        taxSettings: {
+                          ...prev.taxSettings,
+                          enableTCS: checked,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1125,9 +1285,12 @@ export default function Settings() {
                       type="number"
                       value={billingSettings.taxSettings.tcsRate}
                       onChange={(e) => {
-                        setBillingSettings(prev => ({
+                        setBillingSettings((prev) => ({
                           ...prev,
-                          taxSettings: { ...prev.taxSettings, tcsRate: Number(e.target.value) }
+                          taxSettings: {
+                            ...prev.taxSettings,
+                            tcsRate: Number(e.target.value),
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -1157,7 +1320,10 @@ export default function Settings() {
                     type="number"
                     value={billingSettings.defaultDueDays}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({ ...prev, defaultDueDays: Number(e.target.value) }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        defaultDueDays: Number(e.target.value),
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="30"
@@ -1170,7 +1336,10 @@ export default function Settings() {
                     type="number"
                     value={billingSettings.lateFeePercentage}
                     onChange={(e) => {
-                      setBillingSettings(prev => ({ ...prev, lateFeePercentage: Number(e.target.value) }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        lateFeePercentage: Number(e.target.value),
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="2"
@@ -1185,7 +1354,10 @@ export default function Settings() {
                   id="paymentTerms"
                   value={billingSettings.paymentTerms}
                   onChange={(e) => {
-                    setBillingSettings(prev => ({ ...prev, paymentTerms: e.target.value }));
+                    setBillingSettings((prev) => ({
+                      ...prev,
+                      paymentTerms: e.target.value,
+                    }));
                     setUnsavedChanges(true);
                   }}
                   placeholder="Payment due within 30 days"
@@ -1199,7 +1371,10 @@ export default function Settings() {
                   id="discountTerms"
                   value={billingSettings.discountTerms}
                   onChange={(e) => {
-                    setBillingSettings(prev => ({ ...prev, discountTerms: e.target.value }));
+                    setBillingSettings((prev) => ({
+                      ...prev,
+                      discountTerms: e.target.value,
+                    }));
                     setUnsavedChanges(true);
                   }}
                   placeholder="No discount applicable"
@@ -1224,7 +1399,10 @@ export default function Settings() {
                   id="footerText"
                   value={billingSettings.footerText}
                   onChange={(e) => {
-                    setBillingSettings(prev => ({ ...prev, footerText: e.target.value }));
+                    setBillingSettings((prev) => ({
+                      ...prev,
+                      footerText: e.target.value,
+                    }));
                     setUnsavedChanges(true);
                   }}
                   placeholder="Thank you for your business!"
@@ -1238,22 +1416,32 @@ export default function Settings() {
                     id="includeQRCode"
                     checked={billingSettings.includeQRCode}
                     onCheckedChange={(checked) => {
-                      setBillingSettings(prev => ({ ...prev, includeQRCode: checked }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        includeQRCode: checked,
+                      }));
                       setUnsavedChanges(true);
                     }}
                   />
-                  <Label htmlFor="includeQRCode">Include QR Code for payments</Label>
+                  <Label htmlFor="includeQRCode">
+                    Include QR Code for payments
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="includeBankDetails"
                     checked={billingSettings.includeBankDetails}
                     onCheckedChange={(checked) => {
-                      setBillingSettings(prev => ({ ...prev, includeBankDetails: checked }));
+                      setBillingSettings((prev) => ({
+                        ...prev,
+                        includeBankDetails: checked,
+                      }));
                       setUnsavedChanges(true);
                     }}
                   />
-                  <Label htmlFor="includeBankDetails">Include bank details in invoice</Label>
+                  <Label htmlFor="includeBankDetails">
+                    Include bank details in invoice
+                  </Label>
                 </div>
               </div>
             </CardContent>
@@ -1274,10 +1462,13 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="theme">Theme</Label>
-                  <Select value={userPreferences.theme} onValueChange={(value: 'light' | 'dark' | 'system') => {
-                    setUserPreferences(prev => ({ ...prev, theme: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.theme}
+                    onValueChange={(value: "light" | "dark" | "system") => {
+                      setUserPreferences((prev) => ({ ...prev, theme: value }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1305,13 +1496,16 @@ export default function Settings() {
                 </div>
                 <div>
                   <Label htmlFor="fontSize">Font Size</Label>
-                  <Select value={userPreferences.display.fontSize} onValueChange={(value: 'small' | 'medium' | 'large') => {
-                    setUserPreferences(prev => ({
-                      ...prev,
-                      display: { ...prev.display, fontSize: value }
-                    }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.display.fontSize}
+                    onValueChange={(value: "small" | "medium" | "large") => {
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        display: { ...prev.display, fontSize: value },
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1330,9 +1524,9 @@ export default function Settings() {
                     id="compactMode"
                     checked={userPreferences.display.compactMode}
                     onCheckedChange={(checked) => {
-                      setUserPreferences(prev => ({
+                      setUserPreferences((prev) => ({
                         ...prev,
-                        display: { ...prev.display, compactMode: checked }
+                        display: { ...prev.display, compactMode: checked },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1344,9 +1538,9 @@ export default function Settings() {
                     id="showAnimations"
                     checked={userPreferences.display.showAnimations}
                     onCheckedChange={(checked) => {
-                      setUserPreferences(prev => ({
+                      setUserPreferences((prev) => ({
                         ...prev,
-                        display: { ...prev.display, showAnimations: checked }
+                        display: { ...prev.display, showAnimations: checked },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1358,9 +1552,9 @@ export default function Settings() {
                     id="highContrast"
                     checked={userPreferences.display.highContrast}
                     onCheckedChange={(checked) => {
-                      setUserPreferences(prev => ({
+                      setUserPreferences((prev) => ({
                         ...prev,
-                        display: { ...prev.display, highContrast: checked }
+                        display: { ...prev.display, highContrast: checked },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1383,10 +1577,16 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="language">Language</Label>
-                  <Select value={userPreferences.language} onValueChange={(value) => {
-                    setUserPreferences(prev => ({ ...prev, language: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.language}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        language: value,
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1401,18 +1601,32 @@ export default function Settings() {
                 </div>
                 <div>
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Select value={userPreferences.timezone} onValueChange={(value) => {
-                    setUserPreferences(prev => ({ ...prev, timezone: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.timezone}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        timezone: value,
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
-                      <SelectItem value="Asia/Dubai">Asia/Dubai (GST)</SelectItem>
-                      <SelectItem value="Europe/London">Europe/London (GMT)</SelectItem>
-                      <SelectItem value="America/New_York">America/New_York (EST)</SelectItem>
+                      <SelectItem value="Asia/Kolkata">
+                        Asia/Kolkata (IST)
+                      </SelectItem>
+                      <SelectItem value="Asia/Dubai">
+                        Asia/Dubai (GST)
+                      </SelectItem>
+                      <SelectItem value="Europe/London">
+                        Europe/London (GMT)
+                      </SelectItem>
+                      <SelectItem value="America/New_York">
+                        America/New_York (EST)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1421,10 +1635,16 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="dateFormat">Date Format</Label>
-                  <Select value={userPreferences.dateFormat} onValueChange={(value) => {
-                    setUserPreferences(prev => ({ ...prev, dateFormat: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.dateFormat}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        dateFormat: value,
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1437,10 +1657,16 @@ export default function Settings() {
                 </div>
                 <div>
                   <Label htmlFor="currencyFormat">Currency</Label>
-                  <Select value={userPreferences.currencyFormat} onValueChange={(value) => {
-                    setUserPreferences(prev => ({ ...prev, currencyFormat: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.currencyFormat}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        currencyFormat: value,
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1453,10 +1679,16 @@ export default function Settings() {
                 </div>
                 <div>
                   <Label htmlFor="numberFormat">Number Format</Label>
-                  <Select value={userPreferences.numberFormat} onValueChange={(value) => {
-                    setUserPreferences(prev => ({ ...prev, numberFormat: value }));
-                    setUnsavedChanges(true);
-                  }}>
+                  <Select
+                    value={userPreferences.numberFormat}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        numberFormat: value,
+                      }));
+                      setUnsavedChanges(true);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1483,16 +1715,23 @@ export default function Settings() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="emailNotifications">Email Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive notifications via email</p>
+                    <Label htmlFor="emailNotifications">
+                      Email Notifications
+                    </Label>
+                    <p className="text-sm text-gray-500">
+                      Receive notifications via email
+                    </p>
                   </div>
                   <Switch
                     id="emailNotifications"
                     checked={userPreferences.notifications.email}
                     onCheckedChange={(checked) => {
-                      setUserPreferences(prev => ({
+                      setUserPreferences((prev) => ({
                         ...prev,
-                        notifications: { ...prev.notifications, email: checked }
+                        notifications: {
+                          ...prev.notifications,
+                          email: checked,
+                        },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1501,15 +1740,17 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="smsNotifications">SMS Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive notifications via SMS</p>
+                    <p className="text-sm text-gray-500">
+                      Receive notifications via SMS
+                    </p>
                   </div>
                   <Switch
                     id="smsNotifications"
                     checked={userPreferences.notifications.sms}
                     onCheckedChange={(checked) => {
-                      setUserPreferences(prev => ({
+                      setUserPreferences((prev) => ({
                         ...prev,
-                        notifications: { ...prev.notifications, sms: checked }
+                        notifications: { ...prev.notifications, sms: checked },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1517,16 +1758,20 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="pushNotifications">Push Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive browser push notifications</p>
+                    <Label htmlFor="pushNotifications">
+                      Push Notifications
+                    </Label>
+                    <p className="text-sm text-gray-500">
+                      Receive browser push notifications
+                    </p>
                   </div>
                   <Switch
                     id="pushNotifications"
                     checked={userPreferences.notifications.push}
                     onCheckedChange={(checked) => {
-                      setUserPreferences(prev => ({
+                      setUserPreferences((prev) => ({
                         ...prev,
-                        notifications: { ...prev.notifications, push: checked }
+                        notifications: { ...prev.notifications, push: checked },
                       }));
                       setUnsavedChanges(true);
                     }}
@@ -1538,28 +1783,38 @@ export default function Settings() {
                 <h4 className="font-medium">Specific Notifications</h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="billReminders">Bill payment reminders</Label>
+                    <Label htmlFor="billReminders">
+                      Bill payment reminders
+                    </Label>
                     <Switch
                       id="billReminders"
                       checked={userPreferences.notifications.billReminders}
                       onCheckedChange={(checked) => {
-                        setUserPreferences(prev => ({
+                        setUserPreferences((prev) => ({
                           ...prev,
-                          notifications: { ...prev.notifications, billReminders: checked }
+                          notifications: {
+                            ...prev.notifications,
+                            billReminders: checked,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="paymentAlerts">Payment received alerts</Label>
+                    <Label htmlFor="paymentAlerts">
+                      Payment received alerts
+                    </Label>
                     <Switch
                       id="paymentAlerts"
                       checked={userPreferences.notifications.paymentAlerts}
                       onCheckedChange={(checked) => {
-                        setUserPreferences(prev => ({
+                        setUserPreferences((prev) => ({
                           ...prev,
-                          notifications: { ...prev.notifications, paymentAlerts: checked }
+                          notifications: {
+                            ...prev.notifications,
+                            paymentAlerts: checked,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -1571,9 +1826,12 @@ export default function Settings() {
                       id="lowStockAlerts"
                       checked={userPreferences.notifications.lowStockAlerts}
                       onCheckedChange={(checked) => {
-                        setUserPreferences(prev => ({
+                        setUserPreferences((prev) => ({
                           ...prev,
-                          notifications: { ...prev.notifications, lowStockAlerts: checked }
+                          notifications: {
+                            ...prev.notifications,
+                            lowStockAlerts: checked,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -1585,9 +1843,12 @@ export default function Settings() {
                       id="monthlyReports"
                       checked={userPreferences.notifications.monthlyReports}
                       onCheckedChange={(checked) => {
-                        setUserPreferences(prev => ({
+                        setUserPreferences((prev) => ({
                           ...prev,
-                          notifications: { ...prev.notifications, monthlyReports: checked }
+                          notifications: {
+                            ...prev.notifications,
+                            monthlyReports: checked,
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -1612,14 +1873,21 @@ export default function Settings() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="twoFactorAuth">Two-Factor Authentication</Label>
-                  <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
+                  <Label htmlFor="twoFactorAuth">
+                    Two-Factor Authentication
+                  </Label>
+                  <p className="text-sm text-gray-500">
+                    Add an extra layer of security to your account
+                  </p>
                 </div>
                 <Switch
                   id="twoFactorAuth"
                   checked={securitySettings.twoFactorAuth}
                   onCheckedChange={(checked) => {
-                    setSecuritySettings(prev => ({ ...prev, twoFactorAuth: checked }));
+                    setSecuritySettings((prev) => ({
+                      ...prev,
+                      twoFactorAuth: checked,
+                    }));
                     setUnsavedChanges(true);
                   }}
                 />
@@ -1627,13 +1895,18 @@ export default function Settings() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                  <Label htmlFor="sessionTimeout">
+                    Session Timeout (minutes)
+                  </Label>
                   <Input
                     id="sessionTimeout"
                     type="number"
                     value={securitySettings.sessionTimeout}
                     onChange={(e) => {
-                      setSecuritySettings(prev => ({ ...prev, sessionTimeout: Number(e.target.value) }));
+                      setSecuritySettings((prev) => ({
+                        ...prev,
+                        sessionTimeout: Number(e.target.value),
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="60"
@@ -1646,7 +1919,10 @@ export default function Settings() {
                     type="number"
                     value={securitySettings.passwordExpiry}
                     onChange={(e) => {
-                      setSecuritySettings(prev => ({ ...prev, passwordExpiry: Number(e.target.value) }));
+                      setSecuritySettings((prev) => ({
+                        ...prev,
+                        passwordExpiry: Number(e.target.value),
+                      }));
                       setUnsavedChanges(true);
                     }}
                     placeholder="90"
@@ -1656,14 +1932,21 @@ export default function Settings() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="loginNotifications">Login Notifications</Label>
-                  <p className="text-sm text-gray-500">Get notified when someone logs into your account</p>
+                  <Label htmlFor="loginNotifications">
+                    Login Notifications
+                  </Label>
+                  <p className="text-sm text-gray-500">
+                    Get notified when someone logs into your account
+                  </p>
                 </div>
                 <Switch
                   id="loginNotifications"
                   checked={securitySettings.loginNotifications}
                   onCheckedChange={(checked) => {
-                    setSecuritySettings(prev => ({ ...prev, loginNotifications: checked }));
+                    setSecuritySettings((prev) => ({
+                      ...prev,
+                      loginNotifications: checked,
+                    }));
                     setUnsavedChanges(true);
                   }}
                 />
@@ -1683,15 +1966,17 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="apiAccess">Enable API Access</Label>
-                  <p className="text-sm text-gray-500">Allow third-party applications to access your data</p>
+                  <p className="text-sm text-gray-500">
+                    Allow third-party applications to access your data
+                  </p>
                 </div>
                 <Switch
                   id="apiAccess"
                   checked={securitySettings.apiAccess.enabled}
                   onCheckedChange={(checked) => {
-                    setSecuritySettings(prev => ({
+                    setSecuritySettings((prev) => ({
                       ...prev,
-                      apiAccess: { ...prev.apiAccess, enabled: checked }
+                      apiAccess: { ...prev.apiAccess, enabled: checked },
                     }));
                     setUnsavedChanges(true);
                   }}
@@ -1704,7 +1989,7 @@ export default function Settings() {
                     <Label>API Key</Label>
                     <div className="flex items-center gap-2 mt-1">
                       <Input
-                        type={showApiKey ? 'text' : 'password'}
+                        type={showApiKey ? "text" : "password"}
                         value={securitySettings.apiAccess.apiKey}
                         readOnly
                         className="font-mono text-sm"
@@ -1714,14 +1999,18 @@ export default function Settings() {
                         size="sm"
                         onClick={() => setShowApiKey(!showApiKey)}
                       >
-                        {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showApiKey ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={copyApiKey}
-                      >
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      <Button variant="outline" size="sm" onClick={copyApiKey}>
+                        {copied ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -1730,7 +2019,9 @@ export default function Settings() {
                     <div>
                       <p className="text-sm font-medium">Last regenerated:</p>
                       <p className="text-sm text-gray-500">
-                        {securitySettings.apiAccess.lastRegenerated.toLocaleDateString('en-IN')}
+                        {securitySettings.apiAccess.lastRegenerated.toLocaleDateString(
+                          "en-IN",
+                        )}
                       </p>
                     </div>
                     <Button variant="outline" onClick={generateNewApiKey}>
@@ -1744,7 +2035,10 @@ export default function Settings() {
                       <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
                       <div className="text-sm text-yellow-800">
                         <p className="font-medium">Important:</p>
-                        <p>Keep your API key secret. Regenerating will invalidate the previous key.</p>
+                        <p>
+                          Keep your API key secret. Regenerating will invalidate
+                          the previous key.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1765,15 +2059,17 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="dataBackupEnabled">Automatic Backup</Label>
-                  <p className="text-sm text-gray-500">Automatically backup your data</p>
+                  <p className="text-sm text-gray-500">
+                    Automatically backup your data
+                  </p>
                 </div>
                 <Switch
                   id="dataBackupEnabled"
                   checked={securitySettings.dataBackup.enabled}
                   onCheckedChange={(checked) => {
-                    setSecuritySettings(prev => ({
+                    setSecuritySettings((prev) => ({
                       ...prev,
-                      dataBackup: { ...prev.dataBackup, enabled: checked }
+                      dataBackup: { ...prev.dataBackup, enabled: checked },
                     }));
                     setUnsavedChanges(true);
                   }}
@@ -1784,13 +2080,18 @@ export default function Settings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="backupFrequency">Backup Frequency</Label>
-                    <Select value={securitySettings.dataBackup.frequency} onValueChange={(value: 'daily' | 'weekly' | 'monthly') => {
-                      setSecuritySettings(prev => ({
-                        ...prev,
-                        dataBackup: { ...prev.dataBackup, frequency: value }
-                      }));
-                      setUnsavedChanges(true);
-                    }}>
+                    <Select
+                      value={securitySettings.dataBackup.frequency}
+                      onValueChange={(
+                        value: "daily" | "weekly" | "monthly",
+                      ) => {
+                        setSecuritySettings((prev) => ({
+                          ...prev,
+                          dataBackup: { ...prev.dataBackup, frequency: value },
+                        }));
+                        setUnsavedChanges(true);
+                      }}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1802,15 +2103,20 @@ export default function Settings() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="backupRetention">Retention Period (days)</Label>
+                    <Label htmlFor="backupRetention">
+                      Retention Period (days)
+                    </Label>
                     <Input
                       id="backupRetention"
                       type="number"
                       value={securitySettings.dataBackup.retention}
                       onChange={(e) => {
-                        setSecuritySettings(prev => ({
+                        setSecuritySettings((prev) => ({
                           ...prev,
-                          dataBackup: { ...prev.dataBackup, retention: Number(e.target.value) }
+                          dataBackup: {
+                            ...prev.dataBackup,
+                            retention: Number(e.target.value),
+                          },
                         }));
                         setUnsavedChanges(true);
                       }}
@@ -1837,12 +2143,16 @@ export default function Settings() {
           <AlertDialogHeader>
             <AlertDialogTitle>Reset All Settings</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to reset all settings to their default values? This action cannot be undone.
+              Are you sure you want to reset all settings to their default
+              values? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleReset} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={handleReset}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Reset Settings
             </AlertDialogAction>
           </AlertDialogFooter>

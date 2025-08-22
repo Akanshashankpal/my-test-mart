@@ -70,14 +70,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="lg:hidden"
         >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isMobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </Button>
       </div>
 
       {/* Mobile navigation overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50" onClick={closeMobileMenu}>
-          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={closeMobileMenu}
+        >
+          <div
+            className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex flex-col h-full">
               {/* Sidebar header */}
               <div className="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
@@ -85,7 +95,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Store className="h-5 w-5" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-lg text-gray-900">ElectroMart</h1>
+                  <h1 className="font-bold text-lg text-gray-900">
+                    ElectroMart
+                  </h1>
                   <p className="text-xs text-gray-600">Business Management</p>
                 </div>
               </div>
@@ -103,13 +115,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                         isActive
                           ? "bg-blue-50 text-blue-600"
-                          : "text-gray-700 hover:bg-gray-100"
+                          : "text-gray-700 hover:bg-gray-100",
                       )}
                     >
                       <item.icon
                         className={cn(
                           "h-5 w-5 flex-shrink-0",
-                          isActive ? "text-blue-600" : "text-gray-400"
+                          isActive ? "text-blue-600" : "text-gray-400",
                         )}
                       />
                       {item.name}
@@ -131,7 +143,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {user?.name}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {user?.email}
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -154,8 +168,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Sidebar header */}
           <div className="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
             <div className="bg-blue-600 text-white p-2 rounded-lg">
-            <Store className="h-5 w-5" />
-          </div>
+              <Store className="h-5 w-5" />
+            </div>
             <div>
               <h1 className="font-bold text-lg text-gray-900">ElectroMart</h1>
               <p className="text-xs text-gray-500">Business Management</p>
@@ -174,13 +188,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
                     isActive
                       ? "bg-blue-50 text-blue-600 shadow-sm"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
                   )}
                 >
                   <item.icon
                     className={cn(
                       "h-5 w-5 flex-shrink-0",
-                      isActive ? "text-blue-600" : "text-gray-400"
+                      isActive ? "text-blue-600" : "text-gray-400",
                     )}
                   />
                   {item.name}
@@ -215,8 +229,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="bg-white border-b border-gray-200 px-3 sm:px-4 lg:px-6 py-3 lg:py-2 fixed top-0 right-0 left-0 lg:left-64 z-40">
           <div className="flex items-center justify-between">
             <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 truncate pr-2">
-              {navigation.find((item) => item.href === location.pathname)?.name ||
-                "Dashboard"}
+              {navigation.find((item) => item.href === location.pathname)
+                ?.name || "Dashboard"}
             </h1>
 
             {/* Profile dropdown */}
@@ -269,9 +283,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main area with smooth scroll */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth mt-16 px-2 sm:px-4 lg:px-6 py-2 sm:py-4 pb-24 lg:pb-4">
-          <div className="max-w-full">
-            {children}
-          </div>
+          <div className="max-w-full">{children}</div>
         </main>
 
         {/* Bottom navigation for mobile */}
@@ -287,11 +299,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     "flex flex-col items-center gap-0.5 py-1.5 px-1 sm:px-2 rounded-lg transition-colors min-w-0 flex-1",
                     isActive
                       ? "text-blue-600 bg-blue-50"
-                      : "text-gray-500 hover:text-gray-700"
+                      : "text-gray-500 hover:text-gray-700",
                   )}
                 >
                   <item.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                  <span className="text-xs font-medium truncate max-w-full">{item.name}</span>
+                  <span className="text-xs font-medium truncate max-w-full">
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}

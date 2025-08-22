@@ -1,20 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart3,
   TrendingUp,
@@ -46,9 +41,9 @@ import {
   Phone,
   Mail,
   MapPin,
-  Filter
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  Filter,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Types
 interface DashboardMetrics {
@@ -74,11 +69,15 @@ interface DashboardMetrics {
 
 interface RecentActivity {
   id: string;
-  type: 'bill_created' | 'payment_received' | 'customer_added' | 'product_added';
+  type:
+    | "bill_created"
+    | "payment_received"
+    | "customer_added"
+    | "product_added";
   description: string;
   amount?: number;
   time: Date;
-  status: 'success' | 'warning' | 'info';
+  status: "success" | "warning" | "info";
 }
 
 interface TopCustomer {
@@ -131,152 +130,152 @@ const mockMetrics: DashboardMetrics = {
   nonGstBills: 45,
   quotations: 10,
   overduePayments: 45000,
-  partialPayments: 65000
+  partialPayments: 65000,
 };
 
 const mockRecentActivity: RecentActivity[] = [
   {
-    id: '1',
-    type: 'bill_created',
-    description: 'New bill created for John Doe - GST/24/0156',
+    id: "1",
+    type: "bill_created",
+    description: "New bill created for John Doe - GST/24/0156",
     amount: 129999,
     time: new Date(Date.now() - 1000 * 60 * 15),
-    status: 'success'
+    status: "success",
   },
   {
-    id: '2',
-    type: 'payment_received',
-    description: 'Payment received from Sarah Smith via UPI',
+    id: "2",
+    type: "payment_received",
+    description: "Payment received from Sarah Smith via UPI",
     amount: 85000,
     time: new Date(Date.now() - 1000 * 60 * 45),
-    status: 'success'
+    status: "success",
   },
   {
-    id: '3',
-    type: 'customer_added',
-    description: 'New customer registered - Rajesh Kumar',
+    id: "3",
+    type: "customer_added",
+    description: "New customer registered - Rajesh Kumar",
     time: new Date(Date.now() - 1000 * 60 * 120),
-    status: 'info'
+    status: "info",
   },
   {
-    id: '4',
-    type: 'bill_created',
-    description: 'Quotation created for bulk order - QUO/24/0023',
+    id: "4",
+    type: "bill_created",
+    description: "Quotation created for bulk order - QUO/24/0023",
     amount: 456000,
     time: new Date(Date.now() - 1000 * 60 * 180),
-    status: 'info'
+    status: "info",
   },
   {
-    id: '5',
-    type: 'payment_received',
-    description: 'Partial payment received from Mike Johnson',
+    id: "5",
+    type: "payment_received",
+    description: "Partial payment received from Mike Johnson",
     amount: 50000,
     time: new Date(Date.now() - 1000 * 60 * 240),
-    status: 'warning'
-  }
+    status: "warning",
+  },
 ];
 
 const mockTopCustomers: TopCustomer[] = [
   {
-    id: '1',
-    name: 'John Doe',
-    phone: '+91 9876543210',
+    id: "1",
+    name: "John Doe",
+    phone: "+91 9876543210",
     totalSpent: 485000,
     billsCount: 8,
-    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2)
+    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
   },
   {
-    id: '2',
-    name: 'Sarah Smith',
-    phone: '+91 9876543211',
+    id: "2",
+    name: "Sarah Smith",
+    phone: "+91 9876543211",
     totalSpent: 320000,
     billsCount: 12,
-    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1)
+    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1),
   },
   {
-    id: '3',
-    name: 'Rajesh Kumar',
-    phone: '+91 9876543212',
+    id: "3",
+    name: "Rajesh Kumar",
+    phone: "+91 9876543212",
     totalSpent: 275000,
     billsCount: 6,
-    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5)
+    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
   },
   {
-    id: '4',
-    name: 'Priya Sharma',
-    phone: '+91 9876543213',
+    id: "4",
+    name: "Priya Sharma",
+    phone: "+91 9876543213",
     totalSpent: 195000,
     billsCount: 4,
-    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3)
+    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
   },
   {
-    id: '5',
-    name: 'Mike Johnson',
-    phone: '+91 9876543214',
+    id: "5",
+    name: "Mike Johnson",
+    phone: "+91 9876543214",
     totalSpent: 145000,
     billsCount: 3,
-    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)
-  }
+    lastBillDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
+  },
 ];
 
 const mockTopProducts: TopProduct[] = [
   {
-    id: '1',
-    name: 'iPhone 15 Pro',
-    category: 'Mobile',
+    id: "1",
+    name: "iPhone 15 Pro",
+    category: "Mobile",
     quantitySold: 45,
     revenue: 5849955,
-    profitMargin: 18.5
+    profitMargin: 18.5,
   },
   {
-    id: '2',
-    name: 'Samsung Galaxy S24',
-    category: 'Mobile',
+    id: "2",
+    name: "Samsung Galaxy S24",
+    category: "Mobile",
     quantitySold: 38,
     revenue: 3799962,
-    profitMargin: 16.2
+    profitMargin: 16.2,
   },
   {
-    id: '3',
-    name: 'Dell Laptop i5',
-    category: 'Computer',
+    id: "3",
+    name: "Dell Laptop i5",
+    category: "Computer",
     quantitySold: 25,
     revenue: 1649975,
-    profitMargin: 22.8
+    profitMargin: 22.8,
   },
   {
-    id: '4',
-    name: 'LG 1.5 Ton Split AC',
-    category: 'Appliances',
+    id: "4",
+    name: "LG 1.5 Ton Split AC",
+    category: "Appliances",
     quantitySold: 18,
     revenue: 827982,
-    profitMargin: 28.5
+    profitMargin: 28.5,
   },
   {
-    id: '5',
-    name: 'AirPods Pro',
-    category: 'Accessories',
+    id: "5",
+    name: "AirPods Pro",
+    category: "Accessories",
     quantitySold: 67,
     revenue: 1674933,
-    profitMargin: 35.2
-  }
+    profitMargin: 35.2,
+  },
 ];
 
 const mockMonthlyData: MonthlyData[] = [
-  { month: 'Jul 2024', revenue: 980000, bills: 65, customers: 18 },
-  { month: 'Aug 2024', revenue: 1120000, bills: 72, customers: 22 },
-  { month: 'Sep 2024', revenue: 1290000, bills: 78, customers: 19 },
-  { month: 'Oct 2024', revenue: 1350000, bills: 82, customers: 25 },
-  { month: 'Nov 2024', revenue: 1420000, bills: 86, customers: 21 },
-  { month: 'Dec 2024', revenue: 1250000, bills: 89, customers: 23 }
+  { month: "Jul 2024", revenue: 980000, bills: 65, customers: 18 },
+  { month: "Aug 2024", revenue: 1120000, bills: 72, customers: 22 },
+  { month: "Sep 2024", revenue: 1290000, bills: 78, customers: 19 },
+  { month: "Oct 2024", revenue: 1350000, bills: 82, customers: 25 },
+  { month: "Nov 2024", revenue: 1420000, bills: 86, customers: 21 },
+  { month: "Dec 2024", revenue: 1250000, bills: 89, customers: 23 },
 ];
 
 const mockPaymentMethods: PaymentMethod[] = [
-  { method: 'UPI', amount: 520000, percentage: 41.6 },
-  { method: 'Cash', amount: 385000, percentage: 30.8 },
-  { method: 'Card', amount: 245000, percentage: 19.6 },
-  { method: 'Bank Transfer', amount: 75000, percentage: 6.0 },
-  { method: 'Cheque', amount: 25000, percentage: 2.0 }
+  { method: "UPI", amount: 520000, percentage: 41.6 },
+  { method: "Cash", amount: 385000, percentage: 30.8 },
+  { method: "Card", amount: 245000, percentage: 19.6 },
+  { method: "Bank Transfer", amount: 75000, percentage: 6.0 },
+  { method: "Cheque", amount: 25000, percentage: 2.0 },
 ];
 
 export default function EnhancedDashboard() {
@@ -286,11 +285,11 @@ export default function EnhancedDashboard() {
   const [topProducts] = useState<TopProduct[]>(mockTopProducts);
   const [monthlyData] = useState<MonthlyData[]>(mockMonthlyData);
   const [paymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods);
-  const [selectedPeriod, setSelectedPeriod] = useState('7d');
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const [selectedPeriod, setSelectedPeriod] = useState("7d");
+  const [selectedTab, setSelectedTab] = useState("overview");
 
   const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN')}`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
   const formatNumber = (num: number) => {
@@ -301,7 +300,7 @@ export default function EnhancedDashboard() {
     } else if (num >= 1000) {
       return `₹${(num / 1000).toFixed(1)}K`;
     }
-    return `₹${num.toLocaleString('en-IN')}`;
+    return `₹${num.toLocaleString("en-IN")}`;
   };
 
   const formatTime = (date: Date) => {
@@ -320,31 +319,31 @@ export default function EnhancedDashboard() {
     }
   };
 
-  const getActivityIcon = (type: RecentActivity['type']) => {
+  const getActivityIcon = (type: RecentActivity["type"]) => {
     switch (type) {
-      case 'bill_created':
+      case "bill_created":
         return <FileText className="h-4 w-4" />;
-      case 'payment_received':
+      case "payment_received":
         return <DollarSign className="h-4 w-4" />;
-      case 'customer_added':
+      case "customer_added":
         return <Users className="h-4 w-4" />;
-      case 'product_added':
+      case "product_added":
         return <Package className="h-4 w-4" />;
       default:
         return <Activity className="h-4 w-4" />;
     }
   };
 
-  const getActivityColor = (status: RecentActivity['status']) => {
+  const getActivityColor = (status: RecentActivity["status"]) => {
     switch (status) {
-      case 'success':
-        return 'text-green-600 bg-green-50';
-      case 'warning':
-        return 'text-orange-600 bg-orange-50';
-      case 'info':
-        return 'text-blue-600 bg-blue-50';
+      case "success":
+        return "text-green-600 bg-green-50";
+      case "warning":
+        return "text-orange-600 bg-orange-50";
+      case "info":
+        return "text-blue-600 bg-blue-50";
       default:
-        return 'text-gray-600 bg-gray-50';
+        return "text-gray-600 bg-gray-50";
     }
   };
 
@@ -353,8 +352,12 @@ export default function EnhancedDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your business.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Dashboard
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Welcome back! Here's what's happening with your business.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -373,7 +376,7 @@ export default function EnhancedDashboard() {
             <RefreshCcw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={() => window.location.href = '/bill-creator'}>
+          <Button onClick={() => (window.location.href = "/bill-creator")}>
             <FileText className="h-4 w-4 mr-2" />
             New Bill
           </Button>
@@ -389,11 +392,12 @@ export default function EnhancedDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(metrics.totalSales)}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(metrics.totalSales)}
+            </div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +{metrics.monthlyGrowth}%
+                <TrendingUp className="h-3 w-3 mr-1" />+{metrics.monthlyGrowth}%
               </span>
               from last month
             </p>
@@ -403,13 +407,18 @@ export default function EnhancedDashboard() {
         {/* Total Customers */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Customers
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.totalCustomers}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+{metrics.newCustomersThisMonth}</span> new this month
+              <span className="text-green-600">
+                +{metrics.newCustomersThisMonth}
+              </span>{" "}
+              new this month
             </p>
           </CardContent>
         </Card>
@@ -417,7 +426,9 @@ export default function EnhancedDashboard() {
         {/* Total Products */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -431,14 +442,16 @@ export default function EnhancedDashboard() {
         {/* Pending Payments */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Payments
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{formatNumber(metrics.pendingPayments)}</div>
-            <p className="text-xs text-muted-foreground">
-              Requires follow-up
-            </p>
+            <div className="text-2xl font-bold text-orange-600">
+              {formatNumber(metrics.pendingPayments)}
+            </div>
+            <p className="text-xs text-muted-foreground">Requires follow-up</p>
           </CardContent>
         </Card>
       </div>
@@ -456,25 +469,44 @@ export default function EnhancedDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{formatNumber(metrics.paidRevenue)}</div>
-                <div className="text-sm text-muted-foreground">Paid Revenue</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatNumber(metrics.paidRevenue)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Paid Revenue
+                </div>
                 <div className="text-xs text-muted-foreground">
-                  {((metrics.paidRevenue / metrics.totalRevenue) * 100).toFixed(1)}% of total
+                  {((metrics.paidRevenue / metrics.totalRevenue) * 100).toFixed(
+                    1,
+                  )}
+                  % of total
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{formatNumber(metrics.pendingRevenue)}</div>
-                <div className="text-sm text-muted-foreground">Pending Revenue</div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {formatNumber(metrics.pendingRevenue)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Pending Revenue
+                </div>
                 <div className="text-xs text-muted-foreground">
-                  {((metrics.pendingRevenue / metrics.totalRevenue) * 100).toFixed(1)}% of total
+                  {(
+                    (metrics.pendingRevenue / metrics.totalRevenue) *
+                    100
+                  ).toFixed(1)}
+                  % of total
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{formatNumber(metrics.totalRevenue)}</div>
-                <div className="text-sm text-muted-foreground">Total Revenue</div>
+                <div className="text-2xl font-bold">
+                  {formatNumber(metrics.totalRevenue)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Total Revenue
+                </div>
                 <div className="text-xs text-green-600">
-                  <TrendingUp className="h-3 w-3 inline mr-1" />
-                  +{metrics.monthlyGrowth}% growth
+                  <TrendingUp className="h-3 w-3 inline mr-1" />+
+                  {metrics.monthlyGrowth}% growth
                 </div>
               </div>
             </div>
@@ -487,17 +519,23 @@ export default function EnhancedDashboard() {
               </div>
               <div className="grid grid-cols-6 gap-2 h-32">
                 {monthlyData.map((data, index) => {
-                  const height = (data.revenue / Math.max(...monthlyData.map(d => d.revenue))) * 100;
+                  const height =
+                    (data.revenue /
+                      Math.max(...monthlyData.map((d) => d.revenue))) *
+                    100;
                   return (
-                    <div key={data.month} className="flex flex-col items-center gap-1">
+                    <div
+                      key={data.month}
+                      className="flex flex-col items-center gap-1"
+                    >
                       <div className="flex-1 w-8 bg-gray-100 rounded-t relative flex items-end">
-                        <div 
+                        <div
                           className="w-full bg-blue-500 rounded-t transition-all duration-500"
                           style={{ height: `${height}%` }}
                         />
                       </div>
                       <div className="text-xs text-muted-foreground transform -rotate-45 origin-top-left">
-                        {data.month.split(' ')[0]}
+                        {data.month.split(" ")[0]}
                       </div>
                     </div>
                   );
@@ -520,15 +558,21 @@ export default function EnhancedDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">GST Bills</span>
-                <Badge className="bg-blue-100 text-blue-800">{metrics.gstBills}</Badge>
+                <Badge className="bg-blue-100 text-blue-800">
+                  {metrics.gstBills}
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Non-GST Bills</span>
-                <Badge className="bg-purple-100 text-purple-800">{metrics.nonGstBills}</Badge>
+                <Badge className="bg-purple-100 text-purple-800">
+                  {metrics.nonGstBills}
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Quotations</span>
-                <Badge className="bg-indigo-100 text-indigo-800">{metrics.quotations}</Badge>
+                <Badge className="bg-indigo-100 text-indigo-800">
+                  {metrics.quotations}
+                </Badge>
               </div>
             </div>
 
@@ -539,18 +583,24 @@ export default function EnhancedDashboard() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Average Order Value</span>
-                <span className="font-medium">{formatCurrency(metrics.averageOrderValue)}</span>
+                <span className="font-medium">
+                  {formatCurrency(metrics.averageOrderValue)}
+                </span>
               </div>
             </div>
 
             <div className="pt-4 border-t space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-orange-600">Overdue Payments</span>
-                <span className="font-medium text-orange-600">{formatNumber(metrics.overduePayments)}</span>
+                <span className="font-medium text-orange-600">
+                  {formatNumber(metrics.overduePayments)}
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-yellow-600">Partial Payments</span>
-                <span className="font-medium text-yellow-600">{formatNumber(metrics.partialPayments)}</span>
+                <span className="font-medium text-yellow-600">
+                  {formatNumber(metrics.partialPayments)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -579,14 +629,26 @@ export default function EnhancedDashboard() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-                    <div className={cn("p-2 rounded-full", getActivityColor(activity.status))}>
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-gray-50"
+                  >
+                    <div
+                      className={cn(
+                        "p-2 rounded-full",
+                        getActivityColor(activity.status),
+                      )}
+                    >
                       {getActivityIcon(activity.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{activity.description}</p>
+                      <p className="text-sm font-medium">
+                        {activity.description}
+                      </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">{formatTime(activity.time)}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTime(activity.time)}
+                        </span>
                         {activity.amount && (
                           <span className="text-xs font-medium text-green-600">
                             {formatCurrency(activity.amount)}
@@ -607,18 +669,37 @@ export default function EnhancedDashboard() {
               <CardContent>
                 <div className="space-y-3">
                   {paymentMethods.map((method) => (
-                    <div key={method.method} className="flex items-center justify-between">
+                    <div
+                      key={method.method}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
-                        {method.method === 'UPI' && <Smartphone className="h-4 w-4" />}
-                        {method.method === 'Cash' && <Banknote className="h-4 w-4" />}
-                        {method.method === 'Card' && <CreditCard className="h-4 w-4" />}
-                        {method.method === 'Bank Transfer' && <Building className="h-4 w-4" />}
-                        {method.method === 'Cheque' && <FileText className="h-4 w-4" />}
-                        <span className="text-sm font-medium">{method.method}</span>
+                        {method.method === "UPI" && (
+                          <Smartphone className="h-4 w-4" />
+                        )}
+                        {method.method === "Cash" && (
+                          <Banknote className="h-4 w-4" />
+                        )}
+                        {method.method === "Card" && (
+                          <CreditCard className="h-4 w-4" />
+                        )}
+                        {method.method === "Bank Transfer" && (
+                          <Building className="h-4 w-4" />
+                        )}
+                        {method.method === "Cheque" && (
+                          <FileText className="h-4 w-4" />
+                        )}
+                        <span className="text-sm font-medium">
+                          {method.method}
+                        </span>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-medium">{formatNumber(method.amount)}</div>
-                        <div className="text-xs text-muted-foreground">{method.percentage}%</div>
+                        <div className="text-sm font-medium">
+                          {formatNumber(method.amount)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {method.percentage}%
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -640,7 +721,10 @@ export default function EnhancedDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {topCustomers.map((customer, index) => (
-                  <div key={customer.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={customer.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-medium text-sm">
                         #{index + 1}
@@ -654,9 +738,12 @@ export default function EnhancedDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{formatCurrency(customer.totalSpent)}</div>
+                      <div className="font-medium">
+                        {formatCurrency(customer.totalSpent)}
+                      </div>
                       <div className="text-sm text-muted-foreground">
-                        {customer.billsCount} bills • Last: {customer.lastBillDate.toLocaleDateString('en-IN')}
+                        {customer.billsCount} bills • Last:{" "}
+                        {customer.lastBillDate.toLocaleDateString("en-IN")}
                       </div>
                     </div>
                   </div>
@@ -678,7 +765,10 @@ export default function EnhancedDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {topProducts.map((product, index) => (
-                  <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-medium text-sm">
                         #{index + 1}
@@ -691,7 +781,9 @@ export default function EnhancedDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{formatNumber(product.revenue)}</div>
+                      <div className="font-medium">
+                        {formatNumber(product.revenue)}
+                      </div>
                       <div className="text-sm text-green-600">
                         {product.profitMargin}% margin
                       </div>
@@ -708,7 +800,9 @@ export default function EnhancedDashboard() {
             {/* Payment Status Overview */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Payment Status Overview</CardTitle>
+                <CardTitle className="text-lg">
+                  Payment Status Overview
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -718,9 +812,15 @@ export default function EnhancedDashboard() {
                       <span className="font-medium">Paid</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-green-600">{formatNumber(metrics.paidRevenue)}</div>
+                      <div className="font-bold text-green-600">
+                        {formatNumber(metrics.paidRevenue)}
+                      </div>
                       <div className="text-sm text-muted-foreground">
-                        {((metrics.paidRevenue / metrics.totalRevenue) * 100).toFixed(1)}%
+                        {(
+                          (metrics.paidRevenue / metrics.totalRevenue) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </div>
                     </div>
                   </div>
@@ -731,9 +831,15 @@ export default function EnhancedDashboard() {
                       <span className="font-medium">Partial</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-yellow-600">{formatNumber(metrics.partialPayments)}</div>
+                      <div className="font-bold text-yellow-600">
+                        {formatNumber(metrics.partialPayments)}
+                      </div>
                       <div className="text-sm text-muted-foreground">
-                        {((metrics.partialPayments / metrics.totalRevenue) * 100).toFixed(1)}%
+                        {(
+                          (metrics.partialPayments / metrics.totalRevenue) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </div>
                     </div>
                   </div>
@@ -744,9 +850,22 @@ export default function EnhancedDashboard() {
                       <span className="font-medium">Pending</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-orange-600">{formatNumber(metrics.pendingRevenue - metrics.partialPayments - metrics.overduePayments)}</div>
+                      <div className="font-bold text-orange-600">
+                        {formatNumber(
+                          metrics.pendingRevenue -
+                            metrics.partialPayments -
+                            metrics.overduePayments,
+                        )}
+                      </div>
                       <div className="text-sm text-muted-foreground">
-                        {(((metrics.pendingRevenue - metrics.partialPayments - metrics.overduePayments) / metrics.totalRevenue) * 100).toFixed(1)}%
+                        {(
+                          ((metrics.pendingRevenue -
+                            metrics.partialPayments -
+                            metrics.overduePayments) /
+                            metrics.totalRevenue) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </div>
                     </div>
                   </div>
@@ -757,9 +876,15 @@ export default function EnhancedDashboard() {
                       <span className="font-medium">Overdue</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-red-600">{formatNumber(metrics.overduePayments)}</div>
+                      <div className="font-bold text-red-600">
+                        {formatNumber(metrics.overduePayments)}
+                      </div>
                       <div className="text-sm text-muted-foreground">
-                        {((metrics.overduePayments / metrics.totalRevenue) * 100).toFixed(1)}%
+                        {(
+                          (metrics.overduePayments / metrics.totalRevenue) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </div>
                     </div>
                   </div>
@@ -776,9 +901,15 @@ export default function EnhancedDashboard() {
                 <div className="space-y-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-600">
-                      {((metrics.paidRevenue / metrics.totalRevenue) * 100).toFixed(1)}%
+                      {(
+                        (metrics.paidRevenue / metrics.totalRevenue) *
+                        100
+                      ).toFixed(1)}
+                      %
                     </div>
-                    <div className="text-sm text-muted-foreground">Collection Rate</div>
+                    <div className="text-sm text-muted-foreground">
+                      Collection Rate
+                    </div>
                   </div>
 
                   <div className="space-y-3">
@@ -797,20 +928,25 @@ export default function EnhancedDashboard() {
                   </div>
 
                   <div className="pt-4 border-t">
-                    <h4 className="font-medium mb-3">Monthly Collection Trend</h4>
+                    <h4 className="font-medium mb-3">
+                      Monthly Collection Trend
+                    </h4>
                     <div className="grid grid-cols-6 gap-1 h-16">
                       {monthlyData.map((data, index) => {
-                        const collectionRate = 85 + (Math.random() * 10); // Simulated data
+                        const collectionRate = 85 + Math.random() * 10; // Simulated data
                         return (
-                          <div key={data.month} className="flex flex-col items-center gap-1">
+                          <div
+                            key={data.month}
+                            className="flex flex-col items-center gap-1"
+                          >
                             <div className="flex-1 w-6 bg-gray-100 rounded-t relative flex items-end">
-                              <div 
+                              <div
                                 className="w-full bg-gradient-to-t from-green-400 to-green-500 rounded-t"
                                 style={{ height: `${collectionRate}%` }}
                               />
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {data.month.split(' ')[0]}
+                              {data.month.split(" ")[0]}
                             </div>
                           </div>
                         );
@@ -831,23 +967,43 @@ export default function EnhancedDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-            <Button variant="outline" className="h-16 flex-col gap-2" onClick={() => window.location.href = '/bill-creator'}>
+            <Button
+              variant="outline"
+              className="h-16 flex-col gap-2"
+              onClick={() => (window.location.href = "/bill-creator")}
+            >
               <FileText className="h-5 w-5" />
               <span className="text-xs">New Bill</span>
             </Button>
-            <Button variant="outline" className="h-16 flex-col gap-2" onClick={() => window.location.href = '/customers'}>
+            <Button
+              variant="outline"
+              className="h-16 flex-col gap-2"
+              onClick={() => (window.location.href = "/customers")}
+            >
               <Users className="h-5 w-5" />
               <span className="text-xs">Add Customer</span>
             </Button>
-            <Button variant="outline" className="h-16 flex-col gap-2" onClick={() => window.location.href = '/products'}>
+            <Button
+              variant="outline"
+              className="h-16 flex-col gap-2"
+              onClick={() => (window.location.href = "/products")}
+            >
               <Package className="h-5 w-5" />
               <span className="text-xs">Add Product</span>
             </Button>
-            <Button variant="outline" className="h-16 flex-col gap-2" onClick={() => window.location.href = '/billing-history'}>
+            <Button
+              variant="outline"
+              className="h-16 flex-col gap-2"
+              onClick={() => (window.location.href = "/billing-history")}
+            >
               <BarChart3 className="h-5 w-5" />
               <span className="text-xs">View Reports</span>
             </Button>
-            <Button variant="outline" className="h-16 flex-col gap-2" onClick={() => window.location.href = '/settings'}>
+            <Button
+              variant="outline"
+              className="h-16 flex-col gap-2"
+              onClick={() => (window.location.href = "/settings")}
+            >
               <Target className="h-5 w-5" />
               <span className="text-xs">Settings</span>
             </Button>

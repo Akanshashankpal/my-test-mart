@@ -50,7 +50,10 @@ const AppContent = () => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/billing" element={<EnhancedBilling />} />
-            <Route path="/billing-history" element={<EnhancedBillingHistory />} />
+            <Route
+              path="/billing-history"
+              element={<EnhancedBillingHistory />}
+            />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
@@ -75,7 +78,7 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error boundary caught an error:', error, errorInfo);
+    console.error("Error boundary caught an error:", error, errorInfo);
   }
 
   render() {
@@ -83,8 +86,12 @@ class ErrorBoundary extends React.Component<
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h1>
-            <p className="text-gray-600 mb-4">Please refresh the page to try again</p>
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              Something went wrong
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Please refresh the page to try again
+            </p>
             <button
               onClick={() => this.setState({ hasError: false })}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

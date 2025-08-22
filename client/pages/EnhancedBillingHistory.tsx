@@ -28,18 +28,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit2, 
-  Trash2, 
+  Search,
+  Filter,
+  Eye,
+  Edit2,
+  Trash2,
   Download,
   FileText,
   Calendar,
@@ -63,7 +58,7 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -127,7 +122,7 @@ interface Bill {
   pendingAmount: number;
   payments: {
     id: string;
-    method: 'Cash' | 'UPI' | 'Card' | 'Bank Transfer' | 'Cheque';
+    method: "Cash" | "UPI" | "Card" | "Bank Transfer" | "Cheque";
     amount: number;
     date: Date;
     reference?: string;
@@ -158,12 +153,12 @@ const mockBills: Bill[] = [
       email: "john@example.com",
       address: "123 Main Street, Koramangala, Bangalore",
       state: "Karnataka",
-      gstNumber: "29ABCDE1234F1Z5"
+      gstNumber: "29ABCDE1234F1Z5",
     },
     company: {
       name: "ElectroMart Pvt Ltd",
       gstNumber: "29ABCDE1234F1Z5",
-      state: "Karnataka"
+      state: "Karnataka",
     },
     items: [
       {
@@ -178,7 +173,7 @@ const mockBills: Bill[] = [
         cgstAmount: 11699.91,
         sgstAmount: 11699.91,
         igstAmount: 0,
-        totalAmount: 153398.82
+        totalAmount: 153398.82,
       },
       {
         productName: "AirPods Pro",
@@ -192,8 +187,8 @@ const mockBills: Bill[] = [
         cgstAmount: 2249.91,
         sgstAmount: 2249.91,
         igstAmount: 0,
-        totalAmount: 29498.82
-      }
+        totalAmount: 29498.82,
+      },
     ],
     subtotal: 154998,
     discountPercent: 3.2,
@@ -214,8 +209,8 @@ const mockBills: Bill[] = [
         amount: 177045,
         date: new Date("2024-01-20"),
         reference: "TXN123456789",
-        notes: "Full payment via credit card"
-      }
+        notes: "Full payment via credit card",
+      },
     ],
     paymentStatus: "Paid",
     notes: "Customer satisfied with purchase",
@@ -223,7 +218,7 @@ const mockBills: Bill[] = [
     createdBy: "Sarah Wilson",
     createdAt: new Date("2024-01-20"),
     updatedAt: new Date("2024-01-20"),
-    status: "Paid"
+    status: "Paid",
   },
   {
     id: "2",
@@ -235,12 +230,12 @@ const mockBills: Bill[] = [
       name: "Sarah Smith",
       phone: "+91 9876543211",
       address: "456 Park Avenue, Connaught Place, Delhi",
-      state: "Delhi"
+      state: "Delhi",
     },
     company: {
       name: "ElectroMart Pvt Ltd",
       gstNumber: "29ABCDE1234F1Z5",
-      state: "Karnataka"
+      state: "Karnataka",
     },
     items: [
       {
@@ -254,8 +249,8 @@ const mockBills: Bill[] = [
         cgstAmount: 0,
         sgstAmount: 0,
         igstAmount: 0,
-        totalAmount: 1000
-      }
+        totalAmount: 1000,
+      },
     ],
     subtotal: 1000,
     discountPercent: 0,
@@ -274,7 +269,7 @@ const mockBills: Bill[] = [
     createdBy: "Mike Johnson",
     createdAt: new Date("2024-01-19"),
     updatedAt: new Date("2024-01-19"),
-    status: "Sent"
+    status: "Sent",
   },
   {
     id: "3",
@@ -289,12 +284,12 @@ const mockBills: Bill[] = [
       email: "rajesh@example.com",
       address: "789 Market Street, Andheri West, Mumbai",
       state: "Maharashtra",
-      gstNumber: "27ABCDE5678F1Z1"
+      gstNumber: "27ABCDE5678F1Z1",
     },
     company: {
       name: "ElectroMart Pvt Ltd",
       gstNumber: "29ABCDE1234F1Z5",
-      state: "Karnataka"
+      state: "Karnataka",
     },
     items: [
       {
@@ -309,8 +304,8 @@ const mockBills: Bill[] = [
         cgstAmount: 0,
         sgstAmount: 0,
         igstAmount: 17639.82,
-        totalAmount: 115638.84
-      }
+        totalAmount: 115638.84,
+      },
     ],
     subtotal: 99999,
     discountPercent: 2,
@@ -331,8 +326,8 @@ const mockBills: Bill[] = [
         amount: 50000,
         date: new Date("2024-01-18"),
         reference: "UPI789123456",
-        notes: "Partial payment advance"
-      }
+        notes: "Partial payment advance",
+      },
     ],
     paymentStatus: "Partial",
     notes: "Balance payment due before delivery",
@@ -340,7 +335,7 @@ const mockBills: Bill[] = [
     createdBy: "Admin User",
     createdAt: new Date("2024-01-18"),
     updatedAt: new Date("2024-01-19"),
-    status: "Sent"
+    status: "Sent",
   },
   {
     id: "4",
@@ -354,12 +349,12 @@ const mockBills: Bill[] = [
       phone: "+91 9876543213",
       email: "priya@example.com",
       address: "321 Tech Park, Sector 62, Noida",
-      state: "Uttar Pradesh"
+      state: "Uttar Pradesh",
     },
     company: {
       name: "ElectroMart Pvt Ltd",
       gstNumber: "29ABCDE1234F1Z5",
-      state: "Karnataka"
+      state: "Karnataka",
     },
     items: [
       {
@@ -374,7 +369,7 @@ const mockBills: Bill[] = [
         cgstAmount: 0,
         sgstAmount: 0,
         igstAmount: 56429.15,
-        totalAmount: 369924.40
+        totalAmount: 369924.4,
       },
       {
         productName: "Wireless Mouse",
@@ -388,8 +383,8 @@ const mockBills: Bill[] = [
         cgstAmount: 0,
         sgstAmount: 0,
         igstAmount: 1799.1,
-        totalAmount: 11794.1
-      }
+        totalAmount: 11794.1,
+      },
     ],
     subtotal: 339990,
     discountPercent: 7.8,
@@ -406,12 +401,13 @@ const mockBills: Bill[] = [
     payments: [],
     paymentStatus: "Pending",
     notes: "Bulk order quotation for corporate client",
-    terms: "Valid for 30 days\nDelivery: 7-10 working days\nPayment: 50% advance, 50% on delivery",
+    terms:
+      "Valid for 30 days\nDelivery: 7-10 working days\nPayment: 50% advance, 50% on delivery",
     createdBy: "Sales Team",
     createdAt: new Date("2024-01-17"),
     updatedAt: new Date("2024-01-17"),
-    status: "Sent"
-  }
+    status: "Sent",
+  },
 ];
 
 export default function EnhancedBillingHistory() {
@@ -435,53 +431,74 @@ export default function EnhancedBillingHistory() {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(bill =>
-        bill.billNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        bill.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        bill.customer.phone.includes(searchTerm) ||
-        bill.createdBy.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (bill) =>
+          bill.billNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          bill.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          bill.customer.phone.includes(searchTerm) ||
+          bill.createdBy.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     // Status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter(bill => bill.status.toLowerCase() === statusFilter);
+      filtered = filtered.filter(
+        (bill) => bill.status.toLowerCase() === statusFilter,
+      );
     }
 
     // Type filter
     if (typeFilter !== "all") {
-      filtered = filtered.filter(bill => bill.billType === typeFilter);
+      filtered = filtered.filter((bill) => bill.billType === typeFilter);
     }
 
     // Payment filter
     if (paymentFilter !== "all") {
-      filtered = filtered.filter(bill => bill.paymentStatus.toLowerCase() === paymentFilter);
+      filtered = filtered.filter(
+        (bill) => bill.paymentStatus.toLowerCase() === paymentFilter,
+      );
     }
 
     // Date range filter
     if (dateRange.start) {
-      filtered = filtered.filter(bill => bill.billDate >= new Date(dateRange.start));
+      filtered = filtered.filter(
+        (bill) => bill.billDate >= new Date(dateRange.start),
+      );
     }
     if (dateRange.end) {
-      filtered = filtered.filter(bill => bill.billDate <= new Date(dateRange.end));
+      filtered = filtered.filter(
+        (bill) => bill.billDate <= new Date(dateRange.end),
+      );
     }
 
     // Tab filter
     if (activeTab !== "all") {
       if (activeTab === "draft") {
-        filtered = filtered.filter(bill => bill.status === "Draft");
+        filtered = filtered.filter((bill) => bill.status === "Draft");
       } else if (activeTab === "pending") {
-        filtered = filtered.filter(bill => bill.paymentStatus === "Pending" || bill.paymentStatus === "Partial");
+        filtered = filtered.filter(
+          (bill) =>
+            bill.paymentStatus === "Pending" ||
+            bill.paymentStatus === "Partial",
+        );
       } else if (activeTab === "paid") {
-        filtered = filtered.filter(bill => bill.paymentStatus === "Paid");
+        filtered = filtered.filter((bill) => bill.paymentStatus === "Paid");
       } else if (activeTab === "overdue") {
-        filtered = filtered.filter(bill => bill.paymentStatus === "Overdue");
+        filtered = filtered.filter((bill) => bill.paymentStatus === "Overdue");
       }
     }
 
     setFilteredBills(filtered);
     setCurrentPage(1);
-  }, [bills, searchTerm, statusFilter, typeFilter, paymentFilter, dateRange, activeTab]);
+  }, [
+    bills,
+    searchTerm,
+    statusFilter,
+    typeFilter,
+    paymentFilter,
+    dateRange,
+    activeTab,
+  ]);
 
   // Pagination
   const indexOfLastBill = currentPage * billsPerPage;
@@ -491,16 +508,16 @@ export default function EnhancedBillingHistory() {
 
   const formatCurrency = (amount: number | undefined | null) => {
     if (amount === undefined || amount === null || isNaN(amount)) {
-      return '₹0';
+      return "₹0";
     }
-    return `₹${amount.toLocaleString('en-IN')}`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -521,7 +538,9 @@ export default function EnhancedBillingHistory() {
       partial: "bg-orange-100 text-orange-800 border-orange-200",
       overdue: "bg-red-100 text-red-800 border-red-200",
     };
-    return styles[status.toLowerCase() as keyof typeof styles] || styles.pending;
+    return (
+      styles[status.toLowerCase() as keyof typeof styles] || styles.pending
+    );
   };
 
   const getTypeBadge = (type: string) => {
@@ -538,7 +557,7 @@ export default function EnhancedBillingHistory() {
   };
 
   const handleDelete = (billId: string) => {
-    setBills(prev => prev.filter(bill => bill.id !== billId));
+    setBills((prev) => prev.filter((bill) => bill.id !== billId));
     setDeleteBillId(null);
   };
 
@@ -553,45 +572,60 @@ export default function EnhancedBillingHistory() {
       paidAmount: 0,
       pendingAmount: bill.finalAmount,
       payments: [],
-      paymentStatus: "Pending"
+      paymentStatus: "Pending",
     };
-    setBills(prev => [duplicatedBill, ...prev]);
+    setBills((prev) => [duplicatedBill, ...prev]);
   };
 
-  const updateBillStatus = (billId: string, newStatus: Bill['status']) => {
-    setBills(prev => prev.map(bill => 
-      bill.id === billId 
-        ? { ...bill, status: newStatus, updatedAt: new Date() }
-        : bill
-    ));
+  const updateBillStatus = (billId: string, newStatus: Bill["status"]) => {
+    setBills((prev) =>
+      prev.map((bill) =>
+        bill.id === billId
+          ? { ...bill, status: newStatus, updatedAt: new Date() }
+          : bill,
+      ),
+    );
   };
 
   const downloadBillPDF = async (bill: Bill) => {
     try {
-      const { default: jsPDF } = await import('jspdf');
+      const { default: jsPDF } = await import("jspdf");
       const doc = new jsPDF();
 
       // Company Header
       doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text(bill.company.name, 105, 20, { align: 'center' });
+      doc.setFont("helvetica", "bold");
+      doc.text(bill.company.name, 105, 20, { align: "center" });
 
       doc.setFontSize(16);
-      doc.text(bill.billType === 'Quotation' ? 'QUOTATION' : 'INVOICE', 105, 30, { align: 'center' });
+      doc.text(
+        bill.billType === "Quotation" ? "QUOTATION" : "INVOICE",
+        105,
+        30,
+        { align: "center" },
+      );
 
       // Bill details
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${bill.billType === 'Quotation' ? 'Quotation' : 'Invoice'} No: ${bill.billNumber}`, 20, 45);
+      doc.setFont("helvetica", "normal");
+      doc.text(
+        `${bill.billType === "Quotation" ? "Quotation" : "Invoice"} No: ${bill.billNumber}`,
+        20,
+        45,
+      );
       doc.text(`Date: ${formatDate(bill.billDate)}`, 20, 52);
       if (bill.dueDate) {
-        doc.text(`${bill.billType === 'Quotation' ? 'Valid Until' : 'Due Date'}: ${formatDate(bill.dueDate)}`, 20, 59);
+        doc.text(
+          `${bill.billType === "Quotation" ? "Valid Until" : "Due Date"}: ${formatDate(bill.dueDate)}`,
+          20,
+          59,
+        );
       }
 
       // Customer Info
-      doc.setFont('helvetica', 'bold');
-      doc.text('Bill To:', 20, 75);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "bold");
+      doc.text("Bill To:", 20, 75);
+      doc.setFont("helvetica", "normal");
       doc.text(bill.customer.name, 20, 82);
       doc.text(`Phone: ${bill.customer.phone}`, 20, 89);
       if (bill.customer.email) {
@@ -604,23 +638,23 @@ export default function EnhancedBillingHistory() {
 
       // Table Headers
       let yPos = 130;
-      doc.setFont('helvetica', 'bold');
-      doc.text('Item', 20, yPos);
-      doc.text('HSN', 70, yPos);
-      doc.text('Qty', 85, yPos);
-      doc.text('Rate', 100, yPos);
-      doc.text('Disc%', 120, yPos);
-      if (bill.billType === 'GST') {
-        doc.text('GST%', 135, yPos);
+      doc.setFont("helvetica", "bold");
+      doc.text("Item", 20, yPos);
+      doc.text("HSN", 70, yPos);
+      doc.text("Qty", 85, yPos);
+      doc.text("Rate", 100, yPos);
+      doc.text("Disc%", 120, yPos);
+      if (bill.billType === "GST") {
+        doc.text("GST%", 135, yPos);
         if (bill.customer.state === bill.company.state) {
-          doc.text('CGST', 150, yPos);
-          doc.text('SGST', 165, yPos);
+          doc.text("CGST", 150, yPos);
+          doc.text("SGST", 165, yPos);
         } else {
-          doc.text('IGST', 150, yPos);
+          doc.text("IGST", 150, yPos);
         }
-        doc.text('Total', 180, yPos);
+        doc.text("Total", 180, yPos);
       } else {
-        doc.text('Total', 150, yPos);
+        doc.text("Total", 150, yPos);
       }
 
       // Draw line under headers
@@ -628,19 +662,19 @@ export default function EnhancedBillingHistory() {
       yPos += 10;
 
       // Items
-      doc.setFont('helvetica', 'normal');
-      bill.items.forEach(item => {
+      doc.setFont("helvetica", "normal");
+      bill.items.forEach((item) => {
         if (yPos > 250) {
           doc.addPage();
           yPos = 20;
         }
 
         doc.text(item.productName.substring(0, 25), 20, yPos);
-        doc.text(item.hsnCode || '', 70, yPos);
+        doc.text(item.hsnCode || "", 70, yPos);
         doc.text(`${item.quantity} ${item.unit}`, 85, yPos);
         doc.text(`₹${item.rate.toFixed(2)}`, 100, yPos);
         doc.text(`${item.discount}%`, 120, yPos);
-        if (bill.billType === 'GST') {
+        if (bill.billType === "GST") {
           doc.text(`${item.gstRate}%`, 135, yPos);
           if (bill.customer.state === bill.company.state) {
             doc.text(`₹${item.cgstAmount.toFixed(2)}`, 150, yPos);
@@ -660,7 +694,7 @@ export default function EnhancedBillingHistory() {
       doc.line(100, yPos, 190, yPos);
       yPos += 8;
 
-      doc.text('Subtotal:', 130, yPos);
+      doc.text("Subtotal:", 130, yPos);
       doc.text(`₹${bill.subtotal.toFixed(2)}`, 175, yPos);
       yPos += 6;
 
@@ -670,34 +704,34 @@ export default function EnhancedBillingHistory() {
         yPos += 6;
       }
 
-      doc.text('Taxable Amount:', 130, yPos);
+      doc.text("Taxable Amount:", 130, yPos);
       doc.text(`₹${bill.taxableAmount.toFixed(2)}`, 175, yPos);
       yPos += 6;
 
-      if (bill.billType === 'GST' && bill.totalTax > 0) {
+      if (bill.billType === "GST" && bill.totalTax > 0) {
         if (bill.cgstTotal > 0) {
-          doc.text('CGST:', 130, yPos);
+          doc.text("CGST:", 130, yPos);
           doc.text(`₹${bill.cgstTotal.toFixed(2)}`, 175, yPos);
           yPos += 6;
 
-          doc.text('SGST:', 130, yPos);
+          doc.text("SGST:", 130, yPos);
           doc.text(`₹${bill.sgstTotal.toFixed(2)}`, 175, yPos);
           yPos += 6;
         }
-        
+
         if (bill.igstTotal > 0) {
-          doc.text('IGST:', 130, yPos);
+          doc.text("IGST:", 130, yPos);
           doc.text(`₹${bill.igstTotal.toFixed(2)}`, 175, yPos);
           yPos += 6;
         }
 
-        doc.text('Total Tax:', 130, yPos);
+        doc.text("Total Tax:", 130, yPos);
         doc.text(`₹${bill.totalTax.toFixed(2)}`, 175, yPos);
         yPos += 6;
       }
 
       if (bill.roundOffAmount !== 0) {
-        doc.text('Round Off:', 130, yPos);
+        doc.text("Round Off:", 130, yPos);
         doc.text(`₹${bill.roundOffAmount.toFixed(2)}`, 175, yPos);
         yPos += 6;
       }
@@ -705,26 +739,30 @@ export default function EnhancedBillingHistory() {
       // Final total
       doc.line(130, yPos, 190, yPos);
       yPos += 6;
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text('Final Amount:', 130, yPos);
+      doc.text("Final Amount:", 130, yPos);
       doc.text(`₹${bill.finalAmount.toFixed(2)}`, 175, yPos);
 
       // Payment details if any
       if (bill.payments.length > 0) {
         yPos += 15;
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Payment Details:', 20, yPos);
+        doc.setFont("helvetica", "bold");
+        doc.text("Payment Details:", 20, yPos);
         yPos += 8;
-        doc.setFont('helvetica', 'normal');
-        
-        bill.payments.forEach(payment => {
+        doc.setFont("helvetica", "normal");
+
+        bill.payments.forEach((payment) => {
           if (yPos > 270) {
             doc.addPage();
             yPos = 20;
           }
-          doc.text(`${formatDate(payment.date)} - ${payment.method}: ₹${payment.amount.toFixed(2)}`, 20, yPos);
+          doc.text(
+            `${formatDate(payment.date)} - ${payment.method}: ₹${payment.amount.toFixed(2)}`,
+            20,
+            yPos,
+          );
           if (payment.reference) {
             doc.text(`Ref: ${payment.reference}`, 120, yPos);
           }
@@ -732,7 +770,7 @@ export default function EnhancedBillingHistory() {
         });
 
         yPos += 5;
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         doc.text(`Paid Amount: ₹${bill.paidAmount.toFixed(2)}`, 20, yPos);
         yPos += 6;
         doc.text(`Pending Amount: ₹${bill.pendingAmount.toFixed(2)}`, 20, yPos);
@@ -742,21 +780,21 @@ export default function EnhancedBillingHistory() {
       if (bill.notes || bill.terms) {
         yPos += 15;
         if (bill.notes) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Notes:', 20, yPos);
+          doc.setFont("helvetica", "bold");
+          doc.text("Notes:", 20, yPos);
           yPos += 6;
-          doc.setFont('helvetica', 'normal');
+          doc.setFont("helvetica", "normal");
           doc.text(bill.notes, 20, yPos);
           yPos += 10;
         }
-        
+
         if (bill.terms) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Terms & Conditions:', 20, yPos);
+          doc.setFont("helvetica", "bold");
+          doc.text("Terms & Conditions:", 20, yPos);
           yPos += 6;
-          doc.setFont('helvetica', 'normal');
-          const terms = bill.terms.split('\n');
-          terms.forEach(term => {
+          doc.setFont("helvetica", "normal");
+          const terms = bill.terms.split("\n");
+          terms.forEach((term) => {
             if (yPos > 280) {
               doc.addPage();
               yPos = 20;
@@ -769,25 +807,33 @@ export default function EnhancedBillingHistory() {
 
       // Footer
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'italic');
-      doc.text('Thank you for your business!', 105, 285, { align: 'center' });
+      doc.setFont("helvetica", "italic");
+      doc.text("Thank you for your business!", 105, 285, { align: "center" });
 
       // Save the PDF
       doc.save(`${bill.billType}_${bill.billNumber}.pdf`);
-
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
     }
   };
 
   const exportToCSV = () => {
     const headers = [
-      'Bill Number', 'Type', 'Date', 'Customer', 'Phone', 'Amount', 
-      'Paid Amount', 'Pending Amount', 'Payment Status', 'Status', 'Created By'
+      "Bill Number",
+      "Type",
+      "Date",
+      "Customer",
+      "Phone",
+      "Amount",
+      "Paid Amount",
+      "Pending Amount",
+      "Payment Status",
+      "Status",
+      "Created By",
     ];
-    
-    const csvData = filteredBills.map(bill => [
+
+    const csvData = filteredBills.map((bill) => [
       bill.billNumber,
       bill.billType,
       formatDate(bill.billDate),
@@ -798,43 +844,62 @@ export default function EnhancedBillingHistory() {
       bill.pendingAmount,
       bill.paymentStatus,
       bill.status,
-      bill.createdBy
+      bill.createdBy,
     ]);
 
     const csvContent = [headers, ...csvData]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `billing_history_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `billing_history_${new Date().toISOString().split("T")[0]}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const calculateStats = () => {
-    const totalRevenue = filteredBills.reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
-    const paidBills = filteredBills.filter(b => b.paymentStatus === "Paid");
-    const paidRevenue = paidBills.reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
-    const pendingRevenue = filteredBills.filter(b => b.paymentStatus === "Pending").reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
-    const partialRevenue = filteredBills.filter(b => b.paymentStatus === "Partial").reduce((sum, bill) => sum + (bill.pendingAmount || 0), 0);
-    const overdueRevenue = filteredBills.filter(b => b.paymentStatus === "Overdue").reduce((sum, bill) => sum + (bill.pendingAmount || 0), 0);
+    const totalRevenue = filteredBills.reduce(
+      (sum, bill) => sum + (bill.finalAmount || 0),
+      0,
+    );
+    const paidBills = filteredBills.filter((b) => b.paymentStatus === "Paid");
+    const paidRevenue = paidBills.reduce(
+      (sum, bill) => sum + (bill.finalAmount || 0),
+      0,
+    );
+    const pendingRevenue = filteredBills
+      .filter((b) => b.paymentStatus === "Pending")
+      .reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
+    const partialRevenue = filteredBills
+      .filter((b) => b.paymentStatus === "Partial")
+      .reduce((sum, bill) => sum + (bill.pendingAmount || 0), 0);
+    const overdueRevenue = filteredBills
+      .filter((b) => b.paymentStatus === "Overdue")
+      .reduce((sum, bill) => sum + (bill.pendingAmount || 0), 0);
 
     return {
       totalBills: filteredBills.length,
       totalRevenue,
       paidRevenue,
       pendingRevenue: pendingRevenue + partialRevenue + overdueRevenue,
-      gstBills: filteredBills.filter(b => b.billType === "GST").length,
-      nonGstBills: filteredBills.filter(b => b.billType === "Non-GST").length,
-      quotations: filteredBills.filter(b => b.billType === "Quotation").length,
-      draftBills: filteredBills.filter(b => b.status === "Draft").length,
+      gstBills: filteredBills.filter((b) => b.billType === "GST").length,
+      nonGstBills: filteredBills.filter((b) => b.billType === "Non-GST").length,
+      quotations: filteredBills.filter((b) => b.billType === "Quotation")
+        .length,
+      draftBills: filteredBills.filter((b) => b.status === "Draft").length,
       paidBills: paidBills.length,
-      pendingBills: filteredBills.filter(b => b.paymentStatus === "Pending" || b.paymentStatus === "Partial").length,
-      overdueBills: filteredBills.filter(b => b.paymentStatus === "Overdue").length,
+      pendingBills: filteredBills.filter(
+        (b) => b.paymentStatus === "Pending" || b.paymentStatus === "Partial",
+      ).length,
+      overdueBills: filteredBills.filter((b) => b.paymentStatus === "Overdue")
+        .length,
     };
   };
 
@@ -846,8 +911,12 @@ export default function EnhancedBillingHistory() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Billing History</h2>
-          <p className="text-muted-foreground">Comprehensive view and management of all bills</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+            Billing History
+          </h2>
+          <p className="text-muted-foreground">
+            Comprehensive view and management of all bills
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={exportToCSV}>
@@ -858,7 +927,7 @@ export default function EnhancedBillingHistory() {
             <RefreshCcw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={() => window.location.href = '/bill-creator'}>
+          <Button onClick={() => (window.location.href = "/bill-creator")}>
             <Plus className="h-4 w-4 mr-2" />
             New Bill
           </Button>
@@ -877,7 +946,8 @@ export default function EnhancedBillingHistory() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBills}</div>
             <div className="text-sm text-muted-foreground">
-              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Quotes: {stats.quotations}
+              GST: {stats.gstBills} | Non-GST: {stats.nonGstBills} | Quotes:{" "}
+              {stats.quotations}
             </div>
           </CardContent>
         </Card>
@@ -890,7 +960,9 @@ export default function EnhancedBillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(stats.totalRevenue)}
+            </div>
             <div className="flex items-center gap-1 text-sm">
               <TrendingUp className="h-3 w-3 text-green-600" />
               <span className="text-green-600">+12.5%</span>
@@ -907,9 +979,12 @@ export default function EnhancedBillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.paidRevenue)}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(stats.paidRevenue)}
+            </div>
             <div className="text-sm text-muted-foreground">
-              {stats.paidBills} bills ({((stats.paidRevenue / stats.totalRevenue) * 100).toFixed(1)}%)
+              {stats.paidBills} bills (
+              {((stats.paidRevenue / stats.totalRevenue) * 100).toFixed(1)}%)
             </div>
           </CardContent>
         </Card>
@@ -922,7 +997,9 @@ export default function EnhancedBillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{formatCurrency(stats.pendingRevenue)}</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {formatCurrency(stats.pendingRevenue)}
+            </div>
             <div className="text-sm text-muted-foreground">
               {stats.pendingBills} bills pending payment
             </div>
@@ -937,7 +1014,9 @@ export default function EnhancedBillingHistory() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.draftBills}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.draftBills}
+            </div>
             <div className="text-sm text-muted-foreground">
               Needs completion
             </div>
@@ -1011,14 +1090,18 @@ export default function EnhancedBillingHistory() {
                 <Input
                   type="date"
                   value={dateRange.start}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, start: e.target.value }))
+                  }
                   placeholder="Start date"
                 />
 
                 <Input
                   type="date"
                   value={dateRange.end}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                  }
                   placeholder="End date"
                 />
               </div>
@@ -1033,7 +1116,9 @@ export default function EnhancedBillingHistory() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="font-medium">{bill.billNumber}</div>
-                      <div className="text-xs text-gray-500">by {bill.createdBy}</div>
+                      <div className="text-xs text-gray-500">
+                        by {bill.createdBy}
+                      </div>
                     </div>
                     <div className="flex gap-1">
                       <Button
@@ -1060,24 +1145,45 @@ export default function EnhancedBillingHistory() {
                     </div>
                   </div>
 
-                  <MobileTableRowItem label="Customer">{bill.customer.name}</MobileTableRowItem>
-                  <MobileTableRowItem label="Phone">{bill.customer.phone}</MobileTableRowItem>
-                  <MobileTableRowItem label="Date">{formatDate(bill.billDate)}</MobileTableRowItem>
+                  <MobileTableRowItem label="Customer">
+                    {bill.customer.name}
+                  </MobileTableRowItem>
+                  <MobileTableRowItem label="Phone">
+                    {bill.customer.phone}
+                  </MobileTableRowItem>
+                  <MobileTableRowItem label="Date">
+                    {formatDate(bill.billDate)}
+                  </MobileTableRowItem>
                   <MobileTableRowItem label="Type">
-                    <Badge className={cn("text-xs", getTypeBadge(bill.billType))}>
+                    <Badge
+                      className={cn("text-xs", getTypeBadge(bill.billType))}
+                    >
                       {bill.billType}
                     </Badge>
                   </MobileTableRowItem>
-                  <MobileTableRowItem label="Amount">{formatCurrency(bill.finalAmount)}</MobileTableRowItem>
-                  <MobileTableRowItem label="Paid">{formatCurrency(bill.paidAmount)}</MobileTableRowItem>
-                  <MobileTableRowItem label="Pending">{formatCurrency(bill.pendingAmount)}</MobileTableRowItem>
+                  <MobileTableRowItem label="Amount">
+                    {formatCurrency(bill.finalAmount)}
+                  </MobileTableRowItem>
+                  <MobileTableRowItem label="Paid">
+                    {formatCurrency(bill.paidAmount)}
+                  </MobileTableRowItem>
+                  <MobileTableRowItem label="Pending">
+                    {formatCurrency(bill.pendingAmount)}
+                  </MobileTableRowItem>
                   <MobileTableRowItem label="Payment">
-                    <Badge className={cn("text-xs", getPaymentBadge(bill.paymentStatus))}>
+                    <Badge
+                      className={cn(
+                        "text-xs",
+                        getPaymentBadge(bill.paymentStatus),
+                      )}
+                    >
                       {bill.paymentStatus}
                     </Badge>
                   </MobileTableRowItem>
                   <MobileTableRowItem label="Status">
-                    <Badge className={cn("text-xs", getStatusBadge(bill.status))}>
+                    <Badge
+                      className={cn("text-xs", getStatusBadge(bill.status))}
+                    >
                       {bill.status}
                     </Badge>
                   </MobileTableRowItem>
@@ -1108,7 +1214,10 @@ export default function EnhancedBillingHistory() {
                     </thead>
                     <tbody>
                       {currentBills.map((bill) => (
-                        <tr key={bill.id} className="border-b hover:bg-muted/50">
+                        <tr
+                          key={bill.id}
+                          className="border-b hover:bg-muted/50"
+                        >
                           <td className="p-4">
                             <div className="font-medium">{bill.billNumber}</div>
                             <div className="text-sm text-muted-foreground">
@@ -1116,13 +1225,17 @@ export default function EnhancedBillingHistory() {
                             </div>
                           </td>
                           <td className="p-4">
-                            <div className="font-medium">{bill.customer.name}</div>
+                            <div className="font-medium">
+                              {bill.customer.name}
+                            </div>
                             <div className="text-sm text-muted-foreground">
                               {bill.customer.phone}
                             </div>
                           </td>
                           <td className="p-4">
-                            <div className="font-medium">{formatDate(bill.billDate)}</div>
+                            <div className="font-medium">
+                              {formatDate(bill.billDate)}
+                            </div>
                             {bill.dueDate && (
                               <div className="text-sm text-muted-foreground">
                                 Due: {formatDate(bill.dueDate)}
@@ -1130,12 +1243,19 @@ export default function EnhancedBillingHistory() {
                             )}
                           </td>
                           <td className="p-4">
-                            <Badge className={cn("text-xs", getTypeBadge(bill.billType))}>
+                            <Badge
+                              className={cn(
+                                "text-xs",
+                                getTypeBadge(bill.billType),
+                              )}
+                            >
                               {bill.billType}
                             </Badge>
                           </td>
                           <td className="p-4">
-                            <div className="font-medium">{formatCurrency(bill.finalAmount)}</div>
+                            <div className="font-medium">
+                              {formatCurrency(bill.finalAmount)}
+                            </div>
                             {(bill.discountAmount || 0) > 0 && (
                               <div className="text-sm text-muted-foreground">
                                 Disc: {formatCurrency(bill.discountAmount)}
@@ -1143,31 +1263,48 @@ export default function EnhancedBillingHistory() {
                             )}
                           </td>
                           <td className="p-4">
-                            <div className="font-medium text-green-600">{formatCurrency(bill.paidAmount)}</div>
+                            <div className="font-medium text-green-600">
+                              {formatCurrency(bill.paidAmount)}
+                            </div>
                             {bill.payments.length > 0 && (
                               <div className="text-sm text-muted-foreground">
-                                {bill.payments.length} payment{bill.payments.length > 1 ? 's' : ''}
+                                {bill.payments.length} payment
+                                {bill.payments.length > 1 ? "s" : ""}
                               </div>
                             )}
                           </td>
                           <td className="p-4">
-                            <div className="font-medium text-orange-600">{formatCurrency(bill.pendingAmount)}</div>
+                            <div className="font-medium text-orange-600">
+                              {formatCurrency(bill.pendingAmount)}
+                            </div>
                           </td>
                           <td className="p-4">
-                            <Badge className={cn("text-xs", getPaymentBadge(bill.paymentStatus))}>
+                            <Badge
+                              className={cn(
+                                "text-xs",
+                                getPaymentBadge(bill.paymentStatus),
+                              )}
+                            >
                               {bill.paymentStatus}
                             </Badge>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-1">
-                              <Badge className={cn("text-xs", getStatusBadge(bill.status))}>
+                              <Badge
+                                className={cn(
+                                  "text-xs",
+                                  getStatusBadge(bill.status),
+                                )}
+                              >
                                 {bill.status}
                               </Badge>
-                              {bill.status === 'Draft' && (
+                              {bill.status === "Draft" && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => updateBillStatus(bill.id, 'Sent')}
+                                  onClick={() =>
+                                    updateBillStatus(bill.id, "Sent")
+                                  }
                                   title="Send bill"
                                 >
                                   <Send className="h-3 w-3" />
@@ -1229,13 +1366,17 @@ export default function EnhancedBillingHistory() {
                 {/* Pagination */}
                 <div className="flex items-center justify-between p-4 border-t">
                   <div className="text-sm text-muted-foreground">
-                    Showing {indexOfFirstBill + 1} to {Math.min(indexOfLastBill, filteredBills.length)} of {filteredBills.length} bills
+                    Showing {indexOfFirstBill + 1} to{" "}
+                    {Math.min(indexOfLastBill, filteredBills.length)} of{" "}
+                    {filteredBills.length} bills
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
                       disabled={currentPage === 1}
                     >
                       Previous
@@ -1246,7 +1387,9 @@ export default function EnhancedBillingHistory() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
                       disabled={currentPage === totalPages}
                     >
                       Next
@@ -1274,33 +1417,55 @@ export default function EnhancedBillingHistory() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Bill Number:</span>
-                      <span className="font-medium">{selectedBill.billNumber}</span>
+                      <span className="font-medium">
+                        {selectedBill.billNumber}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Type:</span>
-                      <Badge className={cn("text-xs", getTypeBadge(selectedBill.billType))}>
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getTypeBadge(selectedBill.billType),
+                        )}
+                      >
                         {selectedBill.billType}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Date:</span>
-                      <span className="font-medium">{formatDate(selectedBill.billDate)}</span>
+                      <span className="font-medium">
+                        {formatDate(selectedBill.billDate)}
+                      </span>
                     </div>
                     {selectedBill.dueDate && (
                       <div className="flex justify-between">
-                        <span>{selectedBill.billType === 'Quotation' ? 'Valid Until:' : 'Due Date:'}</span>
-                        <span className="font-medium">{formatDate(selectedBill.dueDate)}</span>
+                        <span>
+                          {selectedBill.billType === "Quotation"
+                            ? "Valid Until:"
+                            : "Due Date:"}
+                        </span>
+                        <span className="font-medium">
+                          {formatDate(selectedBill.dueDate)}
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span>Status:</span>
-                      <Badge className={cn("text-xs", getStatusBadge(selectedBill.status))}>
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getStatusBadge(selectedBill.status),
+                        )}
+                      >
                         {selectedBill.status}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Created by:</span>
-                      <span className="font-medium">{selectedBill.createdBy}</span>
+                      <span className="font-medium">
+                        {selectedBill.createdBy}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1310,26 +1475,36 @@ export default function EnhancedBillingHistory() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Name:</span>
-                      <span className="font-medium">{selectedBill.customer.name}</span>
+                      <span className="font-medium">
+                        {selectedBill.customer.name}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Phone:</span>
-                      <span className="font-medium">{selectedBill.customer.phone}</span>
+                      <span className="font-medium">
+                        {selectedBill.customer.phone}
+                      </span>
                     </div>
                     {selectedBill.customer.email && (
                       <div className="flex justify-between">
                         <span>Email:</span>
-                        <span className="font-medium">{selectedBill.customer.email}</span>
+                        <span className="font-medium">
+                          {selectedBill.customer.email}
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span>State:</span>
-                      <span className="font-medium">{selectedBill.customer.state}</span>
+                      <span className="font-medium">
+                        {selectedBill.customer.state}
+                      </span>
                     </div>
                     {selectedBill.customer.gstNumber && (
                       <div className="flex justify-between">
                         <span>GST:</span>
-                        <span className="font-medium">{selectedBill.customer.gstNumber}</span>
+                        <span className="font-medium">
+                          {selectedBill.customer.gstNumber}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -1348,7 +1523,9 @@ export default function EnhancedBillingHistory() {
                     {selectedBill.discountAmount > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>Discount:</span>
-                        <span>-{formatCurrency(selectedBill.discountAmount)}</span>
+                        <span>
+                          -{formatCurrency(selectedBill.discountAmount)}
+                        </span>
                       </div>
                     )}
                     {selectedBill.totalTax > 0 && (
@@ -1371,7 +1548,12 @@ export default function EnhancedBillingHistory() {
                     </div>
                     <div className="flex justify-between">
                       <span>Payment Status:</span>
-                      <Badge className={cn("text-xs", getPaymentBadge(selectedBill.paymentStatus))}>
+                      <Badge
+                        className={cn(
+                          "text-xs",
+                          getPaymentBadge(selectedBill.paymentStatus),
+                        )}
+                      >
                         {selectedBill.paymentStatus}
                       </Badge>
                     </div>
@@ -1381,7 +1563,9 @@ export default function EnhancedBillingHistory() {
 
               {/* Items */}
               <div>
-                <h4 className="font-semibold mb-2">Items ({selectedBill.items.length})</h4>
+                <h4 className="font-semibold mb-2">
+                  Items ({selectedBill.items.length})
+                </h4>
                 <div className="overflow-x-auto">
                   <table className="w-full border rounded-lg">
                     <thead>
@@ -1392,9 +1576,10 @@ export default function EnhancedBillingHistory() {
                         <th className="p-3 text-right">Rate</th>
                         <th className="p-3 text-right">Disc%</th>
                         <th className="p-3 text-right">Taxable</th>
-                        {selectedBill.billType === 'GST' && (
+                        {selectedBill.billType === "GST" && (
                           <>
-                            {selectedBill.customer.state === selectedBill.company.state ? (
+                            {selectedBill.customer.state ===
+                            selectedBill.company.state ? (
                               <>
                                 <th className="p-3 text-right">CGST</th>
                                 <th className="p-3 text-right">SGST</th>
@@ -1411,27 +1596,46 @@ export default function EnhancedBillingHistory() {
                       {selectedBill.items.map((item, index) => (
                         <tr key={index} className="border-t">
                           <td className="p-3">
-                            <div className="font-medium">{item.productName}</div>
-                            <div className="text-sm text-gray-500">{item.unit}</div>
+                            <div className="font-medium">
+                              {item.productName}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {item.unit}
+                            </div>
                           </td>
-                          <td className="p-3 text-center text-sm">{item.hsnCode}</td>
+                          <td className="p-3 text-center text-sm">
+                            {item.hsnCode}
+                          </td>
                           <td className="p-3 text-center">{item.quantity}</td>
-                          <td className="p-3 text-right">{formatCurrency(item.rate)}</td>
+                          <td className="p-3 text-right">
+                            {formatCurrency(item.rate)}
+                          </td>
                           <td className="p-3 text-right">{item.discount}%</td>
-                          <td className="p-3 text-right">{formatCurrency(item.taxableAmount)}</td>
-                          {selectedBill.billType === 'GST' && (
+                          <td className="p-3 text-right">
+                            {formatCurrency(item.taxableAmount)}
+                          </td>
+                          {selectedBill.billType === "GST" && (
                             <>
-                              {selectedBill.customer.state === selectedBill.company.state ? (
+                              {selectedBill.customer.state ===
+                              selectedBill.company.state ? (
                                 <>
-                                  <td className="p-3 text-right">{formatCurrency(item.cgstAmount)}</td>
-                                  <td className="p-3 text-right">{formatCurrency(item.sgstAmount)}</td>
+                                  <td className="p-3 text-right">
+                                    {formatCurrency(item.cgstAmount)}
+                                  </td>
+                                  <td className="p-3 text-right">
+                                    {formatCurrency(item.sgstAmount)}
+                                  </td>
                                 </>
                               ) : (
-                                <td className="p-3 text-right">{formatCurrency(item.igstAmount)}</td>
+                                <td className="p-3 text-right">
+                                  {formatCurrency(item.igstAmount)}
+                                </td>
                               )}
                             </>
                           )}
-                          <td className="p-3 text-right font-medium">{formatCurrency(item.totalAmount)}</td>
+                          <td className="p-3 text-right font-medium">
+                            {formatCurrency(item.totalAmount)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1442,22 +1646,36 @@ export default function EnhancedBillingHistory() {
               {/* Payment History */}
               {selectedBill.payments.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">Payment History ({selectedBill.payments.length})</h4>
+                  <h4 className="font-semibold mb-2">
+                    Payment History ({selectedBill.payments.length})
+                  </h4>
                   <div className="space-y-2">
                     {selectedBill.payments.map((payment) => (
-                      <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                      <div
+                        key={payment.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                      >
                         <div className="flex items-center gap-3">
-                          {payment.method === 'Cash' && <Banknote className="h-4 w-4" />}
-                          {payment.method === 'UPI' && <Smartphone className="h-4 w-4" />}
-                          {payment.method === 'Card' && <CreditCard className="h-4 w-4" />}
+                          {payment.method === "Cash" && (
+                            <Banknote className="h-4 w-4" />
+                          )}
+                          {payment.method === "UPI" && (
+                            <Smartphone className="h-4 w-4" />
+                          )}
+                          {payment.method === "Card" && (
+                            <CreditCard className="h-4 w-4" />
+                          )}
                           <div>
                             <div className="font-medium">{payment.method}</div>
                             <div className="text-sm text-gray-500">
                               {formatDate(payment.date)}
-                              {payment.reference && ` • Ref: ${payment.reference}`}
+                              {payment.reference &&
+                                ` • Ref: ${payment.reference}`}
                             </div>
                             {payment.notes && (
-                              <div className="text-sm text-gray-500">{payment.notes}</div>
+                              <div className="text-sm text-gray-500">
+                                {payment.notes}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1476,13 +1694,17 @@ export default function EnhancedBillingHistory() {
                   {selectedBill.notes && (
                     <div>
                       <h4 className="font-semibold mb-2">Notes</h4>
-                      <p className="text-sm bg-gray-50 p-3 rounded">{selectedBill.notes}</p>
+                      <p className="text-sm bg-gray-50 p-3 rounded">
+                        {selectedBill.notes}
+                      </p>
                     </div>
                   )}
                   {selectedBill.terms && (
                     <div>
                       <h4 className="font-semibold mb-2">Terms & Conditions</h4>
-                      <div className="text-sm bg-gray-50 p-3 rounded whitespace-pre-line">{selectedBill.terms}</div>
+                      <div className="text-sm bg-gray-50 p-3 rounded whitespace-pre-line">
+                        {selectedBill.terms}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1490,20 +1712,31 @@ export default function EnhancedBillingHistory() {
 
               {/* Actions */}
               <div className="flex flex-wrap gap-2 pt-4 border-t">
-                <Button onClick={() => selectedBill && downloadBillPDF(selectedBill)}>
+                <Button
+                  onClick={() => selectedBill && downloadBillPDF(selectedBill)}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Download PDF
                 </Button>
-                <Button variant="outline" onClick={() => handleEdit(selectedBill)}>
+                <Button
+                  variant="outline"
+                  onClick={() => handleEdit(selectedBill)}
+                >
                   <Edit2 className="h-4 w-4 mr-2" />
                   Edit Bill
                 </Button>
-                <Button variant="outline" onClick={() => handleDuplicate(selectedBill)}>
+                <Button
+                  variant="outline"
+                  onClick={() => handleDuplicate(selectedBill)}
+                >
                   <Copy className="h-4 w-4 mr-2" />
                   Duplicate
                 </Button>
-                {selectedBill.status === 'Draft' && (
-                  <Button variant="outline" onClick={() => updateBillStatus(selectedBill.id, 'Sent')}>
+                {selectedBill.status === "Draft" && (
+                  <Button
+                    variant="outline"
+                    onClick={() => updateBillStatus(selectedBill.id, "Sent")}
+                  >
                     <Send className="h-4 w-4 mr-2" />
                     Send Bill
                   </Button>
@@ -1516,7 +1749,7 @@ export default function EnhancedBillingHistory() {
                   <Share className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => setSelectedBill(null)}
                   className="ml-auto"
@@ -1530,12 +1763,17 @@ export default function EnhancedBillingHistory() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteBillId} onOpenChange={() => setDeleteBillId(null)}>
+      <AlertDialog
+        open={!!deleteBillId}
+        onOpenChange={() => setDeleteBillId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Bill</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this bill? This action cannot be undone and will remove all associated data including payment history.
+              Are you sure you want to delete this bill? This action cannot be
+              undone and will remove all associated data including payment
+              history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

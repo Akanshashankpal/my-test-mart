@@ -1,37 +1,40 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: 'https://billing-system-i3py.onrender.com',
+  baseURL: "https://billing-system-i3py.onrender.com",
   timeout: 15000, // Increased timeout for slow connections
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Add API health check
 export const healthCheck = async () => {
   try {
-    console.log('Health check - Testing API connectivity to:', api.defaults.baseURL);
+    console.log(
+      "Health check - Testing API connectivity to:",
+      api.defaults.baseURL,
+    );
 
     // Try a simple GET request to test connectivity
-    const response = await api.get('/api/auth/me', {
+    const response = await api.get("/api/auth/me", {
       headers: {
-        'Authorization': 'Bearer test-token' // This will fail but test connectivity
+        Authorization: "Bearer test-token", // This will fail but test connectivity
       },
-      timeout: 5000
+      timeout: 5000,
     });
     return { success: true, data: response.data };
   } catch (error: any) {
-    console.log('Health check - API test result:', {
+    console.log("Health check - API test result:", {
       status: error.response?.status,
       message: error.message,
-      baseURL: api.defaults.baseURL
+      baseURL: api.defaults.baseURL,
     });
 
     // If we get a 401, that means the server is responding (just unauthorized)
     if (error.response?.status === 401) {
-      return { success: true, data: 'API is reachable' };
+      return { success: true, data: "API is reachable" };
     }
 
     return { success: false, error };
@@ -41,7 +44,7 @@ export const healthCheck = async () => {
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('electromart_token');
+    const token = localStorage.getItem("electromart_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -49,7 +52,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle errors and token refresh
@@ -58,191 +61,216 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('API Error Details:', {
+    console.error("API Error Details:", {
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
     });
 
     // Handle network errors
     if (!error.response) {
-      error.message = 'Network Error: Please check your internet connection';
+      error.message = "Network Error: Please check your internet connection";
       return Promise.reject(error);
     }
 
     // Handle different HTTP status codes
     switch (error.response?.status) {
       case 400:
-        error.message = error.response?.data?.message || 'Bad request. Please check your input.';
+        error.message =
+          error.response?.data?.message ||
+          "Bad request. Please check your input.";
         break;
       case 401:
-        error.message = error.response?.data?.message || 'Invalid credentials';
+        error.message = error.response?.data?.message || "Invalid credentials";
         // Only redirect to login if not already on login page
-        if (!window.location.pathname.includes('/login')) {
-          localStorage.removeItem('electromart_token');
-          localStorage.removeItem('electromart_user');
-          window.location.href = '/login';
+        if (!window.location.pathname.includes("/login")) {
+          localStorage.removeItem("electromart_token");
+          localStorage.removeItem("electromart_user");
+          window.location.href = "/login";
         }
         break;
       case 403:
-        error.message = 'Access forbidden. You do not have permission.';
+        error.message = "Access forbidden. You do not have permission.";
         break;
       case 404:
-        error.message = 'Resource not found. Please check the URL.';
+        error.message = "Resource not found. Please check the URL.";
         break;
       case 422:
-        error.message = error.response?.data?.message || 'Validation error. Please check your input.';
+        error.message =
+          error.response?.data?.message ||
+          "Validation error. Please check your input.";
         break;
       case 500:
-        error.message = 'Internal server error. Please try again later.';
+        error.message = "Internal server error. Please try again later.";
         break;
       case 502:
-        error.message = 'Bad gateway. Server is temporarily unavailable.';
+        error.message = "Bad gateway. Server is temporarily unavailable.";
         break;
       case 503:
-        error.message = 'Service unavailable. Please try again later.';
+        error.message = "Service unavailable. Please try again later.";
         break;
       case 504:
-        error.message = 'Gateway timeout. Server is taking too long to respond.';
+        error.message =
+          "Gateway timeout. Server is taking too long to respond.";
         break;
       default:
-        const detailedMessage = error.response?.data?.message ||
-                              error.response?.data?.error ||
-                              `HTTP ${error.response?.status}: ${error.response?.statusText}`;
+        const detailedMessage =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          `HTTP ${error.response?.status}: ${error.response?.statusText}`;
         error.message = detailedMessage;
     }
 
     return Promise.reject(error);
-  }
+  },
 );
-
 
 // Auth API functions
 export const authAPI = {
   login: async (email: string, password: string) => {
-    console.log('API Login - Attempting login with:', { email, baseURL: api.defaults.baseURL });
+    console.log("API Login - Attempting login with:", {
+      email,
+      baseURL: api.defaults.baseURL,
+    });
 
     try {
-      const response = await api.post('/api/auth/login', { email, password });
-      console.log('API Login - Success:', response.data);
+      const response = await api.post("/api/auth/login", { email, password });
+      console.log("API Login - Success:", response.data);
       return response.data;
     } catch (error: any) {
-      console.error('API Login - Failed:', {
+      console.error("API Login - Failed:", {
         error: error.message,
         status: error.response?.status,
         data: error.response?.data,
-        url: error.config?.url
+        url: error.config?.url,
       });
       throw error;
     }
   },
 
   logout: async () => {
-    return { success: true, message: 'Logged out successfully' };
+    return { success: true, message: "Logged out successfully" };
   },
 
   getProfile: async () => {
-    const response = await api.get('/api/auth/me');
+    const response = await api.get("/api/auth/me");
     return response.data;
   },
 
-  register: async (name: string, email: string, password: string, role?: string) => {
-    const response = await api.post('/api/auth/register', { name, email, password, role });
+  register: async (
+    name: string,
+    email: string,
+    password: string,
+    role?: string,
+  ) => {
+    const response = await api.post("/api/auth/register", {
+      name,
+      email,
+      password,
+      role,
+    });
     return response.data;
   },
 
   updateProfile: async (name?: string, email?: string, avatar?: string) => {
-    const response = await api.put('/api/auth/profile', { name, email, avatar });
+    const response = await api.put("/api/auth/profile", {
+      name,
+      email,
+      avatar,
+    });
     return response.data;
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await api.put('/api/auth/password', { currentPassword, newPassword });
+    const response = await api.put("/api/auth/password", {
+      currentPassword,
+      newPassword,
+    });
     return response.data;
-  }
+  },
 };
 
 // Dashboard API functions
 export const dashboardAPI = {
   getStats: async () => {
-    const response = await api.get('/api/dashboard/stats');
+    const response = await api.get("/api/dashboard/stats");
     return response.data;
   },
-  
+
   getNotifications: async () => {
-    const response = await api.get('/api/dashboard/notifications');
+    const response = await api.get("/api/dashboard/notifications");
     return response.data;
   },
-  
+
   getRecentTransactions: async () => {
-    const response = await api.get('/api/dashboard/transactions');
+    const response = await api.get("/api/dashboard/transactions");
     return response.data;
-  }
+  },
 };
 
 // Products API functions
 export const productsAPI = {
   getProducts: async (params?: any) => {
-    const response = await api.get('/api/products', { params });
+    const response = await api.get("/api/products", { params });
     return response.data;
   },
-  
+
   getProduct: async (id: string) => {
     const response = await api.get(`/api/products/${id}`);
     return response.data;
   },
-  
+
   createProduct: async (data: any) => {
-    const response = await api.post('/api/products', data);
+    const response = await api.post("/api/products", data);
     return response.data;
   },
-  
+
   updateProduct: async (id: string, data: any) => {
     const response = await api.put(`/api/products/${id}`, data);
     return response.data;
   },
-  
+
   deleteProduct: async (id: string) => {
     const response = await api.delete(`/api/products/${id}`);
     return response.data;
-  }
+  },
 };
 
 // Customers API functions
 export const customersAPI = {
   getCustomers: async (params?: any) => {
-    const response = await api.get('/api/customers', { params });
+    const response = await api.get("/api/customers", { params });
     return response.data;
   },
-  
+
   getCustomer: async (id: string) => {
     const response = await api.get(`/api/customers/${id}`);
     return response.data;
   },
-  
+
   createCustomer: async (data: any) => {
-    const response = await api.post('/api/customers', data);
+    const response = await api.post("/api/customers", data);
     return response.data;
   },
-  
+
   updateCustomer: async (id: string, data: any) => {
     const response = await api.put(`/api/customers/${id}`, data);
     return response.data;
   },
-  
+
   deleteCustomer: async (id: string) => {
     const response = await api.delete(`/api/customers/${id}`);
     return response.data;
-  }
+  },
 };
 
 // Bills API functions
 export const billsAPI = {
   getBills: async (params?: any) => {
-    const response = await api.get('/api/bills', { params });
+    const response = await api.get("/api/bills", { params });
     return response.data;
   },
 
@@ -252,7 +280,7 @@ export const billsAPI = {
   },
 
   createBill: async (data: any) => {
-    const response = await api.post('/api/bills', data);
+    const response = await api.post("/api/bills", data);
     return response.data;
   },
 
@@ -268,29 +296,31 @@ export const billsAPI = {
 
   generatePDF: async (id: string) => {
     const response = await api.get(`/api/bills/${id}/pdf`, {
-      responseType: 'blob'
+      responseType: "blob",
     });
     return response.data;
   },
 
   getDashboardStats: async () => {
-    const response = await api.get('/api/bills/dashboard');
+    const response = await api.get("/api/bills/dashboard");
     return response.data;
   },
 
   // Sales Returns API
   getSalesReturns: async (params?: any) => {
-    const response = await api.get('/api/sales-returns', { params });
+    const response = await api.get("/api/sales-returns", { params });
     return response.data;
   },
 
   createSalesReturn: async (data: any) => {
-    const response = await api.post('/api/sales-returns', data);
+    const response = await api.post("/api/sales-returns", data);
     return response.data;
   },
 
   updateSalesReturnStatus: async (id: string, status: string) => {
-    const response = await api.put(`/api/sales-returns/${id}/status`, { status });
+    const response = await api.put(`/api/sales-returns/${id}/status`, {
+      status,
+    });
     return response.data;
   },
 
@@ -303,37 +333,38 @@ export const billsAPI = {
 
     const isInterState = billData.customer?.state !== billData.company?.state;
 
-    const calculatedItems = billData.items?.map((item: any) => {
-      const taxableAmount = item.quantity * item.rate;
-      const gstAmount = (taxableAmount * (item.gstRate || 0)) / 100;
+    const calculatedItems =
+      billData.items?.map((item: any) => {
+        const taxableAmount = item.quantity * item.rate;
+        const gstAmount = (taxableAmount * (item.gstRate || 0)) / 100;
 
-      let cgstAmount = 0;
-      let sgstAmount = 0;
-      let igstAmount = 0;
+        let cgstAmount = 0;
+        let sgstAmount = 0;
+        let igstAmount = 0;
 
-      if (billData.billType === "GST") {
-        if (isInterState) {
-          igstAmount = gstAmount;
-        } else {
-          cgstAmount = gstAmount / 2;
-          sgstAmount = gstAmount / 2;
+        if (billData.billType === "GST") {
+          if (isInterState) {
+            igstAmount = gstAmount;
+          } else {
+            cgstAmount = gstAmount / 2;
+            sgstAmount = gstAmount / 2;
+          }
         }
-      }
 
-      subtotal += taxableAmount;
-      cgstTotal += cgstAmount;
-      sgstTotal += sgstAmount;
-      igstTotal += igstAmount;
+        subtotal += taxableAmount;
+        cgstTotal += cgstAmount;
+        sgstTotal += sgstAmount;
+        igstTotal += igstAmount;
 
-      return {
-        ...item,
-        taxableAmount,
-        cgstAmount,
-        sgstAmount,
-        igstAmount,
-        totalAmount: taxableAmount + gstAmount,
-      };
-    }) || [];
+        return {
+          ...item,
+          taxableAmount,
+          cgstAmount,
+          sgstAmount,
+          igstAmount,
+          totalAmount: taxableAmount + gstAmount,
+        };
+      }) || [];
 
     const discountAmount = (subtotal * (billData.discountPercent || 0)) / 100;
     const taxableAmountAfterDiscount = subtotal - discountAmount;
@@ -355,34 +386,34 @@ export const billsAPI = {
       roundOffAmount,
       finalAmount,
     };
-  }
+  },
 };
 
 // Simple connectivity test function (can be called from browser console)
 export const testAPIConnection = async () => {
-  console.log('Testing API connection to:', api.defaults.baseURL);
+  console.log("Testing API connection to:", api.defaults.baseURL);
 
   try {
     // Test with a basic fetch to bypass axios interceptors
     const response = await fetch(`${api.defaults.baseURL}/api/auth/login`, {
-      method: 'OPTIONS'
+      method: "OPTIONS",
     });
 
-    console.log('Fetch test result:', {
+    console.log("Fetch test result:", {
       status: response.status,
       statusText: response.statusText,
-      headers: Object.fromEntries(response.headers.entries())
+      headers: Object.fromEntries(response.headers.entries()),
     });
 
     return { success: true, status: response.status };
   } catch (error) {
-    console.error('Fetch test failed:', error);
+    console.error("Fetch test failed:", error);
     return { success: false, error: error.message };
   }
 };
 
 // Make test function available globally for debugging
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   (window as any).testAPIConnection = testAPIConnection;
 }
 

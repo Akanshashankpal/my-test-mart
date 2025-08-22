@@ -1,24 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Plus,
   User,
@@ -44,10 +44,10 @@ import {
   DollarSign,
   Search,
   Edit,
-  Copy
-} from 'lucide-react';
-import { billsAPI, customersAPI, productsAPI } from '@/lib/api';
-import { cn } from '@/lib/utils';
+  Copy,
+} from "lucide-react";
+import { billsAPI, customersAPI, productsAPI } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 interface Customer {
   id: string;
@@ -57,7 +57,7 @@ interface Customer {
   address: string;
   gstNumber?: string;
   state: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 interface Product {
@@ -88,7 +88,7 @@ interface BillItem {
 interface Bill {
   id?: string;
   billNumber?: string;
-  billType: 'GST' | 'Non-GST' | 'Demo';
+  billType: "GST" | "Non-GST" | "Demo";
   financialYear: string;
   billDate: string;
   dueDate?: string;
@@ -122,67 +122,67 @@ interface Bill {
   totalTax: number;
   roundOffAmount: number;
   finalAmount: number;
-  paymentStatus: 'Paid' | 'Pending' | 'Partial' | 'Overdue';
+  paymentStatus: "Paid" | "Pending" | "Partial" | "Overdue";
   paymentMethod?: string;
   notes?: string;
-  status: 'Draft' | 'Sent' | 'Paid' | 'Cancelled';
+  status: "Draft" | "Sent" | "Paid" | "Cancelled";
 }
 
 // State codes mapping
 const stateCodes: { [key: string]: string } = {
-  'Andhra Pradesh': '37',
-  'Arunachal Pradesh': '12',
-  'Assam': '18',
-  'Bihar': '10',
-  'Chhattisgarh': '22',
-  'Goa': '30',
-  'Gujarat': '24',
-  'Haryana': '06',
-  'Himachal Pradesh': '02',
-  'Jharkhand': '20',
-  'Karnataka': '29',
-  'Kerala': '32',
-  'Madhya Pradesh': '23',
-  'Maharashtra': '27',
-  'Manipur': '14',
-  'Meghalaya': '17',
-  'Mizoram': '15',
-  'Nagaland': '13',
-  'Odisha': '21',
-  'Punjab': '03',
-  'Rajasthan': '08',
-  'Sikkim': '11',
-  'Tamil Nadu': '33',
-  'Telangana': '36',
-  'Tripura': '16',
-  'Uttar Pradesh': '09',
-  'Uttarakhand': '05',
-  'West Bengal': '19',
-  'Delhi': '07',
+  "Andhra Pradesh": "37",
+  "Arunachal Pradesh": "12",
+  Assam: "18",
+  Bihar: "10",
+  Chhattisgarh: "22",
+  Goa: "30",
+  Gujarat: "24",
+  Haryana: "06",
+  "Himachal Pradesh": "02",
+  Jharkhand: "20",
+  Karnataka: "29",
+  Kerala: "32",
+  "Madhya Pradesh": "23",
+  Maharashtra: "27",
+  Manipur: "14",
+  Meghalaya: "17",
+  Mizoram: "15",
+  Nagaland: "13",
+  Odisha: "21",
+  Punjab: "03",
+  Rajasthan: "08",
+  Sikkim: "11",
+  "Tamil Nadu": "33",
+  Telangana: "36",
+  Tripura: "16",
+  "Uttar Pradesh": "09",
+  Uttarakhand: "05",
+  "West Bengal": "19",
+  Delhi: "07",
 };
 
 const defaultCompany = {
-  name: 'ElectroMart Pvt Ltd',
-  address: '123 Business Park, Electronic City, Bangalore, Karnataka 560100',
-  gstNumber: '29ABCDE1234F1Z5',
-  state: 'Karnataka',
-  stateCode: '29',
-  phone: '+91 80 2345 6789',
-  email: 'info@electromart.com'
+  name: "ElectroMart Pvt Ltd",
+  address: "123 Business Park, Electronic City, Bangalore, Karnataka 560100",
+  gstNumber: "29ABCDE1234F1Z5",
+  state: "Karnataka",
+  stateCode: "29",
+  phone: "+91 80 2345 6789",
+  email: "info@electromart.com",
 };
 
 export default function EnhancedBilling() {
   const [bill, setBill] = useState<Bill>({
-    billType: 'GST',
-    financialYear: '2024-25',
-    billDate: new Date().toISOString().split('T')[0],
+    billType: "GST",
+    financialYear: "2024-25",
+    billDate: new Date().toISOString().split("T")[0],
     customer: {
-      id: '',
-      name: '',
-      phone: '',
-      address: '',
-      state: 'Karnataka',
-      stateCode: '29'
+      id: "",
+      name: "",
+      phone: "",
+      address: "",
+      state: "Karnataka",
+      stateCode: "29",
     },
     company: defaultCompany,
     items: [],
@@ -196,15 +196,15 @@ export default function EnhancedBilling() {
     totalTax: 0,
     roundOffAmount: 0,
     finalAmount: 0,
-    paymentStatus: 'Pending',
-    status: 'Draft',
-    notes: ''
+    paymentStatus: "Pending",
+    status: "Draft",
+    notes: "",
   });
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [searchCustomer, setSearchCustomer] = useState('');
-  const [searchProduct, setSearchProduct] = useState('');
+  const [searchCustomer, setSearchCustomer] = useState("");
+  const [searchProduct, setSearchProduct] = useState("");
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -225,7 +225,7 @@ export default function EnhancedBilling() {
         setCustomers(response.data.customers);
       }
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      console.error("Error fetching customers:", error);
     }
   };
 
@@ -236,14 +236,14 @@ export default function EnhancedBilling() {
         setProducts(response.data.products);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
     }
   };
 
   // Calculate bill amounts
   const calculateBill = () => {
     const calculated = billsAPI.calculateBillAmounts(bill);
-    setBill(prev => ({ ...prev, ...calculated }));
+    setBill((prev) => ({ ...prev, ...calculated }));
   };
 
   useEffect(() => {
@@ -252,15 +252,15 @@ export default function EnhancedBilling() {
 
   // Customer selection
   const selectCustomer = (customer: Customer) => {
-    setBill(prev => ({
+    setBill((prev) => ({
       ...prev,
       customer: {
         ...customer,
-        stateCode: stateCodes[customer.state] || '29'
-      }
+        stateCode: stateCodes[customer.state] || "29",
+      },
     }));
     setIsCustomerDialogOpen(false);
-    setSearchCustomer('');
+    setSearchCustomer("");
   };
 
   // Add item to bill
@@ -270,14 +270,14 @@ export default function EnhancedBilling() {
     const rate = customRate || selectedProduct.price;
     const taxableAmount = productQuantity * rate;
     const gstAmount = (taxableAmount * selectedProduct.gstRate) / 100;
-    
+
     const isInterState = bill.customer.state !== bill.company.state;
-    
+
     let cgstAmount = 0;
     let sgstAmount = 0;
     let igstAmount = 0;
 
-    if (bill.billType === 'GST') {
+    if (bill.billType === "GST") {
       if (isInterState) {
         igstAmount = gstAmount;
       } else {
@@ -298,12 +298,12 @@ export default function EnhancedBilling() {
       cgstAmount,
       sgstAmount,
       igstAmount,
-      totalAmount: taxableAmount + gstAmount
+      totalAmount: taxableAmount + gstAmount,
     };
 
-    setBill(prev => ({
+    setBill((prev) => ({
       ...prev,
-      items: [...prev.items, newItem]
+      items: [...prev.items, newItem],
     }));
 
     // Reset form
@@ -311,33 +311,33 @@ export default function EnhancedBilling() {
     setProductQuantity(1);
     setCustomRate(null);
     setIsProductDialogOpen(false);
-    setSearchProduct('');
+    setSearchProduct("");
   };
 
   // Remove item
   const removeItem = (itemId: string) => {
-    setBill(prev => ({
+    setBill((prev) => ({
       ...prev,
-      items: prev.items.filter(item => item.id !== itemId)
+      items: prev.items.filter((item) => item.id !== itemId),
     }));
   };
 
   // Update item quantity
   const updateItemQuantity = (itemId: string, quantity: number) => {
-    setBill(prev => ({
+    setBill((prev) => ({
       ...prev,
-      items: prev.items.map(item => {
+      items: prev.items.map((item) => {
         if (item.id === itemId) {
           const taxableAmount = quantity * item.rate;
           const gstAmount = (taxableAmount * item.gstRate) / 100;
-          
+
           const isInterState = bill.customer.state !== bill.company.state;
-          
+
           let cgstAmount = 0;
           let sgstAmount = 0;
           let igstAmount = 0;
 
-          if (bill.billType === 'GST') {
+          if (bill.billType === "GST") {
             if (isInterState) {
               igstAmount = gstAmount;
             } else {
@@ -353,29 +353,29 @@ export default function EnhancedBilling() {
             cgstAmount,
             sgstAmount,
             igstAmount,
-            totalAmount: taxableAmount + gstAmount
+            totalAmount: taxableAmount + gstAmount,
           };
         }
         return item;
-      })
+      }),
     }));
   };
 
   // Save bill
   const saveBill = async () => {
     if (!bill.customer.name || bill.items.length === 0) {
-      alert('Please select customer and add at least one item');
+      alert("Please select customer and add at least one item");
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await billsAPI.createBill(bill);
-      alert('Bill saved successfully!');
+      alert("Bill saved successfully!");
       // Reset form or redirect
     } catch (error) {
-      console.error('Error saving bill:', error);
-      alert('Error saving bill');
+      console.error("Error saving bill:", error);
+      alert("Error saving bill");
     } finally {
       setIsLoading(false);
     }
@@ -384,34 +384,36 @@ export default function EnhancedBilling() {
   // Generate PDF
   const generatePDF = async () => {
     if (!bill.id) {
-      alert('Please save the bill first');
+      alert("Please save the bill first");
       return;
     }
 
     try {
       const pdfBlob = await billsAPI.generatePDF(bill.id);
       const url = window.URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
+      const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
-      a.download = `Bill-${bill.billNumber || 'draft'}.pdf`;
+      a.download = `Bill-${bill.billNumber || "draft"}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF');
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF");
     }
   };
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchCustomer.toLowerCase()) ||
-    customer.phone.includes(searchCustomer)
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchCustomer.toLowerCase()) ||
+      customer.phone.includes(searchCustomer),
   );
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchProduct.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchProduct.toLowerCase()),
   );
 
   return (
@@ -420,7 +422,9 @@ export default function EnhancedBilling() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Create Bill</h1>
-          <p className="text-gray-600 mt-1">Generate GST/Non-GST bills with automatic calculations</p>
+          <p className="text-gray-600 mt-1">
+            Generate GST/Non-GST bills with automatic calculations
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.history.back()}>
@@ -433,7 +437,7 @@ export default function EnhancedBilling() {
           </Button>
           <Button onClick={saveBill} disabled={isLoading}>
             <Save className="h-4 w-4 mr-2" />
-            {isLoading ? 'Saving...' : 'Save Bill'}
+            {isLoading ? "Saving..." : "Save Bill"}
           </Button>
         </div>
       </div>
@@ -453,9 +457,12 @@ export default function EnhancedBilling() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="billType">Bill Type</Label>
-                  <Select value={bill.billType} onValueChange={(value: 'GST' | 'Non-GST' | 'Demo') => 
-                    setBill(prev => ({ ...prev, billType: value }))
-                  }>
+                  <Select
+                    value={bill.billType}
+                    onValueChange={(value: "GST" | "Non-GST" | "Demo") =>
+                      setBill((prev) => ({ ...prev, billType: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -472,14 +479,19 @@ export default function EnhancedBilling() {
                     id="billDate"
                     type="date"
                     value={bill.billDate}
-                    onChange={(e) => setBill(prev => ({ ...prev, billDate: e.target.value }))}
+                    onChange={(e) =>
+                      setBill((prev) => ({ ...prev, billDate: e.target.value }))
+                    }
                   />
                 </div>
                 <div>
                   <Label htmlFor="financialYear">Financial Year</Label>
-                  <Select value={bill.financialYear} onValueChange={(value) => 
-                    setBill(prev => ({ ...prev, financialYear: value }))
-                  }>
+                  <Select
+                    value={bill.financialYear}
+                    onValueChange={(value) =>
+                      setBill((prev) => ({ ...prev, financialYear: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -507,28 +519,40 @@ export default function EnhancedBilling() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg">{bill.customer.name}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {bill.customer.name}
+                      </h3>
                       <p className="text-gray-600">{bill.customer.phone}</p>
                       {bill.customer.email && (
                         <p className="text-gray-600">{bill.customer.email}</p>
                       )}
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => setIsCustomerDialogOpen(true)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsCustomerDialogOpen(true)}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       Change
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-600">{bill.customer.address}</p>
+                  <p className="text-sm text-gray-600">
+                    {bill.customer.address}
+                  </p>
                   <div className="flex gap-4 text-sm">
-                    <span><strong>State:</strong> {bill.customer.state}</span>
+                    <span>
+                      <strong>State:</strong> {bill.customer.state}
+                    </span>
                     {bill.customer.gstNumber && (
-                      <span><strong>GST:</strong> {bill.customer.gstNumber}</span>
+                      <span>
+                        <strong>GST:</strong> {bill.customer.gstNumber}
+                      </span>
                     )}
                   </div>
                 </div>
               ) : (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full h-20 border-dashed"
                   onClick={() => setIsCustomerDialogOpen(true)}
                 >
@@ -563,7 +587,7 @@ export default function EnhancedBilling() {
                         <TableHead className="text-center">Qty</TableHead>
                         <TableHead className="text-right">Rate</TableHead>
                         <TableHead className="text-right">GST%</TableHead>
-                        {bill.billType === 'GST' && (
+                        {bill.billType === "GST" && (
                           <>
                             <TableHead className="text-right">CGST</TableHead>
                             <TableHead className="text-right">SGST</TableHead>
@@ -579,31 +603,56 @@ export default function EnhancedBilling() {
                         <TableRow key={item.id}>
                           <TableCell>
                             <div>
-                              <div className="font-medium">{item.productName}</div>
-                              <div className="text-sm text-gray-500">{item.unit}</div>
+                              <div className="font-medium">
+                                {item.productName}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {item.unit}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
                             <Input
                               type="number"
                               value={item.quantity}
-                              onChange={(e) => updateItemQuantity(item.id, Number(e.target.value))}
+                              onChange={(e) =>
+                                updateItemQuantity(
+                                  item.id,
+                                  Number(e.target.value),
+                                )
+                              }
                               className="w-20 text-center"
                               min="1"
                             />
                           </TableCell>
-                          <TableCell className="text-right">₹{item.rate.toFixed(2)}</TableCell>
-                          <TableCell className="text-right">{item.gstRate}%</TableCell>
-                          {bill.billType === 'GST' && (
+                          <TableCell className="text-right">
+                            ₹{item.rate.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {item.gstRate}%
+                          </TableCell>
+                          {bill.billType === "GST" && (
                             <>
-                              <TableCell className="text-right">₹{item.cgstAmount.toFixed(2)}</TableCell>
-                              <TableCell className="text-right">₹{item.sgstAmount.toFixed(2)}</TableCell>
-                              <TableCell className="text-right">₹{item.igstAmount.toFixed(2)}</TableCell>
+                              <TableCell className="text-right">
+                                ₹{item.cgstAmount.toFixed(2)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                ₹{item.sgstAmount.toFixed(2)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                ₹{item.igstAmount.toFixed(2)}
+                              </TableCell>
                             </>
                           )}
-                          <TableCell className="text-right font-medium">₹{item.totalAmount.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            ₹{item.totalAmount.toFixed(2)}
+                          </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeItem(item.id)}
+                            >
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                           </TableCell>
@@ -630,8 +679,10 @@ export default function EnhancedBilling() {
             <CardContent>
               <Textarea
                 placeholder="Add any additional notes or terms..."
-                value={bill.notes || ''}
-                onChange={(e) => setBill(prev => ({ ...prev, notes: e.target.value }))}
+                value={bill.notes || ""}
+                onChange={(e) =>
+                  setBill((prev) => ({ ...prev, notes: e.target.value }))
+                }
                 rows={3}
               />
             </CardContent>
@@ -654,7 +705,7 @@ export default function EnhancedBilling() {
                   <span>Subtotal:</span>
                   <span>₹{bill.subtotal.toFixed(2)}</span>
                 </div>
-                
+
                 {bill.discountPercent > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount ({bill.discountPercent}%):</span>
@@ -667,7 +718,7 @@ export default function EnhancedBilling() {
                   <span>₹{bill.taxableAmount.toFixed(2)}</span>
                 </div>
 
-                {bill.billType === 'GST' && bill.totalTax > 0 && (
+                {bill.billType === "GST" && bill.totalTax > 0 && (
                   <>
                     {bill.cgstTotal > 0 && (
                       <div className="flex justify-between text-sm">
@@ -716,7 +767,12 @@ export default function EnhancedBilling() {
                   id="discount"
                   type="number"
                   value={bill.discountPercent}
-                  onChange={(e) => setBill(prev => ({ ...prev, discountPercent: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setBill((prev) => ({
+                      ...prev,
+                      discountPercent: Number(e.target.value),
+                    }))
+                  }
                   min="0"
                   max="100"
                   step="0.1"
@@ -729,9 +785,12 @@ export default function EnhancedBilling() {
 
                 <div>
                   <Label htmlFor="paymentStatus">Payment Status</Label>
-                  <Select value={bill.paymentStatus} onValueChange={(value: any) =>
-                    setBill(prev => ({ ...prev, paymentStatus: value }))
-                  }>
+                  <Select
+                    value={bill.paymentStatus}
+                    onValueChange={(value: any) =>
+                      setBill((prev) => ({ ...prev, paymentStatus: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -744,12 +803,15 @@ export default function EnhancedBilling() {
                   </Select>
                 </div>
 
-                {bill.paymentStatus === 'Paid' && (
+                {bill.paymentStatus === "Paid" && (
                   <div>
                     <Label htmlFor="paymentMethod">Payment Method</Label>
-                    <Select value={bill.paymentMethod || ''} onValueChange={(value) =>
-                      setBill(prev => ({ ...prev, paymentMethod: value }))
-                    }>
+                    <Select
+                      value={bill.paymentMethod || ""}
+                      onValueChange={(value) =>
+                        setBill((prev) => ({ ...prev, paymentMethod: value }))
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select payment method" />
                       </SelectTrigger>
@@ -758,7 +820,9 @@ export default function EnhancedBilling() {
                         <SelectItem value="UPI">UPI</SelectItem>
                         <SelectItem value="Credit Card">Credit Card</SelectItem>
                         <SelectItem value="Debit Card">Debit Card</SelectItem>
-                        <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                        <SelectItem value="Bank Transfer">
+                          Bank Transfer
+                        </SelectItem>
                         <SelectItem value="Cheque">Cheque</SelectItem>
                       </SelectContent>
                     </Select>
@@ -772,7 +836,13 @@ export default function EnhancedBilling() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setBill(prev => ({ ...prev, paymentStatus: 'Paid', paymentMethod: 'Cash' }))}
+                      onClick={() =>
+                        setBill((prev) => ({
+                          ...prev,
+                          paymentStatus: "Paid",
+                          paymentMethod: "Cash",
+                        }))
+                      }
                       className="text-green-600 border-green-200 hover:bg-green-50"
                     >
                       <DollarSign className="h-4 w-4 mr-1" />
@@ -781,7 +851,13 @@ export default function EnhancedBilling() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setBill(prev => ({ ...prev, paymentStatus: 'Paid', paymentMethod: 'UPI' }))}
+                      onClick={() =>
+                        setBill((prev) => ({
+                          ...prev,
+                          paymentStatus: "Paid",
+                          paymentMethod: "UPI",
+                        }))
+                      }
                       className="text-blue-600 border-blue-200 hover:bg-blue-50"
                     >
                       📱 UPI Payment
@@ -800,16 +876,25 @@ export default function EnhancedBilling() {
             <CardContent className="space-y-2 text-sm">
               <div className="font-semibold">{bill.company.name}</div>
               <div className="text-gray-600">{bill.company.address}</div>
-              <div><strong>GST:</strong> {bill.company.gstNumber}</div>
-              <div><strong>Phone:</strong> {bill.company.phone}</div>
-              <div><strong>Email:</strong> {bill.company.email}</div>
+              <div>
+                <strong>GST:</strong> {bill.company.gstNumber}
+              </div>
+              <div>
+                <strong>Phone:</strong> {bill.company.phone}
+              </div>
+              <div>
+                <strong>Email:</strong> {bill.company.email}
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
       {/* Customer Selection Dialog */}
-      <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
+      <Dialog
+        open={isCustomerDialogOpen}
+        onOpenChange={setIsCustomerDialogOpen}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Select or Add Customer</DialogTitle>
@@ -828,9 +913,9 @@ export default function EnhancedBilling() {
               <Button
                 onClick={() => {
                   // Add new customer functionality
-                  const name = prompt('Enter customer name:');
-                  const phone = prompt('Enter phone number:');
-                  const address = prompt('Enter address:');
+                  const name = prompt("Enter customer name:");
+                  const phone = prompt("Enter phone number:");
+                  const address = prompt("Enter address:");
 
                   if (name && phone && address) {
                     const newCustomer = {
@@ -838,12 +923,12 @@ export default function EnhancedBilling() {
                       name,
                       phone,
                       address,
-                      email: '',
-                      state: 'Karnataka',
-                      status: 'active' as const
+                      email: "",
+                      state: "Karnataka",
+                      status: "active" as const,
                     };
 
-                    setCustomers(prev => [...prev, newCustomer]);
+                    setCustomers((prev) => [...prev, newCustomer]);
                     selectCustomer(newCustomer);
                   }
                 }}
@@ -863,16 +948,26 @@ export default function EnhancedBilling() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold">{customer.name}</div>
-                      <div className="text-sm text-gray-600">{customer.phone}</div>
+                      <div className="text-sm text-gray-600">
+                        {customer.phone}
+                      </div>
                       {customer.email && (
-                        <div className="text-sm text-gray-600">{customer.email}</div>
+                        <div className="text-sm text-gray-600">
+                          {customer.email}
+                        </div>
                       )}
                     </div>
-                    <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        customer.status === "active" ? "default" : "secondary"
+                      }
+                    >
                       {customer.status}
                     </Badge>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">{customer.address}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {customer.address}
+                  </div>
                 </div>
               ))}
               {filteredCustomers.length === 0 && searchCustomer && (
@@ -880,8 +975,8 @@ export default function EnhancedBilling() {
                   <p>No customers found matching "{searchCustomer}"</p>
                   <Button
                     onClick={() => {
-                      const phone = prompt('Enter phone number:');
-                      const address = prompt('Enter address:');
+                      const phone = prompt("Enter phone number:");
+                      const address = prompt("Enter address:");
 
                       if (phone && address) {
                         const newCustomer = {
@@ -889,12 +984,12 @@ export default function EnhancedBilling() {
                           name: searchCustomer,
                           phone,
                           address,
-                          email: '',
-                          state: 'Karnataka',
-                          status: 'active' as const
+                          email: "",
+                          state: "Karnataka",
+                          status: "active" as const,
                         };
 
-                        setCustomers(prev => [...prev, newCustomer]);
+                        setCustomers((prev) => [...prev, newCustomer]);
                         selectCustomer(newCustomer);
                       }
                     }}
@@ -930,11 +1025,12 @@ export default function EnhancedBilling() {
               <Button
                 onClick={() => {
                   // Add new product functionality
-                  const name = prompt('Enter product name:');
-                  const priceStr = prompt('Enter price (₹):');
-                  const unit = prompt('Enter unit (e.g., pcs, kg, meter):') || 'pcs';
-                  const gstRateStr = prompt('Enter GST rate (%):') || '18';
-                  const category = prompt('Enter category:') || 'General';
+                  const name = prompt("Enter product name:");
+                  const priceStr = prompt("Enter price (₹):");
+                  const unit =
+                    prompt("Enter unit (e.g., pcs, kg, meter):") || "pcs";
+                  const gstRateStr = prompt("Enter GST rate (%):") || "18";
+                  const category = prompt("Enter category:") || "General";
 
                   if (name && priceStr) {
                     const price = parseFloat(priceStr);
@@ -948,10 +1044,10 @@ export default function EnhancedBilling() {
                         unit,
                         gstRate,
                         category,
-                        stock: 100
+                        stock: 100,
                       };
 
-                      setProducts(prev => [...prev, newProduct]);
+                      setProducts((prev) => [...prev, newProduct]);
                       setSelectedProduct(newProduct);
                       setCustomRate(price);
                     }
@@ -963,19 +1059,25 @@ export default function EnhancedBilling() {
                 Add New Product
               </Button>
             </div>
-            
+
             {selectedProduct ? (
               <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold">{selectedProduct.name}</h3>
-                    <p className="text-sm text-gray-600">{selectedProduct.category}</p>
+                    <p className="text-sm text-gray-600">
+                      {selectedProduct.category}
+                    </p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedProduct(null)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="quantity">Quantity</Label>
@@ -983,7 +1085,9 @@ export default function EnhancedBilling() {
                       id="quantity"
                       type="number"
                       value={productQuantity}
-                      onChange={(e) => setProductQuantity(Number(e.target.value))}
+                      onChange={(e) =>
+                        setProductQuantity(Number(e.target.value))
+                      }
                       min="1"
                     />
                   </div>
@@ -1004,7 +1108,7 @@ export default function EnhancedBilling() {
                     </div>
                   </div>
                 </div>
-                
+
                 <Button onClick={addItem} className="w-full">
                   Add to Bill
                 </Button>
@@ -1021,11 +1125,15 @@ export default function EnhancedBilling() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-semibold">{product.name}</div>
-                          <div className="text-sm text-gray-600">{product.category}</div>
+                          <div className="text-sm text-gray-600">
+                            {product.category}
+                          </div>
                         </div>
                         <div className="text-right">
                           <div className="font-semibold">₹{product.price}</div>
-                          <div className="text-sm text-gray-600">{product.gstRate}% GST</div>
+                          <div className="text-sm text-gray-600">
+                            {product.gstRate}% GST
+                          </div>
                         </div>
                       </div>
                       {product.stock && (
@@ -1040,10 +1148,14 @@ export default function EnhancedBilling() {
                       <p>No products found matching "{searchProduct}"</p>
                       <Button
                         onClick={() => {
-                          const priceStr = prompt('Enter price (₹):');
-                          const unit = prompt('Enter unit (e.g., pcs, kg, meter):') || 'pcs';
-                          const gstRateStr = prompt('Enter GST rate (%):') || '18';
-                          const category = prompt('Enter category:') || 'General';
+                          const priceStr = prompt("Enter price (₹):");
+                          const unit =
+                            prompt("Enter unit (e.g., pcs, kg, meter):") ||
+                            "pcs";
+                          const gstRateStr =
+                            prompt("Enter GST rate (%):") || "18";
+                          const category =
+                            prompt("Enter category:") || "General";
 
                           if (priceStr) {
                             const price = parseFloat(priceStr);
@@ -1057,10 +1169,10 @@ export default function EnhancedBilling() {
                                 unit,
                                 gstRate,
                                 category,
-                                stock: 100
+                                stock: 100,
                               };
 
-                              setProducts(prev => [...prev, newProduct]);
+                              setProducts((prev) => [...prev, newProduct]);
                               setSelectedProduct(newProduct);
                               setCustomRate(price);
                             }

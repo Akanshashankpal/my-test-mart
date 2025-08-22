@@ -26,15 +26,34 @@
   }
 
   /* Mobile typography scale */
-  .text-mobile-xs { font-size: 0.75rem; line-height: 1rem; }
-  .text-mobile-sm { font-size: 0.875rem; line-height: 1.25rem; }
-  .text-mobile-base { font-size: 1rem; line-height: 1.5rem; }
-  .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
-  .text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
+  .text-mobile-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  .text-mobile-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .text-mobile-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  .text-mobile-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  .text-mobile-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
 
   /* Mobile spacing utilities */
-  .mobile-padding { padding: 0.75rem; }
-  .mobile-margin { margin: 0.5rem; }
+  .mobile-padding {
+    padding: 0.75rem;
+  }
+  .mobile-margin {
+    margin: 0.5rem;
+  }
 
   /* Touch-friendly input styles */
   .mobile-input {
@@ -45,7 +64,9 @@
   /* Mobile card improvements */
   .mobile-card {
     border-radius: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-shadow:
+      0 1px 3px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.06);
   }
 
   /* Responsive grid utilities */
@@ -88,7 +109,11 @@
   }
 
   /* Improve tap targets on mobile */
-  button, [role="button"], input, select, textarea {
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
     touch-action: manipulation;
   }
 

@@ -34,7 +34,7 @@ import {
   X,
   FileText,
   ArrowLeft,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -82,18 +82,22 @@ export default function SimpleBilling() {
   const { addBill, bills } = useBilling();
   const { user } = useAuth();
   const { products } = useProducts();
-  
+
   // Current workflow state
-  const [currentStep, setCurrentStep] = useState<"customer" | "invoice" | "list">("list");
-  const [billingMode, setBillingMode] = useState<"GST" | "Non-GST" | "Quotation">("GST");
-  
+  const [currentStep, setCurrentStep] = useState<
+    "customer" | "invoice" | "list"
+  >("list");
+  const [billingMode, setBillingMode] = useState<
+    "GST" | "Non-GST" | "Quotation"
+  >("GST");
+
   // Customer form state
   const [customer, setCustomer] = useState<Customer>({
     name: "",
     phone: "",
     address: "",
   });
-  
+
   // Invoice state
   const [currentInvoice, setCurrentInvoice] = useState<Invoice>({
     id: "",
@@ -109,7 +113,8 @@ export default function SimpleBilling() {
     finalAmount: 0,
     billingMode: "GST",
     observation: "",
-    termsAndConditions: "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
+    termsAndConditions:
+      "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
     isReturnSale: false,
     paymentMode: "full",
     paidAmount: 0,
@@ -118,7 +123,7 @@ export default function SimpleBilling() {
     createdAt: new Date(),
     status: "draft",
   });
-  
+
   // Product adding state
   const [newItem, setNewItem] = useState({
     productName: "",
@@ -132,17 +137,20 @@ export default function SimpleBilling() {
 
   // Payment dialog state
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  
+
   // Generate bill number
   const generateBillNumber = () => {
     const timestamp = Date.now();
     const prefix = billingMode === "GST" ? "GST" : "NGST";
     return `${prefix}/24/${timestamp.toString().slice(-4)}`;
   };
-  
+
   // Calculate invoice totals
   useEffect(() => {
-    const subtotal = currentInvoice.items.reduce((sum, item) => sum + item.totalAmount, 0);
+    const subtotal = currentInvoice.items.reduce(
+      (sum, item) => sum + item.totalAmount,
+      0,
+    );
     const discountAmount = (subtotal * currentInvoice.discountPercent) / 100;
     const discountedSubtotal = subtotal - discountAmount;
 
@@ -151,7 +159,10 @@ export default function SimpleBilling() {
     let sgst = 0;
 
     if (billingMode === "GST") {
-      gstTotal = currentInvoice.items.reduce((sum, item) => sum + item.gstAmount, 0);
+      gstTotal = currentInvoice.items.reduce(
+        (sum, item) => sum + item.gstAmount,
+        0,
+      );
       cgst = gstTotal / 2;
       sgst = gstTotal / 2;
     }
@@ -159,7 +170,7 @@ export default function SimpleBilling() {
     const finalAmount = discountedSubtotal + gstTotal;
     const pendingAmount = finalAmount - currentInvoice.paidAmount;
 
-    setCurrentInvoice(prev => ({
+    setCurrentInvoice((prev) => ({
       ...prev,
       subtotal,
       discountAmount,
@@ -169,21 +180,26 @@ export default function SimpleBilling() {
       finalAmount,
       pendingAmount,
     }));
-  }, [currentInvoice.items, currentInvoice.discountPercent, currentInvoice.paidAmount, billingMode]);
-  
+  }, [
+    currentInvoice.items,
+    currentInvoice.discountPercent,
+    currentInvoice.paidAmount,
+    billingMode,
+  ]);
+
   // Start new invoice
   const startNewInvoice = () => {
     setCustomer({ name: "", phone: "", address: "" });
     setCurrentStep("customer");
   };
-  
+
   // Create invoice from customer details
   const createInvoice = () => {
     if (!customer.name || !customer.phone) {
       alert("Please fill in customer name and phone number");
       return;
     }
-    
+
     const billNumber = generateBillNumber();
     setCurrentInvoice({
       id: Date.now().toString(),
@@ -199,7 +215,8 @@ export default function SimpleBilling() {
       finalAmount: 0,
       billingMode,
       observation: "",
-      termsAndConditions: "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
+      termsAndConditions:
+        "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
       isReturnSale: false,
       paymentMode: "full",
       paidAmount: 0,
@@ -208,10 +225,10 @@ export default function SimpleBilling() {
       createdAt: new Date(),
       status: "draft",
     });
-    
+
     setCurrentStep("invoice");
   };
-  
+
   // Add item to invoice
   const addItem = () => {
     const quantity = parseFloat(newItem.quantity) || 0;
@@ -223,7 +240,8 @@ export default function SimpleBilling() {
     }
 
     const totalAmount = quantity * price;
-    const gstAmount = billingMode === "GST" ? (totalAmount * newItem.gstPercent) / 100 : 0;
+    const gstAmount =
+      billingMode === "GST" ? (totalAmount * newItem.gstPercent) / 100 : 0;
 
     const item: InvoiceItem = {
       id: Date.now().toString(),
@@ -235,7 +253,7 @@ export default function SimpleBilling() {
       gstAmount,
     };
 
-    setCurrentInvoice(prev => ({
+    setCurrentInvoice((prev) => ({
       ...prev,
       items: [...prev.items, item],
     }));
@@ -248,22 +266,22 @@ export default function SimpleBilling() {
       gstPercent: 18,
     });
   };
-  
+
   // Remove item from invoice
   const removeItem = (itemId: string) => {
-    setCurrentInvoice(prev => ({
+    setCurrentInvoice((prev) => ({
       ...prev,
-      items: prev.items.filter(item => item.id !== itemId),
+      items: prev.items.filter((item) => item.id !== itemId),
     }));
   };
-  
+
   // Save invoice
   const saveInvoice = () => {
     if (currentInvoice.items.length === 0) {
       alert("Please add at least one item to the invoice");
       return;
     }
-    
+
     const billToSave = {
       id: currentInvoice.id,
       billNumber: currentInvoice.billNumber,
@@ -275,7 +293,7 @@ export default function SimpleBilling() {
         phone: currentInvoice.customer.phone,
         address: currentInvoice.customer.address,
       },
-      items: currentInvoice.items.map(item => ({
+      items: currentInvoice.items.map((item) => ({
         productName: item.productName,
         quantity: item.quantity,
         price: item.price,
@@ -297,38 +315,43 @@ export default function SimpleBilling() {
       createdAt: currentInvoice.createdAt,
       status: "Draft" as const,
     };
-    
+
     addBill(billToSave);
     setCurrentStep("list");
     alert("Invoice saved successfully!");
   };
-  
+
   // Download PDF
   const downloadPDF = async () => {
     try {
-      const { default: jsPDF } = await import('jspdf');
+      const { default: jsPDF } = await import("jspdf");
       const doc = new jsPDF();
 
       // Enhanced Header (matching preview format)
       doc.setFontSize(24);
-      doc.setFont('helvetica', 'bold');
-      doc.text('ElectroMart', 20, 25);
+      doc.setFont("helvetica", "bold");
+      doc.text("ElectroMart", 20, 25);
 
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Business Management Solution', 20, 32);
-      doc.text('Delhi, India', 20, 38);
+      doc.setFont("helvetica", "normal");
+      doc.text("Business Management Solution", 20, 32);
+      doc.text("Delhi, India", 20, 38);
 
       // Right side header info
-      const documentTitle = billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE";
+      const documentTitle =
+        billingMode === "Quotation"
+          ? "QUOTATION"
+          : currentInvoice.isReturnSale
+            ? "RETURN INVOICE"
+            : "INVOICE";
       doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.text(documentTitle, 150, 25);
 
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.text(`No: ${currentInvoice.billNumber}`, 150, 32);
-      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 150, 38);
+      doc.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, 150, 38);
       doc.text(`Type: ${billingMode}`, 150, 44);
 
       // Header border line
@@ -336,12 +359,12 @@ export default function SimpleBilling() {
 
       // Customer details
       let yPos = 60;
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text('Bill To:', 20, yPos);
+      doc.text("Bill To:", 20, yPos);
       yPos += 8;
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.text(currentInvoice.customer.name, 20, yPos);
       yPos += 6;
@@ -354,28 +377,28 @@ export default function SimpleBilling() {
 
       // Items table header
       yPos += 10;
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text('Item', 20, yPos);
-      doc.text('Qty', 80, yPos);
-      doc.text('Rate (₹)', 105, yPos);
-      if (billingMode === 'GST') {
-        doc.text('GST%', 130, yPos);
-        doc.text('GST (₹)', 150, yPos);
+      doc.text("Item", 20, yPos);
+      doc.text("Qty", 80, yPos);
+      doc.text("Rate (₹)", 105, yPos);
+      if (billingMode === "GST") {
+        doc.text("GST%", 130, yPos);
+        doc.text("GST (₹)", 150, yPos);
       }
-      doc.text('Total (₹)', 175, yPos);
+      doc.text("Total (₹)", 175, yPos);
 
       // Table header line
       doc.line(20, yPos + 2, 190, yPos + 2);
       yPos += 8;
 
       // Items
-      doc.setFont('helvetica', 'normal');
-      currentInvoice.items.forEach(item => {
+      doc.setFont("helvetica", "normal");
+      currentInvoice.items.forEach((item) => {
         doc.text(item.productName.substring(0, 20), 20, yPos);
         doc.text(item.quantity.toString(), 80, yPos);
         doc.text(item.price.toLocaleString(), 105, yPos);
-        if (billingMode === 'GST') {
+        if (billingMode === "GST") {
           doc.text(`${item.gstPercent}%`, 130, yPos);
           doc.text(item.gstAmount.toLocaleString(), 150, yPos);
         }
@@ -389,59 +412,79 @@ export default function SimpleBilling() {
       yPos += 8;
 
       // Subtotal
-      doc.text('Subtotal:', 130, yPos);
+      doc.text("Subtotal:", 130, yPos);
       doc.text(`₹${currentInvoice.subtotal.toLocaleString()}`, 175, yPos);
       yPos += 6;
 
       // Discount
       if (currentInvoice.discountAmount > 0) {
         doc.text(`Discount (${currentInvoice.discountPercent}%):`, 130, yPos);
-        doc.text(`-₹${currentInvoice.discountAmount.toLocaleString()}`, 175, yPos);
+        doc.text(
+          `-₹${currentInvoice.discountAmount.toLocaleString()}`,
+          175,
+          yPos,
+        );
         yPos += 6;
       }
 
       // GST breakdown (matching preview format)
-      if (billingMode === 'GST' && currentInvoice.gstTotal > 0) {
-        doc.text('CGST (9%):', 130, yPos);
+      if (billingMode === "GST" && currentInvoice.gstTotal > 0) {
+        doc.text("CGST (9%):", 130, yPos);
         doc.text(`₹${currentInvoice.cgst.toLocaleString()}`, 175, yPos);
         yPos += 6;
-        doc.text('SGST (9%):', 130, yPos);
+        doc.text("SGST (9%):", 130, yPos);
         doc.text(`₹${currentInvoice.sgst.toLocaleString()}`, 175, yPos);
         yPos += 6;
-        doc.setFont('helvetica', 'bold');
-        doc.text('Total GST:', 130, yPos);
+        doc.setFont("helvetica", "bold");
+        doc.text("Total GST:", 130, yPos);
         doc.text(`₹${currentInvoice.gstTotal.toLocaleString()}`, 175, yPos);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
         yPos += 8;
       }
 
       // Final total
       doc.line(130, yPos, 190, yPos);
       yPos += 8;
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text('Final Amount:', 130, yPos);
+      doc.text("Final Amount:", 130, yPos);
       doc.text(`₹${currentInvoice.finalAmount.toLocaleString()}`, 175, yPos);
       yPos += 12;
 
       // Payment Details Section
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
-      doc.text('Payment Details:', 20, yPos);
+      doc.text("Payment Details:", 20, yPos);
       yPos += 8;
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
-      doc.text(`Method: ${currentInvoice.paymentMethod.toUpperCase()}`, 20, yPos);
+      doc.text(
+        `Method: ${currentInvoice.paymentMethod.toUpperCase()}`,
+        20,
+        yPos,
+      );
       yPos += 5;
-      doc.text(`Status: ${currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}`, 20, yPos);
+      doc.text(
+        `Status: ${currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}`,
+        20,
+        yPos,
+      );
       yPos += 5;
 
       if (currentInvoice.paymentMode === "partial") {
-        doc.text(`Paid: ₹${currentInvoice.paidAmount.toLocaleString()}`, 20, yPos);
+        doc.text(
+          `Paid: ₹${currentInvoice.paidAmount.toLocaleString()}`,
+          20,
+          yPos,
+        );
         yPos += 5;
         doc.setTextColor(255, 0, 0); // Red color for pending
-        doc.text(`Pending: ₹${currentInvoice.pendingAmount.toLocaleString()}`, 20, yPos);
+        doc.text(
+          `Pending: ₹${currentInvoice.pendingAmount.toLocaleString()}`,
+          20,
+          yPos,
+        );
         doc.setTextColor(0, 0, 0); // Reset to black
         yPos += 5;
       }
@@ -449,28 +492,31 @@ export default function SimpleBilling() {
       // Observation
       if (currentInvoice.observation) {
         yPos += 8;
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
-        doc.text('Observation:', 20, yPos);
+        doc.text("Observation:", 20, yPos);
         yPos += 6;
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
-        const observationLines = doc.splitTextToSize(currentInvoice.observation, 170);
+        const observationLines = doc.splitTextToSize(
+          currentInvoice.observation,
+          170,
+        );
         doc.text(observationLines, 20, yPos);
         yPos += observationLines.length * 4;
       }
 
       // Terms & Conditions
       yPos += 10;
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text('Terms & Conditions:', 20, yPos);
+      doc.text("Terms & Conditions:", 20, yPos);
       yPos += 6;
 
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
-      const termsLines = currentInvoice.termsAndConditions.split('\\n');
-      termsLines.forEach(term => {
+      const termsLines = currentInvoice.termsAndConditions.split("\\n");
+      termsLines.forEach((term) => {
         if (term.trim()) {
           doc.text(term, 20, yPos);
           yPos += 4;
@@ -481,29 +527,37 @@ export default function SimpleBilling() {
       yPos += 15;
       doc.line(20, yPos, 190, yPos);
       yPos += 8;
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text('Thank you for your business!', 105, yPos, { align: 'center' });
+      doc.text("Thank you for your business!", 105, yPos, { align: "center" });
       yPos += 5;
-      doc.setFont('helvetica', 'normal');
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
-      doc.text('This is a computer-generated document and does not require a signature.', 105, yPos, { align: 'center' });
+      doc.text(
+        "This is a computer-generated document and does not require a signature.",
+        105,
+        yPos,
+        { align: "center" },
+      );
 
       // Generate filename based on document type
-      const filename = billingMode === "Quotation" ? `Quotation_${currentInvoice.billNumber}.pdf` :
-                      currentInvoice.isReturnSale ? `Return_${currentInvoice.billNumber}.pdf` :
-                      `Invoice_${currentInvoice.billNumber}.pdf`;
+      const filename =
+        billingMode === "Quotation"
+          ? `Quotation_${currentInvoice.billNumber}.pdf`
+          : currentInvoice.isReturnSale
+            ? `Return_${currentInvoice.billNumber}.pdf`
+            : `Invoice_${currentInvoice.billNumber}.pdf`;
 
       doc.save(filename);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
     }
   };
-  
+
   // Print invoice
   const printInvoice = () => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
     const billContent = `
@@ -678,7 +732,7 @@ export default function SimpleBilling() {
             <div class="document-info">
               <h2>${billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE"}</h2>
               <p><strong>No:</strong> ${currentInvoice.billNumber}</p>
-              <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleDateString("en-IN")}</p>
               <p><strong>Type:</strong> ${billingMode}</p>
             </div>
           </div>
@@ -687,7 +741,7 @@ export default function SimpleBilling() {
             <h3>Bill To:</h3>
             <p><strong>${currentInvoice.customer.name}</strong></p>
             <p>Phone: ${currentInvoice.customer.phone}</p>
-            ${currentInvoice.customer.address ? `<p>Address: ${currentInvoice.customer.address}</p>` : ''}
+            ${currentInvoice.customer.address ? `<p>Address: ${currentInvoice.customer.address}</p>` : ""}
           </div>
 
           <table class="items-table">
@@ -696,23 +750,31 @@ export default function SimpleBilling() {
                 <th>Item</th>
                 <th class="text-center">Qty</th>
                 <th class="text-right">Rate (₹)</th>
-                ${billingMode === 'GST' ? '<th class="text-center">GST%</th><th class="text-right">GST Amt (₹)</th>' : ''}
+                ${billingMode === "GST" ? '<th class="text-center">GST%</th><th class="text-right">GST Amt (₹)</th>' : ""}
                 <th class="text-right">Total (₹)</th>
               </tr>
             </thead>
             <tbody>
-              ${currentInvoice.items.map(item => `
+              ${currentInvoice.items
+                .map(
+                  (item) => `
                 <tr>
                   <td>${item.productName}</td>
                   <td class="text-center">${item.quantity}</td>
                   <td class="text-right">${item.price.toLocaleString()}</td>
-                  ${billingMode === 'GST' ? `
+                  ${
+                    billingMode === "GST"
+                      ? `
                     <td class="text-center">${item.gstPercent}%</td>
                     <td class="text-right">${item.gstAmount.toLocaleString()}</td>
-                  ` : ''}
+                  `
+                      : ""
+                  }
                   <td class="text-right">${item.totalAmount.toLocaleString()}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </tbody>
           </table>
 
@@ -722,13 +784,19 @@ export default function SimpleBilling() {
                 <td>Subtotal:</td>
                 <td class="text-right">₹${currentInvoice.subtotal.toLocaleString()}</td>
               </tr>
-              ${currentInvoice.discountAmount > 0 ? `
+              ${
+                currentInvoice.discountAmount > 0
+                  ? `
                 <tr>
                   <td>Discount (${currentInvoice.discountPercent}%):</td>
                   <td class="text-right" style="color: #16a34a;">-₹${currentInvoice.discountAmount.toLocaleString()}</td>
                 </tr>
-              ` : ''}
-              ${billingMode === 'GST' && currentInvoice.gstTotal > 0 ? `
+              `
+                  : ""
+              }
+              ${
+                billingMode === "GST" && currentInvoice.gstTotal > 0
+                  ? `
                 <tr>
                   <td>CGST (9%):</td>
                   <td class="text-right">₹${currentInvoice.cgst.toLocaleString()}</td>
@@ -741,7 +809,9 @@ export default function SimpleBilling() {
                   <td><strong>Total GST:</strong></td>
                   <td class="text-right"><strong>₹${currentInvoice.gstTotal.toLocaleString()}</strong></td>
                 </tr>
-              ` : ''}
+              `
+                  : ""
+              }
               <tr class="final-total">
                 <td><strong>Final Amount:</strong></td>
                 <td class="text-right"><strong>₹${currentInvoice.finalAmount.toLocaleString()}</strong></td>
@@ -755,26 +825,35 @@ export default function SimpleBilling() {
               <div>
                 <p><strong>Method:</strong> ${currentInvoice.paymentMethod.toUpperCase()}</p>
                 <p><strong>Status:</strong> ${currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}</p>
-                ${currentInvoice.paymentMode === "partial" ? `
+                ${
+                  currentInvoice.paymentMode === "partial"
+                    ? `
                   <p><strong>Paid:</strong> ₹${currentInvoice.paidAmount.toLocaleString()}</p>
                   <p class="pending-amount"><strong>Pending:</strong> ₹${currentInvoice.pendingAmount.toLocaleString()}</p>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
-              ${currentInvoice.observation ? `
+              ${
+                currentInvoice.observation
+                  ? `
                 <div>
                   <h4 style="font-weight: bold; margin-bottom: 5px;">Observation:</h4>
                   <p style="font-size: 11px; background: #f9f9f9; padding: 8px; border-radius: 3px;">${currentInvoice.observation}</p>
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
             </div>
           </div>
 
           <div class="terms-section">
             <h3>Terms & Conditions:</h3>
             <div class="terms-content">
-              ${currentInvoice.termsAndConditions.split('\\n').map(term =>
-                term.trim() ? `<p>${term}</p>` : ''
-              ).join('')}
+              ${currentInvoice.termsAndConditions
+                .split("\\n")
+                .map((term) => (term.trim() ? `<p>${term}</p>` : ""))
+                .join("")}
             </div>
           </div>
 
@@ -797,18 +876,18 @@ export default function SimpleBilling() {
       }, 250);
     };
   };
-  
+
   // Format currency
   const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN')}`;
+    return `₹${amount.toLocaleString("en-IN")}`;
   };
-  
+
   // Format date
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -833,11 +912,15 @@ export default function SimpleBilling() {
             </div>
 
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">New Invoice</h1>
-              <p className="text-gray-600">Enter customer details to create a new invoice</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                New Invoice
+              </h1>
+              <p className="text-gray-600">
+                Enter customer details to create a new invoice
+              </p>
             </div>
           </div>
-          
+
           {/* Billing Mode Selection */}
           <Card className="mb-6">
             <CardHeader>
@@ -847,7 +930,12 @@ export default function SimpleBilling() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Select value={billingMode} onValueChange={(value: "GST" | "Non-GST" | "Quotation") => setBillingMode(value)}>
+              <Select
+                value={billingMode}
+                onValueChange={(value: "GST" | "Non-GST" | "Quotation") =>
+                  setBillingMode(value)
+                }
+              >
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Select billing mode" />
                 </SelectTrigger>
@@ -859,7 +947,7 @@ export default function SimpleBilling() {
               </Select>
             </CardContent>
           </Card>
-          
+
           {/* Customer Form */}
           <Card>
             <CardHeader>
@@ -874,46 +962,55 @@ export default function SimpleBilling() {
                 <Input
                   id="customerName"
                   value={customer.name}
-                  onChange={(e) => setCustomer(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setCustomer((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   placeholder="Enter customer name"
                   className="h-12"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="customerPhone">Phone Number *</Label>
                 <Input
                   id="customerPhone"
                   value={customer.phone}
-                  onChange={(e) => setCustomer(prev => ({ ...prev, phone: e.target.value }))}
+                  onChange={(e) =>
+                    setCustomer((prev) => ({ ...prev, phone: e.target.value }))
+                  }
                   placeholder="Enter phone number"
                   className="h-12"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="customerAddress">Address</Label>
                 <Input
                   id="customerAddress"
                   value={customer.address}
-                  onChange={(e) => setCustomer(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) =>
+                    setCustomer((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }))
+                  }
                   placeholder="Enter customer address"
                   className="h-12"
                 />
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Action Buttons */}
           <div className="flex gap-4 mt-8">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setCurrentStep("list")}
               className="flex-1 h-12"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={createInvoice}
               className="flex-1 h-12 bg-green-600 hover:bg-green-700"
             >
@@ -948,18 +1045,25 @@ export default function SimpleBilling() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
-                <p className="text-gray-600">Invoice No: {currentInvoice.billNumber}</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Create Invoice
+                </h1>
+                <p className="text-gray-600">
+                  Invoice No: {currentInvoice.billNumber}
+                </p>
               </div>
               <div className="flex gap-2 hidden lg:flex">
-                <Button variant="outline" onClick={() => setCurrentStep("list")}>
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep("list")}
+                >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Invoice Details */}
             <div className="lg:col-span-2 space-y-6">
@@ -975,20 +1079,26 @@ export default function SimpleBilling() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Name</Label>
-                      <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{currentInvoice.customer.name}</p>
+                      <p className="mt-1 text-sm bg-gray-50 p-2 rounded">
+                        {currentInvoice.customer.name}
+                      </p>
                     </div>
                     <div>
                       <Label>Phone</Label>
-                      <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{currentInvoice.customer.phone}</p>
+                      <p className="mt-1 text-sm bg-gray-50 p-2 rounded">
+                        {currentInvoice.customer.phone}
+                      </p>
                     </div>
                     <div className="md:col-span-2">
                       <Label>Address</Label>
-                      <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{currentInvoice.customer.address || "Not provided"}</p>
+                      <p className="mt-1 text-sm bg-gray-50 p-2 rounded">
+                        {currentInvoice.customer.address || "Not provided"}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Add Item Form */}
               <Card>
                 <CardHeader>
@@ -1004,7 +1114,12 @@ export default function SimpleBilling() {
                       <Input
                         id="productName"
                         value={newItem.productName}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, productName: e.target.value }))}
+                        onChange={(e) =>
+                          setNewItem((prev) => ({
+                            ...prev,
+                            productName: e.target.value,
+                          }))
+                        }
                         placeholder="Enter product name"
                       />
                     </div>
@@ -1015,7 +1130,12 @@ export default function SimpleBilling() {
                         type="number"
                         min="1"
                         value={newItem.quantity}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, quantity: e.target.value }))}
+                        onChange={(e) =>
+                          setNewItem((prev) => ({
+                            ...prev,
+                            quantity: e.target.value,
+                          }))
+                        }
                         placeholder="Enter quantity"
                       />
                     </div>
@@ -1027,18 +1147,26 @@ export default function SimpleBilling() {
                         min="0"
                         step="0.01"
                         value={newItem.price}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, price: e.target.value }))}
+                        onChange={(e) =>
+                          setNewItem((prev) => ({
+                            ...prev,
+                            price: e.target.value,
+                          }))
+                        }
                         placeholder="Enter price"
                       />
                     </div>
                   </div>
-                  <Button onClick={addItem} className="mt-4 w-full bg-green-600 hover:bg-green-700">
+                  <Button
+                    onClick={addItem}
+                    className="mt-4 w-full bg-green-600 hover:bg-green-700"
+                  >
                     <Package className="h-4 w-4 mr-2" />
                     Add Item
                   </Button>
                 </CardContent>
               </Card>
-              
+
               {/* Items List */}
               <Card>
                 <CardHeader>
@@ -1046,20 +1174,29 @@ export default function SimpleBilling() {
                 </CardHeader>
                 <CardContent>
                   {currentInvoice.items.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No items added yet</p>
+                    <p className="text-center text-gray-500 py-8">
+                      No items added yet
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {currentInvoice.items.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
                           <div className="flex-1">
                             <h4 className="font-medium">{item.productName}</h4>
                             <p className="text-sm text-gray-600">
-                              Qty: {item.quantity} × {formatCurrency(item.price)}
-                              {billingMode === "GST" && ` (GST: ${item.gstPercent}%)`}
+                              Qty: {item.quantity} ×{" "}
+                              {formatCurrency(item.price)}
+                              {billingMode === "GST" &&
+                                ` (GST: ${item.gstPercent}%)`}
                             </p>
                           </div>
                           <div className="text-right mr-4">
-                            <div className="font-medium">{formatCurrency(item.totalAmount)}</div>
+                            <div className="font-medium">
+                              {formatCurrency(item.totalAmount)}
+                            </div>
                             {billingMode === "GST" && (
                               <div className="text-xs text-gray-500">
                                 +{formatCurrency(item.gstAmount)} GST
@@ -1081,7 +1218,7 @@ export default function SimpleBilling() {
                 </CardContent>
               </Card>
             </div>
-            
+
             {/* Right Column - Invoice Summary & Actions */}
             <div className="space-y-6">
               {/* Discount */}
@@ -1096,10 +1233,12 @@ export default function SimpleBilling() {
                       min="0"
                       max="100"
                       value={currentInvoice.discountPercent}
-                      onChange={(e) => setCurrentInvoice(prev => ({ 
-                        ...prev, 
-                        discountPercent: parseFloat(e.target.value) || 0 
-                      }))}
+                      onChange={(e) =>
+                        setCurrentInvoice((prev) => ({
+                          ...prev,
+                          discountPercent: parseFloat(e.target.value) || 0,
+                        }))
+                      }
                       placeholder="0"
                       className="flex-1"
                     />
@@ -1112,7 +1251,7 @@ export default function SimpleBilling() {
                   )}
                 </CardContent>
               </Card>
-              
+
               {/* Invoice Summary */}
               <Card>
                 <CardHeader>
@@ -1124,11 +1263,15 @@ export default function SimpleBilling() {
                       <span>Subtotal:</span>
                       <span>{formatCurrency(currentInvoice.subtotal)}</span>
                     </div>
-                    
+
                     {currentInvoice.discountAmount > 0 && (
                       <div className="flex justify-between text-amber-600">
-                        <span>Discount ({currentInvoice.discountPercent}%):</span>
-                        <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
+                        <span>
+                          Discount ({currentInvoice.discountPercent}%):
+                        </span>
+                        <span>
+                          -{formatCurrency(currentInvoice.discountAmount)}
+                        </span>
                       </div>
                     )}
 
@@ -1152,7 +1295,9 @@ export default function SimpleBilling() {
                     <div className="border-t pt-2">
                       <div className="flex justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span className="text-slate-700 font-semibold">{formatCurrency(currentInvoice.finalAmount)}</span>
+                        <span className="text-slate-700 font-semibold">
+                          {formatCurrency(currentInvoice.finalAmount)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1173,10 +1318,12 @@ export default function SimpleBilling() {
                       type="checkbox"
                       id="returnSale"
                       checked={currentInvoice.isReturnSale}
-                      onChange={(e) => setCurrentInvoice(prev => ({
-                        ...prev,
-                        isReturnSale: e.target.checked
-                      }))}
+                      onChange={(e) =>
+                        setCurrentInvoice((prev) => ({
+                          ...prev,
+                          isReturnSale: e.target.checked,
+                        }))
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <Label htmlFor="returnSale" className="text-sm">
@@ -1197,10 +1344,12 @@ export default function SimpleBilling() {
                 <CardContent>
                   <textarea
                     value={currentInvoice.observation}
-                    onChange={(e) => setCurrentInvoice(prev => ({
-                      ...prev,
-                      observation: e.target.value
-                    }))}
+                    onChange={(e) =>
+                      setCurrentInvoice((prev) => ({
+                        ...prev,
+                        observation: e.target.value,
+                      }))
+                    }
                     placeholder="Add any notes or observations for this invoice..."
                     className="w-full h-16 p-3 border border-gray-300 rounded-lg resize-none text-sm"
                   />
@@ -1218,10 +1367,12 @@ export default function SimpleBilling() {
                 <CardContent>
                   <textarea
                     value={currentInvoice.termsAndConditions}
-                    onChange={(e) => setCurrentInvoice(prev => ({
-                      ...prev,
-                      termsAndConditions: e.target.value
-                    }))}
+                    onChange={(e) =>
+                      setCurrentInvoice((prev) => ({
+                        ...prev,
+                        termsAndConditions: e.target.value,
+                      }))
+                    }
                     placeholder="Enter terms and conditions..."
                     className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none text-sm"
                   />
@@ -1243,7 +1394,10 @@ export default function SimpleBilling() {
                       <Select
                         value={currentInvoice.paymentMethod}
                         onValueChange={(value: "cash" | "online" | "mixed") =>
-                          setCurrentInvoice(prev => ({ ...prev, paymentMethod: value }))
+                          setCurrentInvoice((prev) => ({
+                            ...prev,
+                            paymentMethod: value,
+                          }))
                         }
                       >
                         <SelectTrigger>
@@ -1252,7 +1406,9 @@ export default function SimpleBilling() {
                         <SelectContent>
                           <SelectItem value="cash">Cash</SelectItem>
                           <SelectItem value="online">Online</SelectItem>
-                          <SelectItem value="mixed">Mixed (Cash + Online)</SelectItem>
+                          <SelectItem value="mixed">
+                            Mixed (Cash + Online)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1261,7 +1417,10 @@ export default function SimpleBilling() {
                       <Select
                         value={currentInvoice.paymentMode}
                         onValueChange={(value: "full" | "partial") =>
-                          setCurrentInvoice(prev => ({ ...prev, paymentMode: value }))
+                          setCurrentInvoice((prev) => ({
+                            ...prev,
+                            paymentMode: value,
+                          }))
                         }
                       >
                         <SelectTrigger>
@@ -1269,7 +1428,9 @@ export default function SimpleBilling() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="full">Full Payment</SelectItem>
-                          <SelectItem value="partial">Partial Payment</SelectItem>
+                          <SelectItem value="partial">
+                            Partial Payment
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1285,10 +1446,12 @@ export default function SimpleBilling() {
                           min="0"
                           max={currentInvoice.finalAmount}
                           value={currentInvoice.paidAmount}
-                          onChange={(e) => setCurrentInvoice(prev => ({
-                            ...prev,
-                            paidAmount: parseFloat(e.target.value) || 0
-                          }))}
+                          onChange={(e) =>
+                            setCurrentInvoice((prev) => ({
+                              ...prev,
+                              paidAmount: parseFloat(e.target.value) || 0,
+                            }))
+                          }
                           placeholder="Enter paid amount"
                         />
                       </div>
@@ -1324,7 +1487,7 @@ export default function SimpleBilling() {
                     <Save className="h-4 w-4 mr-2" />
                     Save Invoice
                   </Button>
-                  
+
                   <Button
                     onClick={downloadPDF}
                     variant="outline"
@@ -1334,7 +1497,7 @@ export default function SimpleBilling() {
                     <Download className="h-4 w-4 mr-2" />
                     Download PDF
                   </Button>
-                  
+
                   <Button
                     onClick={printInvoice}
                     variant="outline"
@@ -1354,24 +1517,41 @@ export default function SimpleBilling() {
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Invoice Preview - {currentInvoice.billNumber}</DialogTitle>
+              <DialogTitle>
+                Invoice Preview - {currentInvoice.billNumber}
+              </DialogTitle>
             </DialogHeader>
             <div className="bg-white p-8 border border-gray-200 rounded-lg">
               {/* Invoice Header */}
               <div className="border-b pb-6 mb-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-3xl font-bold text-slate-800 mb-2">ElectroMart</h1>
-                    <p className="text-sm text-gray-600">Business Management Solution</p>
+                    <h1 className="text-3xl font-bold text-slate-800 mb-2">
+                      ElectroMart
+                    </h1>
+                    <p className="text-sm text-gray-600">
+                      Business Management Solution
+                    </p>
                     <p className="text-sm text-gray-600">Delhi, India</p>
                   </div>
                   <div className="text-right">
                     <h2 className="text-2xl font-bold mb-2">
-                      {billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE"}
+                      {billingMode === "Quotation"
+                        ? "QUOTATION"
+                        : currentInvoice.isReturnSale
+                          ? "RETURN INVOICE"
+                          : "INVOICE"}
                     </h2>
-                    <p><strong>No:</strong> {currentInvoice.billNumber}</p>
-                    <p><strong>Date:</strong> {new Date().toLocaleDateString('en-IN')}</p>
-                    <p><strong>Type:</strong> {billingMode}</p>
+                    <p>
+                      <strong>No:</strong> {currentInvoice.billNumber}
+                    </p>
+                    <p>
+                      <strong>Date:</strong>{" "}
+                      {new Date().toLocaleDateString("en-IN")}
+                    </p>
+                    <p>
+                      <strong>Type:</strong> {billingMode}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1391,31 +1571,55 @@ export default function SimpleBilling() {
                 <table className="w-full border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-2 text-left">Item</th>
-                      <th className="border border-gray-300 p-2 text-center">Qty</th>
-                      <th className="border border-gray-300 p-2 text-right">Rate (₹)</th>
-                      {billingMode === 'GST' && (
+                      <th className="border border-gray-300 p-2 text-left">
+                        Item
+                      </th>
+                      <th className="border border-gray-300 p-2 text-center">
+                        Qty
+                      </th>
+                      <th className="border border-gray-300 p-2 text-right">
+                        Rate (₹)
+                      </th>
+                      {billingMode === "GST" && (
                         <>
-                          <th className="border border-gray-300 p-2 text-center">GST%</th>
-                          <th className="border border-gray-300 p-2 text-right">GST Amt (₹)</th>
+                          <th className="border border-gray-300 p-2 text-center">
+                            GST%
+                          </th>
+                          <th className="border border-gray-300 p-2 text-right">
+                            GST Amt (₹)
+                          </th>
                         </>
                       )}
-                      <th className="border border-gray-300 p-2 text-right">Total (₹)</th>
+                      <th className="border border-gray-300 p-2 text-right">
+                        Total (₹)
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentInvoice.items.map((item) => (
                       <tr key={item.id}>
-                        <td className="border border-gray-300 p-2">{item.productName}</td>
-                        <td className="border border-gray-300 p-2 text-center">{item.quantity}</td>
-                        <td className="border border-gray-300 p-2 text-right">{item.price.toLocaleString()}</td>
-                        {billingMode === 'GST' && (
+                        <td className="border border-gray-300 p-2">
+                          {item.productName}
+                        </td>
+                        <td className="border border-gray-300 p-2 text-center">
+                          {item.quantity}
+                        </td>
+                        <td className="border border-gray-300 p-2 text-right">
+                          {item.price.toLocaleString()}
+                        </td>
+                        {billingMode === "GST" && (
                           <>
-                            <td className="border border-gray-300 p-2 text-center">{item.gstPercent}%</td>
-                            <td className="border border-gray-300 p-2 text-right">{item.gstAmount.toLocaleString()}</td>
+                            <td className="border border-gray-300 p-2 text-center">
+                              {item.gstPercent}%
+                            </td>
+                            <td className="border border-gray-300 p-2 text-right">
+                              {item.gstAmount.toLocaleString()}
+                            </td>
                           </>
                         )}
-                        <td className="border border-gray-300 p-2 text-right">{item.totalAmount.toLocaleString()}</td>
+                        <td className="border border-gray-300 p-2 text-right">
+                          {item.totalAmount.toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1432,10 +1636,12 @@ export default function SimpleBilling() {
                   {currentInvoice.discountAmount > 0 && (
                     <div className="flex justify-between py-1 text-amber-600">
                       <span>Discount ({currentInvoice.discountPercent}%):</span>
-                      <span>-₹{currentInvoice.discountAmount.toLocaleString()}</span>
+                      <span>
+                        -₹{currentInvoice.discountAmount.toLocaleString()}
+                      </span>
                     </div>
                   )}
-                  {billingMode === 'GST' && currentInvoice.gstTotal > 0 && (
+                  {billingMode === "GST" && currentInvoice.gstTotal > 0 && (
                     <>
                       <div className="flex justify-between py-1">
                         <span>CGST (9%):</span>
@@ -1454,7 +1660,9 @@ export default function SimpleBilling() {
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between font-bold text-lg">
                       <span>Final Amount:</span>
-                      <span>₹{currentInvoice.finalAmount.toLocaleString()}</span>
+                      <span>
+                        ₹{currentInvoice.finalAmount.toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1465,12 +1673,26 @@ export default function SimpleBilling() {
                 <div>
                   <h3 className="font-bold mb-2">Payment Details:</h3>
                   <div className="text-sm space-y-1">
-                    <p><strong>Method:</strong> {currentInvoice.paymentMethod.toUpperCase()}</p>
-                    <p><strong>Status:</strong> {currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}</p>
+                    <p>
+                      <strong>Method:</strong>{" "}
+                      {currentInvoice.paymentMethod.toUpperCase()}
+                    </p>
+                    <p>
+                      <strong>Status:</strong>{" "}
+                      {currentInvoice.paymentMode === "full"
+                        ? "Paid in Full"
+                        : "Partial Payment"}
+                    </p>
                     {currentInvoice.paymentMode === "partial" && (
                       <>
-                        <p><strong>Paid:</strong> ₹{currentInvoice.paidAmount.toLocaleString()}</p>
-                        <p className="text-red-600"><strong>Pending:</strong> ₹{currentInvoice.pendingAmount.toLocaleString()}</p>
+                        <p>
+                          <strong>Paid:</strong> ₹
+                          {currentInvoice.paidAmount.toLocaleString()}
+                        </p>
+                        <p className="text-red-600">
+                          <strong>Pending:</strong> ₹
+                          {currentInvoice.pendingAmount.toLocaleString()}
+                        </p>
                       </>
                     )}
                   </div>
@@ -1479,7 +1701,9 @@ export default function SimpleBilling() {
                 {currentInvoice.observation && (
                   <div>
                     <h3 className="font-bold mb-2">Observation:</h3>
-                    <p className="text-sm bg-gray-50 p-3 rounded border">{currentInvoice.observation}</p>
+                    <p className="text-sm bg-gray-50 p-3 rounded border">
+                      {currentInvoice.observation}
+                    </p>
                   </div>
                 )}
               </div>
@@ -1488,21 +1712,32 @@ export default function SimpleBilling() {
               <div className="mb-6">
                 <h3 className="font-bold mb-2">Terms & Conditions:</h3>
                 <div className="text-sm bg-gray-50 p-3 rounded border">
-                  {currentInvoice.termsAndConditions.split('\\n').map((term, index) => (
-                    <p key={index} className="mb-1">{term}</p>
-                  ))}
+                  {currentInvoice.termsAndConditions
+                    .split("\\n")
+                    .map((term, index) => (
+                      <p key={index} className="mb-1">
+                        {term}
+                      </p>
+                    ))}
                 </div>
               </div>
 
               {/* Footer */}
               <div className="text-center text-sm text-gray-600 mt-8 border-t pt-4">
                 <p className="font-medium">Thank you for your business!</p>
-                <p className="text-xs mt-1">This is a computer-generated document and does not require a signature.</p>
+                <p className="text-xs mt-1">
+                  This is a computer-generated document and does not require a
+                  signature.
+                </p>
               </div>
             </div>
 
             <div className="flex gap-3 mt-4">
-              <Button onClick={() => setShowPreview(false)} variant="outline" className="flex-1">
+              <Button
+                onClick={() => setShowPreview(false)}
+                variant="outline"
+                className="flex-1"
+              >
                 Close Preview
               </Button>
               <Button onClick={downloadPDF} className="flex-1">
@@ -1525,7 +1760,10 @@ export default function SimpleBilling() {
           <h2 className="text-2xl font-bold text-gray-900">Billing</h2>
           <p className="text-gray-600">Manage your invoices and billing</p>
         </div>
-        <Button onClick={startNewInvoice} className="bg-green-600 hover:bg-green-700">
+        <Button
+          onClick={startNewInvoice}
+          className="bg-green-600 hover:bg-green-700"
+        >
           <Plus className="h-4 w-4 mr-2" />
           New Invoice
         </Button>
@@ -1540,7 +1778,10 @@ export default function SimpleBilling() {
           {bills && bills.length > 0 ? (
             <div className="space-y-3">
               {bills.slice(0, 10).map((bill) => (
-                <div key={bill.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div
+                  key={bill.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-lg">
@@ -1548,21 +1789,27 @@ export default function SimpleBilling() {
                       </div>
                       <div>
                         <h4 className="font-medium">{bill.billNumber}</h4>
-                        <p className="text-sm text-gray-600">{bill.customer.name}</p>
+                        <p className="text-sm text-gray-600">
+                          {bill.customer.name}
+                        </p>
                       </div>
                     </div>
                   </div>
                   <div className="text-right mr-4">
-                    <div className="font-medium">{formatCurrency(bill.finalAmount || 0)}</div>
+                    <div className="font-medium">
+                      {formatCurrency(bill.finalAmount || 0)}
+                    </div>
                     <div className="text-xs text-gray-500">
                       <Calendar className="h-3 w-3 inline mr-1" />
                       {formatDate(bill.billDate)}
                     </div>
                   </div>
-                  <Badge 
+                  <Badge
                     variant="outline"
                     className={cn(
-                      bill.billType === "GST" ? "border-blue-200 text-blue-800" : "border-purple-200 text-purple-800"
+                      bill.billType === "GST"
+                        ? "border-blue-200 text-blue-800"
+                        : "border-purple-200 text-purple-800",
                     )}
                   >
                     {bill.billType}
@@ -1573,9 +1820,16 @@ export default function SimpleBilling() {
           ) : (
             <div className="text-center py-12">
               <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="font-medium text-gray-900 mb-2">No invoices yet</h3>
-              <p className="text-gray-600 mb-4">Create your first invoice to get started</p>
-              <Button onClick={startNewInvoice} className="bg-green-600 hover:bg-green-700">
+              <h3 className="font-medium text-gray-900 mb-2">
+                No invoices yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Create your first invoice to get started
+              </p>
+              <Button
+                onClick={startNewInvoice}
+                className="bg-green-600 hover:bg-green-700"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Invoice
               </Button>
