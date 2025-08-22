@@ -373,9 +373,9 @@ export default function EnhancedBilling() {
       const response = await billsAPI.createBill(bill);
       alert('Bill saved successfully!');
       // Reset form or redirect
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving bill:', error);
-      alert('Error saving bill');
+      alert(`Error saving bill: ${error.message || 'Unknown error occurred'}`);
     } finally {
       setIsLoading(false);
     }
@@ -398,9 +398,9 @@ export default function EnhancedBilling() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating PDF:', error);
-      alert('Error generating PDF');
+      alert(`Error generating PDF: ${error.message || 'Unknown error occurred'}`);
     }
   };
 
