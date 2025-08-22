@@ -214,16 +214,17 @@ export default function Settings() {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
+      <div className="flex space-x-1 bg-muted p-1 rounded-lg w-full sm:w-fit overflow-x-auto">
         {tabs.map((tab) => (
           <Button
             key={tab.id}
             variant={activeTab === tab.id ? "default" : "ghost"}
             onClick={() => setActiveTab(tab.id as any)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 text-xs sm:text-sm"
+            size="sm"
           >
-            <tab.icon className="h-4 w-4" />
-            {tab.label}
+            <tab.icon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="truncate">{tab.label}</span>
           </Button>
         ))}
       </div>
