@@ -86,7 +86,8 @@ export default function SimpleBilling() {
   const { toast } = useToast();
   
   // Current workflow state
-  const [currentStep, setCurrentStep] = useState<"customer" | "invoice" | "list">("list");
+  const [currentStep, setCurrentStep] = useState<"list" | "create">("list");
+  const [createStep, setCreateStep] = useState<1 | 2 | 3>(1); // 1: Customer, 2: Items, 3: Review
   const [billingMode, setBillingMode] = useState<"GST" | "Non-GST" | "Quotation">("GST");
   
   // Customer form state
