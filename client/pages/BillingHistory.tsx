@@ -50,30 +50,33 @@ import { cn } from "@/lib/utils";
 interface Bill {
   id: string;
   billNumber: string;
-  billType: "GST" | "Non-GST" | "Demo";
-  billDate: Date;
-  dueDate?: Date;
-  customer: {
-    id: string;
-    name: string;
-    phone: string;
-    email?: string;
-  };
+  billType: "GST" | "Non-GST" | "Quotation";
+  billDate: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress?: string;
+  pincode?: string;
   items: {
-    productName: string;
-    quantity: number;
-    rate: number;
-    totalAmount: number;
+    itemName: string;
+    itemPrice: number;
+    itemQuantity: number;
+    itemTotal?: number;
   }[];
   subtotal: number;
   discountAmount: number;
-  taxAmount: number;
-  finalAmount: number;
-  paymentStatus: "Paid" | "Pending" | "Partial" | "Overdue";
-  paymentMethod?: string;
-  createdBy: string;
-  createdAt: Date;
-  status: "Draft" | "Sent" | "Paid" | "Cancelled";
+  afterDiscount: number;
+  gstPercent: number;
+  gstAmount: number;
+  totalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  paymentType: 'Full' | 'Partial';
+  paymentMethod: 'cash' | 'online' | 'mixed';
+  observation?: string;
+  termsAndConditions?: string;
+  stateKey: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // Mock data
