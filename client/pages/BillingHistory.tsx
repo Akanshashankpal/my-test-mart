@@ -327,10 +327,10 @@ export default function BillingHistory() {
   };
 
   const calculateStats = () => {
-    const totalRevenue = filteredBills.reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
-    const paidBills = filteredBills.filter(b => b.paymentStatus === "Paid");
-    const paidRevenue = paidBills.reduce((sum, bill) => sum + (bill.finalAmount || 0), 0);
-    const pendingRevenue = totalRevenue - paidRevenue;
+    const totalRevenue = filteredBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const paidBills = filteredBills.filter(b => b.paymentType === "Full");
+    const paidRevenue = paidBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const pendingRevenue = filteredBills.reduce((sum, bill) => sum + (bill.remainingAmount || 0), 0);
 
     return {
       totalBills: filteredBills.length,
@@ -339,7 +339,7 @@ export default function BillingHistory() {
       pendingRevenue,
       gstBills: filteredBills.filter(b => b.billType === "GST").length,
       nonGstBills: filteredBills.filter(b => b.billType === "Non-GST").length,
-      demoBills: filteredBills.filter(b => b.billType === "Demo").length,
+      quotationBills: filteredBills.filter(b => b.billType === "Quotation").length,
     };
   };
 
