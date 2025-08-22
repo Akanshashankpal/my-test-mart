@@ -168,7 +168,7 @@ export const billingService = {
   async createBill(billData: BillData): Promise<Bill> {
     // Calculate bill totals using the provided function
     const calculations = calculateBill(billData);
-    
+
     const billPayload = {
       ...billData,
       ...calculations,
@@ -181,26 +181,43 @@ export const billingService = {
       body: JSON.stringify(billPayload),
     });
 
-    return response.data;
+    // Handle different response formats
+    if (response && response.data) {
+      return response.data;
+    }
+    return response;
   },
 
   // Get all bills
   async getAllBills(): Promise<Bill[]> {
     const response = await apiCall('/getBills');
-    return response.data || [];
+
+    // Handle different response formats
+    if (response && Array.isArray(response.data)) {
+      return response.data;
+    }
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return [];
   },
 
   // Get bill by ID
   async getBillById(id: string): Promise<Bill> {
     const response = await apiCall(`/getBillsbyid/${id}`);
-    return response.data;
+
+    // Handle different response formats
+    if (response && response.data) {
+      return response.data;
+    }
+    return response;
   },
 
   // Update bill
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
     // Recalculate if items or discount changed
     const calculations = billData.items ? calculateBill(billData as BillData) : {};
-    
+
     const billPayload = {
       ...billData,
       ...calculations,
@@ -212,7 +229,11 @@ export const billingService = {
       body: JSON.stringify(billPayload),
     });
 
-    return response.data;
+    // Handle different response formats
+    if (response && response.data) {
+      return response.data;
+    }
+    return response;
   },
 
   // Delete bill
