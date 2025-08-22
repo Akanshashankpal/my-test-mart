@@ -143,10 +143,10 @@ export default function BillingHistory() {
 
     // Date range filter
     if (dateRange.start) {
-      filtered = filtered.filter(bill => bill.billDate >= new Date(dateRange.start));
+      filtered = filtered.filter(bill => new Date(bill.billDate || bill.createdAt) >= new Date(dateRange.start));
     }
     if (dateRange.end) {
-      filtered = filtered.filter(bill => bill.billDate <= new Date(dateRange.end));
+      filtered = filtered.filter(bill => new Date(bill.billDate || bill.createdAt) <= new Date(dateRange.end));
     }
 
     setFilteredBills(filtered);
