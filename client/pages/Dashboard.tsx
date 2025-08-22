@@ -359,11 +359,10 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(stats.overallStats.totalRevenue)}</div>
               <div className="flex items-center gap-1 text-sm">
                 <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.sales.change}%</span>
-                <span className="text-muted-foreground">this month</span>
+                <span className="text-green-500">All time revenue</span>
               </div>
             </CardContent>
           </Card>
@@ -376,11 +375,10 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overallStats.customers.total}</div>
+              <div className="text-2xl font-bold">{stats.overallStats.totalCustomers}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.customers.change}%</span>
-                <span className="text-muted-foreground">growth</span>
+                <Users className="h-3 w-3 text-blue-500" />
+                <span className="text-blue-500">Unique customers</span>
               </div>
             </CardContent>
           </Card>
@@ -388,16 +386,15 @@ export default function Dashboard() {
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Total Rs
+                <Receipt className="h-4 w-4" />
+                Total Bills
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
+              <div className="text-2xl font-bold">{stats.overallStats.totalTransactions}</div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.revenue.growth}%</span>
-                <span className="text-muted-foreground">total value</span>
+                <Receipt className="h-3 w-3 text-purple-500" />
+                <span className="text-purple-500">All transactions</span>
               </div>
             </CardContent>
           </Card>
@@ -406,13 +403,13 @@ export default function Dashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Star className="h-4 w-4" />
-                Monthly Growth
+                Paid Revenue
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">+{overallStats.revenue.growth}%</div>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.overallStats.paidRevenue)}</div>
               <div className="text-sm text-muted-foreground">
-                {formatCurrency(overallStats.revenue.thisMonth)} this month
+                Collected payments
               </div>
             </CardContent>
           </Card>
