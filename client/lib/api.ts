@@ -39,6 +39,15 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    console.error('API Error Details:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+
     // Handle network errors
     if (!error.response) {
       error.message = 'Network Error: Please check your internet connection';
@@ -47,7 +56,11 @@ api.interceptors.response.use(
 
     // Handle different HTTP status codes
     switch (error.response?.status) {
+      case 400:
+        error.message = error.response?.data?.message || 'Bad request. Please check your input.';
+        break;
       case 401:
+        error.message = error.response?.data?.message || 'Invalid credentials';
         // Only redirect to login if not already on login page
         if (!window.location.pathname.includes('/login')) {
           localStorage.removeItem('electromart_token');
@@ -59,16 +72,28 @@ api.interceptors.response.use(
         error.message = 'Access forbidden. You do not have permission.';
         break;
       case 404:
-        error.message = 'Resource not found.';
+        error.message = 'Resource not found. Please check the URL.';
+        break;
+      case 422:
+        error.message = error.response?.data?.message || 'Validation error. Please check your input.';
         break;
       case 500:
         error.message = 'Internal server error. Please try again later.';
         break;
+      case 502:
+        error.message = 'Bad gateway. Server is temporarily unavailable.';
+        break;
       case 503:
         error.message = 'Service unavailable. Please try again later.';
         break;
+      case 504:
+        error.message = 'Gateway timeout. Server is taking too long to respond.';
+        break;
       default:
-        error.message = error.response?.data?.message || 'An error occurred';
+        const detailedMessage = error.response?.data?.message ||
+                              error.response?.data?.error ||
+                              `HTTP ${error.response?.status}: ${error.response?.statusText}`;
+        error.message = detailedMessage;
     }
 
     return Promise.reject(error);
