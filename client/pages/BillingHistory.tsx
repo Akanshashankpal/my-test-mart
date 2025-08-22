@@ -262,15 +262,15 @@ export default function BillingHistory() {
       // Items
       doc.setFont('helvetica', 'normal');
       bill.items.forEach(item => {
-        doc.text(item.productName.substring(0, 25), 20, yPos);
-        doc.text(item.quantity.toString(), 80, yPos);
-        doc.text(item.price.toLocaleString(), 100, yPos);
+        doc.text(item.itemName.substring(0, 25), 20, yPos);
+        doc.text(item.itemQuantity.toString(), 80, yPos);
+        doc.text(item.itemPrice.toLocaleString(), 100, yPos);
         if (bill.billType === 'GST') {
-          doc.text(`${item.gstPercent}%`, 130, yPos);
-          doc.text(item.gstAmount.toLocaleString(), 150, yPos);
-          doc.text(item.totalAmount.toLocaleString(), 175, yPos);
+          doc.text(`${bill.gstPercent}%`, 130, yPos);
+          doc.text((item.itemPrice * item.itemQuantity * bill.gstPercent / 100).toLocaleString(), 150, yPos);
+          doc.text((item.itemPrice * item.itemQuantity * (1 + bill.gstPercent / 100)).toLocaleString(), 175, yPos);
         } else {
-          doc.text(item.totalAmount.toLocaleString(), 150, yPos);
+          doc.text((item.itemPrice * item.itemQuantity).toLocaleString(), 150, yPos);
         }
         yPos += 8;
       });
