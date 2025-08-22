@@ -112,9 +112,9 @@ export default function BillingHistory() {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(bill =>
-        bill.billNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        bill.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        bill.customer.phone.includes(searchTerm)
+        (bill.billNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (bill.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (bill.customerPhone || '').includes(searchTerm)
       );
     }
 
