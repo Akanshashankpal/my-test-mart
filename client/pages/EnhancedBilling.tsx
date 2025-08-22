@@ -1035,6 +1035,44 @@ export default function EnhancedBilling() {
                       )}
                     </div>
                   ))}
+                  {filteredProducts.length === 0 && searchProduct && (
+                    <div className="p-4 text-center text-gray-500">
+                      <p>No products found matching "{searchProduct}"</p>
+                      <Button
+                        onClick={() => {
+                          const priceStr = prompt('Enter price (₹):');
+                          const unit = prompt('Enter unit (e.g., pcs, kg, meter):') || 'pcs';
+                          const gstRateStr = prompt('Enter GST rate (%):') || '18';
+                          const category = prompt('Enter category:') || 'General';
+
+                          if (priceStr) {
+                            const price = parseFloat(priceStr);
+                            const gstRate = parseFloat(gstRateStr);
+
+                            if (!isNaN(price) && !isNaN(gstRate)) {
+                              const newProduct = {
+                                id: Date.now().toString(),
+                                name: searchProduct,
+                                price,
+                                unit,
+                                gstRate,
+                                category,
+                                stock: 100
+                              };
+
+                              setProducts(prev => [...prev, newProduct]);
+                              setSelectedProduct(newProduct);
+                              setCustomRate(price);
+                            }
+                          }
+                        }}
+                        variant="outline"
+                        className="mt-2"
+                      >
+                        Create "{searchProduct}" as new product
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
