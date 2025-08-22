@@ -32,11 +32,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check if user is already logged in (from localStorage)
     const savedUser = localStorage.getItem('electromart_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('electromart_token');
+
+    if (savedUser && savedToken) {
       try {
         setUser(JSON.parse(savedUser));
+        // TODO: Optionally verify token with /api/auth/me endpoint
       } catch (error) {
         localStorage.removeItem('electromart_user');
+        localStorage.removeItem('electromart_token');
       }
     }
     setIsLoading(false);
@@ -44,46 +48,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock authentication - in real app, this would be an API call
-    if (email === 'admin@electromart.com' && password === 'admin123') {
-      const userData: User = {
-        id: '1',
-        name: 'Admin User',
-        email: 'admin@electromart.com',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-        role: 'admin'
-      };
-      
-      setUser(userData);
-      localStorage.setItem('electromart_user', JSON.stringify(userData));
+
+    try {
+      const response = await fetch('https://billing-system-i3py.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data?.user) {
+        const userData: User = {
+          id: data.data.user.id,
+          name: data.data.user.name,
+          email: data.data.user.email,
+          avatar: data.data.user.avatar,
+          role: data.data.user.role
+        };
+
+        setUser(userData);
+        localStorage.setItem('electromart_user', JSON.stringify(userData));
+        localStorage.setItem('electromart_token', data.data.token);
+        setIsLoading(false);
+        return true;
+      } else {
+        setIsLoading(false);
+        return false;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setIsLoading(false);
-      return true;
-    } else if (email === 'manager@electromart.com' && password === 'manager123') {
-      const userData: User = {
-        id: '2',
-        name: 'Sarah Wilson',
-        email: 'manager@electromart.com',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b788?w=40&h=40&fit=crop&crop=face',
-        role: 'manager'
-      };
-      
-      setUser(userData);
-      localStorage.setItem('electromart_user', JSON.stringify(userData));
-      setIsLoading(false);
-      return true;
+      return false;
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('electromart_user');
+    localStorage.removeItem('electromart_token');
   };
 
   return (

@@ -1,162 +1,212 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import {
+  billingService,
+  Bill as ApiBill,
+  BillData,
+} from "@/services/billingService";
+import { useToast } from "@/hooks/use-toast";
 
+// Updated interface to match API structure
 export interface BillItem {
-  productName: string;
-  quantity: number;
-  price: number;
-  gstPercent: number;
-  totalAmount: number;
-  gstAmount: number;
+  itemName: string;
+  itemPrice: number;
+  itemQuantity: number;
+  itemTotal?: number;
 }
 
 export interface Bill {
   id: string;
   billNumber: string;
-  billType: "GST" | "Non-GST" | "Demo";
-  billDate: Date;
-  dueDate?: Date;
-  customer: {
-    id: string;
-    name: string;
-    phone: string;
-    email?: string;
-    address?: string;
-  };
+  billType: "GST" | "Non-GST" | "Quotation";
+  billDate: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress?: string;
+  pincode?: string;
   items: BillItem[];
   subtotal: number;
   discountAmount: number;
-  discountPercent: number;
-  taxAmount: number;
-  cgst: number;
-  sgst: number;
-  igst: number;
-  totalGst: number;
-  finalAmount: number;
-  paymentStatus: "Paid" | "Pending" | "Partial" | "Overdue";
-  paymentMethod?: string;
-  createdBy: string;
-  createdAt: Date;
-  status: "Draft" | "Sent" | "Paid" | "Cancelled";
+  afterDiscount: number;
+  gstPercent: number;
+  gstAmount: number;
+  totalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  paymentType: "Full" | "Partial";
+  paymentMethod: "cash" | "online" | "mixed";
+  observation?: string;
+  termsAndConditions?: string;
+  stateKey: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 interface BillingContextType {
   bills: Bill[];
-  addBill: (bill: Bill) => void;
-  updateBill: (billId: string, updates: Partial<Bill>) => void;
-  deleteBill: (billId: string) => void;
+  isLoading: boolean;
+  error: string | null;
+  fetchBills: () => Promise<void>;
+  addBill: (billData: BillData) => Promise<Bill | null>;
+  updateBill: (
+    billId: string,
+    updates: Partial<BillData>,
+  ) => Promise<Bill | null>;
+  deleteBill: (billId: string) => Promise<boolean>;
   getBillById: (billId: string) => Bill | undefined;
 }
 
 const BillingContext = createContext<BillingContextType | undefined>(undefined);
 
-// Mock initial data
-const initialBills: Bill[] = [
-  {
-    id: "1",
-    billNumber: "GST/24/0001",
-    billType: "GST",
-    billDate: new Date("2024-01-20"),
-    dueDate: new Date("2024-02-20"),
-    customer: {
-      id: "1",
-      name: "John Doe",
-      phone: "+91 9876543210",
-      email: "john@example.com",
-      address: "123 Main St, Mumbai"
-    },
-    items: [
-      { 
-        productName: "iPhone 15 Pro", 
-        quantity: 1, 
-        price: 129999, 
-        gstPercent: 18,
-        gstAmount: 23399.82,
-        totalAmount: 153398.82
-      },
-      { 
-        productName: "AirPods Pro", 
-        quantity: 1, 
-        price: 24999, 
-        gstPercent: 18,
-        gstAmount: 4499.82,
-        totalAmount: 29498.82
-      },
-    ],
-    subtotal: 154998,
-    discountAmount: 5000,
-    discountPercent: 3.2,
-    taxAmount: 27000,
-    cgst: 13500,
-    sgst: 13500,
-    igst: 0,
-    totalGst: 27000,
-    finalAmount: 176998,
-    paymentStatus: "Paid",
-    paymentMethod: "Card",
-    createdBy: "Sarah Wilson",
-    createdAt: new Date("2024-01-20"),
-    status: "Paid",
-  },
-  {
-    id: "2",
-    billNumber: "NGST/24/0001",
-    billType: "Non-GST",
-    billDate: new Date("2024-01-19"),
-    customer: {
-      id: "2",
-      name: "Sarah Smith",
-      phone: "+91 9876543211",
-      address: "456 Oak St, Delhi"
-    },
-    items: [
-      { 
-        productName: "Phone Cover", 
-        quantity: 2, 
-        price: 500, 
-        gstPercent: 0,
-        gstAmount: 0,
-        totalAmount: 1000
-      },
-    ],
-    subtotal: 1000,
-    discountAmount: 0,
-    discountPercent: 0,
-    taxAmount: 0,
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
-    totalGst: 0,
-    finalAmount: 1000,
-    paymentStatus: "Pending",
-    createdBy: "Mike Johnson",
-    createdAt: new Date("2024-01-19"),
-    status: "Sent",
-  },
-];
-
 export function BillingProvider({ children }: { children: ReactNode }) {
-  const [bills, setBills] = useState<Bill[]>(initialBills);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const addBill = (bill: Bill) => {
-    setBills(prev => [bill, ...prev]);
+  // Fetch all bills from API
+  const fetchBills = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const apiBills = await billingService.getAllBills();
+      setBills(apiBills);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch bills";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updateBill = (billId: string, updates: Partial<Bill>) => {
-    setBills(prev => prev.map(bill => 
-      bill.id === billId ? { ...bill, ...updates } : bill
-    ));
+  // Add new bill
+  const addBill = async (billData: BillData): Promise<Bill | null> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Generate bill number
+      const billNumber = billingService.generateBillNumber(billData.billType);
+      const billWithNumber = { ...billData, billNumber };
+
+      const newBill = await billingService.createBill(billWithNumber);
+      setBills((prev) => [newBill, ...prev]);
+
+      toast({
+        title: "Success",
+        description: "Bill created successfully!",
+        variant: "default",
+      });
+
+      return newBill;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create bill";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteBill = (billId: string) => {
-    setBills(prev => prev.filter(bill => bill.id !== billId));
+  // Update bill
+  const updateBill = async (
+    billId: string,
+    updates: Partial<BillData>,
+  ): Promise<Bill | null> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const updatedBill = await billingService.updateBill(billId, updates);
+      setBills((prev) =>
+        prev.map((bill) => (bill.id === billId ? updatedBill : bill)),
+      );
+
+      toast({
+        title: "Success",
+        description: "Bill updated successfully!",
+        variant: "default",
+      });
+
+      return updatedBill;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update bill";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Delete bill
+  const deleteBill = async (billId: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      await billingService.deleteBill(billId);
+      setBills((prev) => prev.filter((bill) => bill.id !== billId));
+
+      toast({
+        title: "Success",
+        description: "Bill deleted successfully!",
+        variant: "default",
+      });
+
+      return true;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete bill";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Get bill by ID
   const getBillById = (billId: string) => {
-    return bills.find(bill => bill.id === billId);
+    return bills.find((bill) => bill.id === billId);
   };
+
+  // Fetch bills on component mount
+  useEffect(() => {
+    fetchBills();
+  }, []);
 
   const value = {
     bills,
+    isLoading,
+    error,
+    fetchBills,
     addBill,
     updateBill,
     deleteBill,
@@ -164,16 +214,14 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <BillingContext.Provider value={value}>
-      {children}
-    </BillingContext.Provider>
+    <BillingContext.Provider value={value}>{children}</BillingContext.Provider>
   );
 }
 
 export function useBilling() {
   const context = useContext(BillingContext);
   if (context === undefined) {
-    throw new Error('useBilling must be used within a BillingProvider');
+    throw new Error("useBilling must be used within a BillingProvider");
   }
   return context;
 }

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useBilling } from "@/contexts/BillingContext";
 import {
   Bell,
   TrendingUp,
@@ -22,131 +23,179 @@ import {
   Target,
   Star,
   ShieldAlert,
-  Receipt
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Enhanced mock data for comprehensive dashboard
-const todayStats = {
-  sales: { amount: 23450, transactions: 12, change: 18.5 },
-  customers: { new: 8, returning: 15, change: 12.0 },
-  returnSales: { amount: 1200, count: 2, change: -5.2 },
-};
-
-const overallStats = {
-  sales: { amount: 1250420, transactions: 3247, change: 12.5 },
-  customers: { total: 892, active: 654, change: 8.3 },
-  products: { total: 1240, lowStock: 23, outOfStock: 5 },
-  revenue: { thisMonth: 345670, lastMonth: 298450, growth: 15.8 },
-};
-
-const chartData = {
-  salesTrend: [
-    { month: "Jan", sales: 85000, customers: 120 },
-    { month: "Feb", sales: 92000, customers: 135 },
-    { month: "Mar", sales: 108000, customers: 158 },
-    { month: "Apr", sales: 125000, customers: 180 },
-    { month: "May", sales: 134000, customers: 195 },
-    { month: "Jun", sales: 145000, customers: 210 },
-  ],
-  categoryBreakdown: [
-    { category: "Mobile", sales: 450000, percentage: 36 },
-    { category: "AC", sales: 320000, percentage: 26 },
-    { category: "TV", sales: 280000, percentage: 22 },
-    { category: "Laptop", sales: 200000, percentage: 16 },
-  ],
-};
-
+// Mock notifications (can be replaced with real notification system later)
 const notifications = [
   {
     id: "1",
-    type: "security",
-    title: "Multiple Login Detected",
-    message: "Admin account logged in from new device (Mobile - Mumbai)",
-    timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-    read: false,
-    severity: "high",
-  },
-  {
-    id: "2",
-    type: "deletion",
-    title: "Bill Deletion Request",
-    message: "Cashier requested deletion of invoice INV-2024-001234",
-    timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-    read: false,
-    severity: "medium",
-    actionRequired: true,
-  },
-  {
-    id: "3",
     type: "system",
-    title: "Low Stock Alert",
-    message: "23 products are running low on stock",
-    timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-    read: true,
+    title: "System Status",
+    message: "All systems are running normally",
+    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+    read: false,
     severity: "low",
-  },
-  {
-    id: "4",
-    type: "security",
-    title: "Admin Login",
-    message: "Main admin logged in from Desktop - Delhi",
-    timestamp: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
-    read: true,
-    severity: "low",
-  },
-];
-
-const recentTransactions = [
-  {
-    id: "TXN001",
-    customer: "John Doe",
-    amount: 2450,
-    items: 3,
-    time: "2 min ago",
-    type: "GST",
-    status: "completed",
-  },
-  {
-    id: "TXN002",
-    customer: "Sarah Smith",
-    amount: 1200,
-    items: 1,
-    time: "15 min ago",
-    type: "Non-GST",
-    status: "completed",
-  },
-  {
-    id: "TXN003",
-    customer: "Mike Johnson",
-    amount: 850,
-    items: 2,
-    time: "1 hour ago",
-    type: "GST",
-    status: "pending",
   },
 ];
 
 export default function Dashboard() {
+  const { bills, isLoading } = useBilling();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(
-    notifications.filter(n => !n.read).length
-  );
+  const [unreadCount, setUnreadCount] = useState(1);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
-  const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN')}`;
+  // Handle click outside to close notification dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
+
+  // Calculate real statistics from bill data
+  const calculateStats = () => {
+    if (!bills || bills.length === 0) {
+      return {
+        todayStats: {
+          sales: { amount: 0, transactions: 0, change: 0 },
+          customers: { total: 0, unique: 0, change: 0 },
+          returnSales: { amount: 0, count: 0, change: 0 },
+        },
+        overallStats: {
+          totalRevenue: 0,
+          totalCustomers: 0,
+          totalTransactions: 0,
+          paidRevenue: 0,
+          pendingRevenue: 0,
+        },
+        recentBills: [],
+        chartData: {
+          gstSales: 0,
+          nonGstSales: 0,
+          quotationSales: 0,
+          totalSales: 0,
+        },
+      };
+    }
+
+    const today = new Date();
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    // Filter today's bills
+    const todayBills = bills.filter((bill) => {
+      const billDate = new Date(bill.billDate || bill.createdAt);
+      return billDate >= todayStart;
+    });
+
+    // Calculate today's stats
+    const todayRevenue = todayBills.reduce(
+      (sum, bill) => sum + (bill.totalAmount || 0),
+      0,
+    );
+    const todayCustomers = new Set(todayBills.map((bill) => bill.customerPhone))
+      .size;
+    const todayTransactions = todayBills.length;
+
+    // Calculate overall stats
+    const totalRevenue = bills.reduce(
+      (sum, bill) => sum + (bill.totalAmount || 0),
+      0,
+    );
+    const paidRevenue = bills
+      .filter((bill) => bill.paymentType === "Full")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const pendingRevenue = bills.reduce(
+      (sum, bill) => sum + (bill.remainingAmount || 0),
+      0,
+    );
+    const uniqueCustomers = new Set(bills.map((bill) => bill.customerPhone))
+      .size;
+
+    // Calculate sales by type
+    const gstSales = bills
+      .filter((bill) => bill.billType === "GST")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const nonGstSales = bills
+      .filter((bill) => bill.billType === "Non-GST")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+    const quotationSales = bills
+      .filter((bill) => bill.billType === "Quotation")
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+
+    // Get recent bills (last 5)
+    const recentBills = bills
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 5);
+
+    return {
+      todayStats: {
+        sales: {
+          amount: todayRevenue,
+          transactions: todayTransactions,
+          change: 0,
+        },
+        customers: { total: todayCustomers, unique: todayCustomers, change: 0 },
+        returnSales: { amount: 0, count: 0, change: 0 }, // Will need to track return sales separately
+      },
+      overallStats: {
+        totalRevenue,
+        totalCustomers: uniqueCustomers,
+        totalTransactions: bills.length,
+        paidRevenue,
+        pendingRevenue,
+      },
+      recentBills,
+      chartData: {
+        gstSales,
+        nonGstSales,
+        quotationSales,
+        totalSales: totalRevenue,
+      },
+    };
   };
 
-  const formatTime = (date: Date) => {
+  const stats = calculateStats();
+
+  const formatCurrency = (amount: number) => {
+    return `₹${amount.toLocaleString("en-IN")}`;
+  };
+
+  const formatTime = (date: Date | string) => {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 60) {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    const diffInMinutes = Math.floor(
+      (now.getTime() - dateObj.getTime()) / (1000 * 60),
+    );
+
+    if (diffInMinutes < 1) {
+      return "Just now";
+    } else if (diffInMinutes < 60) {
       return `${diffInMinutes}m ago`;
     } else if (diffInMinutes < 1440) {
       return `${Math.floor(diffInMinutes / 60)}h ago`;
     } else {
-      return date.toLocaleDateString();
+      return dateObj.toLocaleDateString();
     }
   };
 
@@ -181,10 +230,14 @@ export default function Dashboard() {
       {/* Header with Notifications */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Business Dashboard</h2>
-          <p className="text-muted-foreground">Monitor your business performance and key metrics</p>
+          <h2 className="text-3xl font-bold text-foreground">
+            Business Dashboard
+          </h2>
+          <p className="text-muted-foreground">
+            Monitor your business performance and key metrics
+          </p>
         </div>
-        <div className="relative">
+        <div className="relative" ref={notificationRef}>
           <Button
             variant="outline"
             size="icon"
@@ -198,7 +251,7 @@ export default function Dashboard() {
               </span>
             )}
           </Button>
-          
+
           {showNotifications && (
             <div className="absolute right-0 top-12 w-80 bg-white border rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
               <div className="p-4 border-b">
@@ -210,19 +263,23 @@ export default function Dashboard() {
                     key={notification.id}
                     className={cn(
                       "p-4 border-b hover:bg-muted/50 transition-colors",
-                      !notification.read && "bg-primary/5"
+                      !notification.read && "bg-primary/5",
                     )}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        getSeverityColor(notification.severity)
-                      )}>
+                      <div
+                        className={cn(
+                          "p-2 rounded-full",
+                          getSeverityColor(notification.severity),
+                        )}
+                      >
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm">{notification.title}</h4>
+                          <h4 className="font-medium text-sm">
+                            {notification.title}
+                          </h4>
                           <span className="text-xs text-muted-foreground">
                             {formatTime(notification.timestamp)}
                           </span>
@@ -232,11 +289,19 @@ export default function Dashboard() {
                         </p>
                         {notification.actionRequired && (
                           <div className="flex gap-2 mt-2">
-                            <Button size="sm" variant="outline" className="text-xs">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            >
                               <CheckCircle className="h-3 w-3" />
                               Approve
                             </Button>
-                            <Button size="sm" variant="outline" className="text-xs">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            >
                               <X className="h-3 w-3" />
                               Deny
                             </Button>
@@ -254,7 +319,9 @@ export default function Dashboard() {
 
       {/* Today's Statistics */}
       <div>
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Today's Performance</h3>
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
+          Today's Performance
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border-l-4 border-l-green-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
@@ -265,15 +332,14 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(todayStats.sales.amount)}
+                {formatCurrency(stats.todayStats.sales.amount)}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
                 <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.sales.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
+                <span className="text-green-500">Real-time data</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.sales.transactions} transactions
+                {stats.todayStats.sales.transactions} transactions today
               </div>
             </CardContent>
           </Card>
@@ -287,37 +353,14 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
-                {todayStats.customers.new + todayStats.customers.returning}
+                {stats.todayStats.customers.total}
               </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{todayStats.customers.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
+                <Users className="h-3 w-3 text-blue-500" />
+                <span className="text-blue-500">Unique customers</span>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.customers.new} new, {todayStats.customers.returning} returning
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-red-500 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-red-600" />
-                Today Return Sale
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(todayStats.returnSales.amount)}
-              </div>
-              <div className="flex items-center gap-1 text-sm mt-2">
-                <TrendingDown className="h-3 w-3 text-red-500" />
-                <span className="text-red-500">{todayStats.returnSales.change}%</span>
-                <span className="text-muted-foreground">vs yesterday</span>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {todayStats.returnSales.count} return transactions
+                {stats.todayStats.customers.total} served today
               </div>
             </CardContent>
           </Card>
@@ -325,26 +368,71 @@ export default function Dashboard() {
           <Card className="border-l-4 border-l-orange-500 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="h-4 w-4 text-orange-600" />
-                Daily Target
+                <Receipt className="h-4 w-4 text-orange-600" />
+                Pending Amount
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">78%</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {formatCurrency(stats.overallStats.pendingRevenue)}
+              </div>
               <div className="flex items-center gap-1 text-sm mt-2">
-                <span className="text-muted-foreground">₹30,000 target</span>
+                <TrendingDown className="h-3 w-3 text-orange-500" />
+                <span className="text-orange-500">Outstanding</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                From partial payments
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-purple-500 shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Target className="h-4 w-4 text-purple-600" />
+                Collection Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">
+                {stats.overallStats.totalRevenue > 0
+                  ? (
+                      (stats.overallStats.paidRevenue /
+                        stats.overallStats.totalRevenue) *
+                      100
+                    ).toFixed(1)
+                  : 0}
+                %
+              </div>
+              <div className="flex items-center gap-1 text-sm mt-2">
+                <span className="text-muted-foreground">
+                  Payment success rate
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div className="bg-orange-500 h-2 rounded-full" style={{ width: "78%" }}></div>
+                <div
+                  className="bg-purple-500 h-2 rounded-full"
+                  style={{
+                    width: `${
+                      stats.overallStats.totalRevenue > 0
+                        ? (stats.overallStats.paidRevenue /
+                            stats.overallStats.totalRevenue) *
+                          100
+                        : 0
+                    }%`,
+                  }}
+                ></div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Overall Statistics */} 
+      {/* Overall Statistics */}
       <div>
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Overall Performance</h3>
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
+          Overall Performance
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
@@ -354,11 +442,12 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount)}</div>
+              <div className="text-2xl font-bold">
+                {formatCurrency(stats.overallStats.totalRevenue)}
+              </div>
               <div className="flex items-center gap-1 text-sm">
                 <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.sales.change}%</span>
-                <span className="text-muted-foreground">this month</span>
+                <span className="text-green-500">All time revenue</span>
               </div>
             </CardContent>
           </Card>
@@ -371,11 +460,12 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overallStats.customers.total}</div>
+              <div className="text-2xl font-bold">
+                {stats.overallStats.totalCustomers}
+              </div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.customers.change}%</span>
-                <span className="text-muted-foreground">growth</span>
+                <Users className="h-3 w-3 text-blue-500" />
+                <span className="text-blue-500">Unique customers</span>
               </div>
             </CardContent>
           </Card>
@@ -383,16 +473,17 @@ export default function Dashboard() {
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Total Rs
+                <Receipt className="h-4 w-4" />
+                Total Bills
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(overallStats.sales.amount + overallStats.revenue.thisMonth)}</div>
+              <div className="text-2xl font-bold">
+                {stats.overallStats.totalTransactions}
+              </div>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{overallStats.revenue.growth}%</span>
-                <span className="text-muted-foreground">total value</span>
+                <Receipt className="h-3 w-3 text-purple-500" />
+                <span className="text-purple-500">All transactions</span>
               </div>
             </CardContent>
           </Card>
@@ -401,13 +492,15 @@ export default function Dashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Star className="h-4 w-4" />
-                Monthly Growth
+                Paid Revenue
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">+{overallStats.revenue.growth}%</div>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(stats.overallStats.paidRevenue)}
+              </div>
               <div className="text-sm text-muted-foreground">
-                {formatCurrency(overallStats.revenue.thisMonth)} this month
+                Collected payments
               </div>
             </CardContent>
           </Card>
@@ -416,54 +509,92 @@ export default function Dashboard() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales Trend Chart */}
+        {/* Bill Type Breakdown */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              Sales Trend (6 Months)
+              Bill Type Breakdown
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {chartData.salesTrend.map((data, index) => (
-                <div key={data.month} className="flex items-center justify-between">
-                  <span className="text-sm font-medium w-12">{data.month}</span>
-                  <div className="flex-1 mx-4">
-                    <div className="bg-gray-200 rounded-full h-3 relative">
-                      <div
-                        className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
-                        style={{
-                          width: `${(data.sales / Math.max(...chartData.salesTrend.map(d => d.sales))) * 100}%`
-                        }}
-                      ></div>
-                    </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium w-16">GST</span>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3 relative">
+                    <div
+                      className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
+                      style={{
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.gstSales / stats.chartData.totalSales) * 100 : 0}%`,
+                      }}
+                    ></div>
                   </div>
-                  <span className="text-sm text-muted-foreground w-20 text-right">
-                    {formatCurrency(data.sales)}
-                  </span>
                 </div>
-              ))}
+                <span className="text-sm text-muted-foreground w-20 text-right">
+                  {formatCurrency(stats.chartData.gstSales)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium w-16">Non-GST</span>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3 relative">
+                    <div
+                      className="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full"
+                      style={{
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.nonGstSales / stats.chartData.totalSales) * 100 : 0}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="text-sm text-muted-foreground w-20 text-right">
+                  {formatCurrency(stats.chartData.nonGstSales)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium w-16">Quote</span>
+                <div className="flex-1 mx-4">
+                  <div className="bg-gray-200 rounded-full h-3 relative">
+                    <div
+                      className="bg-gradient-to-r from-purple-400 to-purple-600 h-3 rounded-full"
+                      style={{
+                        width: `${stats.chartData.totalSales > 0 ? (stats.chartData.quotationSales / stats.chartData.totalSales) * 100 : 0}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="text-sm text-muted-foreground w-20 text-right">
+                  {formatCurrency(stats.chartData.quotationSales)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Sales Donut Chart */}
+        {/* Sales Distribution */}
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PieChart className="h-5 w-5 text-primary" />
-              Sales Distribution
+              Revenue Distribution
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center mb-6">
               <div className="relative w-32 h-32">
-                <div className="w-32 h-32 rounded-full border-8 border-green-500 border-t-blue-500 border-r-purple-500 border-b-orange-500 animate-pulse"></div>
+                <div className="w-32 h-32 rounded-full border-8 border-green-500 border-t-blue-500 border-r-purple-500 border-b-orange-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-lg font-bold">₹12.5L</div>
-                    <div className="text-xs text-muted-foreground">Total Sales</div>
+                    <div className="text-lg font-bold">
+                      {stats.chartData.totalSales > 1000000
+                        ? `₹${(stats.chartData.totalSales / 100000).toFixed(1)}L`
+                        : formatCurrency(stats.chartData.totalSales)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Total Sales
+                    </div>
                   </div>
                 </div>
               </div>
@@ -471,7 +602,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>GST Sales</span>
+                <span>GST Bills</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
@@ -479,7 +610,7 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                <span>Returns</span>
+                <span>Quotations</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
@@ -499,46 +630,79 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {recentTransactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-white rounded-lg border border-green-100 hover:shadow-md transition-shadow"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">{transaction.customer}</span>
-                  <Badge
-                    variant={transaction.type === "GST" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {transaction.type}
-                  </Badge>
-                  <Badge
-                    variant={transaction.status === "completed" ? "default" : "secondary"}
-                    className={cn(
-                      "text-xs",
-                      transaction.status === "completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading recent bills...</p>
+            </div>
+          ) : stats.recentBills.length === 0 ? (
+            <div className="text-center py-8">
+              <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No bills found</p>
+              <p className="text-sm text-muted-foreground">
+                Create your first bill to see it here
+              </p>
+            </div>
+          ) : (
+            stats.recentBills.map((bill) => {
+              const timeAgo = formatTime(new Date(bill.createdAt));
+              return (
+                <div
+                  key={bill.id}
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-white rounded-lg border border-green-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">
+                        {bill.customerName || "Unknown Customer"}
+                      </span>
+                      <Badge
+                        variant={
+                          bill.billType === "GST" ? "default" : "secondary"
+                        }
+                        className="text-xs"
+                      >
+                        {bill.billType}
+                      </Badge>
+                      <Badge
+                        variant={
+                          bill.paymentType === "Full" ? "default" : "secondary"
+                        }
+                        className={cn(
+                          "text-xs",
+                          bill.paymentType === "Full"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800",
+                        )}
+                      >
+                        {bill.paymentType === "Full" ? "Paid" : "Partial"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>
+                        {bill.billNumber || `BILL-${bill.id.slice(-4)}`}
+                      </span>
+                      <span>{bill.items?.length || 0} items</span>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {timeAgo}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-green-600">
+                      {formatCurrency(bill.totalAmount || 0)}
+                    </div>
+                    {(bill.remainingAmount || 0) > 0 && (
+                      <div className="text-xs text-orange-600">
+                        Pending: {formatCurrency(bill.remainingAmount)}
+                      </div>
                     )}
-                  >
-                    {transaction.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{transaction.id}</span>
-                  <span>{transaction.items} items</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {transaction.time}
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="font-semibold text-green-600">
-                  {formatCurrency(transaction.amount)}
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </CardContent>
       </Card>
     </div>
