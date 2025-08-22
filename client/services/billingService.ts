@@ -1,5 +1,5 @@
-// Billing API Service - Using local server
-const API_BASE_URL = window.location.origin;
+// Billing API Service - Using remote server
+const API_BASE_URL = "https://billing-system-i3py.onrender.com";
 
 // GST Configuration for state detection
 const gstConfig = {
