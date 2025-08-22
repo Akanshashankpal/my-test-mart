@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,24 @@ export default function Dashboard() {
   const { bills, isLoading } = useBilling();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(1);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to close notification dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications]);
 
   // Calculate real statistics from bill data
   const calculateStats = () => {
@@ -184,7 +202,7 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold text-foreground">Business Dashboard</h2>
           <p className="text-muted-foreground">Monitor your business performance and key metrics</p>
         </div>
-        <div className="relative">
+        <div className="relative" ref={notificationRef}>
           <Button
             variant="outline"
             size="icon"
@@ -198,7 +216,7 @@ export default function Dashboard() {
               </span>
             )}
           </Button>
-          
+
           {showNotifications && (
             <div className="absolute right-0 top-12 w-80 bg-white border rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
               <div className="p-4 border-b">
