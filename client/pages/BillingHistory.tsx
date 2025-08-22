@@ -730,16 +730,22 @@ export default function BillingHistory() {
                       <span>-{formatCurrency(selectedBill.discountAmount)}</span>
                     </div>
                   )}
-                  {(selectedBill.taxAmount || 0) > 0 && (
+                  {(selectedBill.gstAmount || 0) > 0 && (
                     <div className="flex justify-between">
-                      <span>Tax:</span>
-                      <span>{formatCurrency(selectedBill.taxAmount)}</span>
+                      <span>GST ({selectedBill.gstPercent}%):</span>
+                      <span>{formatCurrency(selectedBill.gstAmount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-lg border-t pt-2">
                     <span>Total:</span>
-                    <span>{formatCurrency(selectedBill.finalAmount)}</span>
+                    <span>{formatCurrency(selectedBill.totalAmount)}</span>
                   </div>
+                  {(selectedBill.remainingAmount || 0) > 0 && (
+                    <div className="flex justify-between text-red-600">
+                      <span>Remaining:</span>
+                      <span>{formatCurrency(selectedBill.remainingAmount)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
