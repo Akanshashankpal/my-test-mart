@@ -217,7 +217,7 @@ export default function SimpleBilling() {
       status: "draft",
     });
     
-    setCurrentStep("invoice");
+    setCreateStep(2);
   };
   
   // Add item to invoice
