@@ -271,10 +271,20 @@ export default function SimpleBilling() {
   
   // Save invoice
   const saveInvoice = async () => {
+    // Validation
     if (currentInvoice.items.length === 0) {
       toast({
         title: "Empty Invoice",
         description: "Please add at least one item to the invoice",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!currentInvoice.customer.name || !currentInvoice.customer.phone) {
+      toast({
+        title: "Missing Customer Details",
+        description: "Please ensure customer name and phone are provided",
         variant: "destructive"
       });
       return;
