@@ -118,9 +118,13 @@ export default function BillingHistory() {
       );
     }
 
-    // Status filter
+    // Status filter - using payment type as status since new structure doesn't have status
     if (statusFilter !== "all") {
-      filtered = filtered.filter(bill => bill.status.toLowerCase() === statusFilter);
+      if (statusFilter === "paid") {
+        filtered = filtered.filter(bill => bill.paymentType === "Full");
+      } else if (statusFilter === "pending") {
+        filtered = filtered.filter(bill => bill.paymentType === "Partial" || (bill.remainingAmount || 0) > 0);
+      }
     }
 
     // Type filter
@@ -128,9 +132,13 @@ export default function BillingHistory() {
       filtered = filtered.filter(bill => bill.billType === typeFilter);
     }
 
-    // Payment filter
+    // Payment filter - using payment type
     if (paymentFilter !== "all") {
-      filtered = filtered.filter(bill => bill.paymentStatus.toLowerCase() === paymentFilter);
+      if (paymentFilter === "paid") {
+        filtered = filtered.filter(bill => bill.paymentType === "Full");
+      } else if (paymentFilter === "pending") {
+        filtered = filtered.filter(bill => bill.paymentType === "Partial" || (bill.remainingAmount || 0) > 0);
+      }
     }
 
     // Date range filter
