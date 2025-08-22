@@ -935,16 +935,20 @@ export const utilityAPI = {
 // Error handling utilities
 export const handleAPIError = (error: any): string => {
   if (!error.response) {
-    return 'Network error. Please check your connection.';
+    return error?.message || 'Network error. Please check your connection.';
   }
 
   const { status, data } = error.response;
-  
+
   if (data?.message) {
     return data.message;
   }
 
-  if (data?.errors) {
+  if (data?.error) {
+    return data.error;
+  }
+
+  if (data?.errors && typeof data.errors === 'object') {
     const errorMessages = Object.values(data.errors).flat();
     return errorMessages.join(', ');
   }
@@ -967,8 +971,14 @@ export const handleAPIError = (error: any): string => {
     case 503:
       return 'Service unavailable. Please try again later.';
     default:
-      return 'An unexpected error occurred.';
+      return `HTTP ${status}: ${error.response?.statusText || 'An unexpected error occurred.'}`;
   }
+};
+
+// Show user-friendly error message
+export const showAPIError = (error: any, context: string = 'Operation') => {
+  const message = handleAPIError(error);
+  alert(`${context} failed: ${message}`);
 };
 
 // Connection test
