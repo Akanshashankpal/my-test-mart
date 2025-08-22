@@ -270,7 +270,7 @@ export default function SimpleBilling() {
   };
   
   // Save invoice
-  const saveInvoice = () => {
+  const saveInvoice = async () => {
     if (currentInvoice.items.length === 0) {
       toast({
         title: "Empty Invoice",
@@ -279,49 +279,57 @@ export default function SimpleBilling() {
       });
       return;
     }
-    
-    const billToSave = {
-      id: currentInvoice.id,
-      billNumber: currentInvoice.billNumber,
-      billType: currentInvoice.billingMode,
-      billDate: currentInvoice.createdAt,
-      customer: {
-        id: Date.now().toString(),
-        name: currentInvoice.customer.name,
-        phone: currentInvoice.customer.phone,
-        address: currentInvoice.customer.address,
-      },
+
+    // Convert to API format
+    const billData = {
+      customerName: currentInvoice.customer.name,
+      customerPhone: currentInvoice.customer.phone,
+      customerAddress: currentInvoice.customer.address,
+      pincode: '', // We can add pincode field later if needed
       items: currentInvoice.items.map(item => ({
-        productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        gstPercent: item.gstPercent,
-        totalAmount: item.totalAmount,
-        gstAmount: item.gstAmount,
+        itemName: item.productName,
+        itemPrice: item.price,
+        itemQuantity: item.quantity,
       })),
-      subtotal: currentInvoice.subtotal,
-      discountAmount: currentInvoice.discountAmount,
-      discountPercent: currentInvoice.discountPercent,
-      taxAmount: currentInvoice.gstTotal,
-      cgst: currentInvoice.gstTotal / 2,
-      sgst: currentInvoice.gstTotal / 2,
-      igst: 0,
-      totalGst: currentInvoice.gstTotal,
-      finalAmount: currentInvoice.finalAmount,
-      paymentStatus: "Pending" as const,
-      createdBy: user?.name || "Unknown",
-      createdAt: currentInvoice.createdAt,
-      status: "Draft" as const,
+      discount: currentInvoice.discountPercent,
+      paymentType: currentInvoice.paymentMode === "full" ? "Full" as const : "Partial" as const,
+      paidAmount: currentInvoice.paidAmount,
+      paymentMethod: currentInvoice.paymentMethod,
+      observation: currentInvoice.observation,
+      termsAndConditions: currentInvoice.termsAndConditions,
+      billType: billingMode,
     };
-    
-    addBill(billToSave);
-    setCurrentStep("list");
-    setCreateStep(1);
-    toast({
-      title: "Success",
-      description: "Invoice saved successfully!",
-      variant: "default"
-    });
+
+    const savedBill = await addBill(billData);
+    if (savedBill) {
+      setCurrentStep("list");
+      setCreateStep(1);
+      // Reset form
+      setCustomer({ name: "", phone: "", address: "" });
+      setCurrentInvoice({
+        id: "",
+        billNumber: "",
+        customer: { name: "", phone: "", address: "" },
+        items: [],
+        subtotal: 0,
+        discountPercent: 0,
+        discountAmount: 0,
+        gstTotal: 0,
+        cgst: 0,
+        sgst: 0,
+        finalAmount: 0,
+        billingMode: "GST",
+        observation: "",
+        termsAndConditions: "1. Payment due within 30 days\n2. Goods once sold will not be taken back\n3. Subject to Delhi jurisdiction",
+        isReturnSale: false,
+        paymentMode: "full",
+        paidAmount: 0,
+        pendingAmount: 0,
+        paymentMethod: "cash",
+        createdAt: new Date(),
+        status: "draft",
+      });
+    }
   };
   
   // Download PDF
