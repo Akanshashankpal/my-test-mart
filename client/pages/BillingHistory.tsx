@@ -465,7 +465,7 @@ export default function BillingHistory() {
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="GST">GST</SelectItem>
                 <SelectItem value="Non-GST">Non-GST</SelectItem>
-                <SelectItem value="Demo">Demo</SelectItem>
+                <SelectItem value="Quotation">Quotation</SelectItem>
               </SelectContent>
             </Select>
 
