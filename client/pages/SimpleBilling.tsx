@@ -1668,14 +1668,14 @@ export default function SimpleBilling() {
                     </div>
                   </div>
                   <div className="text-right mr-4">
-                    <div className="font-medium">{formatCurrency(bill.totalAmount || 0)}</div>
+                    <div className="font-medium">{formatCurrency(bill.totalAmount || bill.finalAmount || 0)}</div>
                     <div className="text-xs text-gray-500">
                       <Calendar className="h-3 w-3 inline mr-1" />
-                      {new Date(bill.billDate || bill.createdAt).toLocaleDateString('en-IN')}
+                      {new Date(bill.billDate || bill.createdAt || new Date()).toLocaleDateString('en-IN')}
                     </div>
-                    {bill.remainingAmount > 0 && (
+                    {(bill.remainingAmount || 0) > 0 && (
                       <div className="text-xs text-red-600">
-                        Pending: {formatCurrency(bill.remainingAmount)}
+                        Pending: {formatCurrency(bill.remainingAmount || 0)}
                       </div>
                     )}
                   </div>
