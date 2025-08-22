@@ -87,13 +87,10 @@ function calculateBill(data: any) {
 
 // API Helper function
 async function apiCall(endpoint: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('electromart_token');
-
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
