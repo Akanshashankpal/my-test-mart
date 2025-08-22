@@ -15,6 +15,8 @@ import Dashboard from "./pages/Dashboard";
 import SimpleBilling from "./pages/SimpleBilling";
 import EnhancedBilling from "./pages/EnhancedBilling";
 import BillingHistory from "./pages/BillingHistory";
+import EnhancedBillingHistory from "./pages/EnhancedBillingHistory";
+import SalesReturn from "./pages/SalesReturn";
 import Products from "./pages/Products";
 import Customers from "./pages/Customers";
 import UserManagement from "./pages/UserManagement";
