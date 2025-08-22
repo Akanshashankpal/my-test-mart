@@ -52,9 +52,103 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile header */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <div className="bg-blue-600 text-white p-2 rounded-lg">
+            <Store className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="font-bold text-lg text-gray-900">ElectroMart</h1>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="lg:hidden"
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      </div>
+
+      {/* Mobile navigation overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50" onClick={closeMobileMenu}>
+          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col h-full">
+              {/* Sidebar header */}
+              <div className="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
+                <div className="bg-blue-600 text-white p-2 rounded-lg">
+                  <Store className="h-5 w-5" />
+                </div>
+                <div>
+                  <h1 className="font-bold text-lg text-gray-900">ElectroMart</h1>
+                  <p className="text-xs text-gray-600">Business Management</p>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <nav className="flex-1 p-4 space-y-2">
+                {navigation.map((item) => {
+                  const isActive = location.pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={closeMobileMenu}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-gray-700 hover:bg-gray-100"
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isActive ? "text-blue-600" : "text-gray-400"
+                        )}
+                      />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* User info */}
+              <div className="p-4 border-t border-gray-200">
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 mb-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarFallback className="bg-purple-600 text-white text-xs">
+                      {user ? getUserInitials(user.name) : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar for large screens */}
-      <div className="hidden lg:flex fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
+      <div className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200">
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
           <div className="flex items-center gap-2 h-16 px-6 border-b border-gray-200">
