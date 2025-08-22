@@ -53,10 +53,12 @@ interface Customer {
   phone: string;
   address: string;
   email?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   totalPurchases: number;
-  lastPurchase?: Date;
+  lastPurchase?: string;
+  status: 'active' | 'inactive';
+  gstNumber?: string;
 }
 
 interface Purchase {
@@ -67,6 +69,20 @@ interface Purchase {
   items: number;
   invoiceNumber: string;
   type: "GST" | "Non-GST";
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+interface CustomersResponse {
+  customers: Customer[];
+  pagination: Pagination;
 }
 
 // Mock data
