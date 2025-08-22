@@ -399,9 +399,21 @@ export const testAPIConnection = async () => {
   }
 };
 
+// Error handling utility for components
+export const handleAPIError = (error: any, defaultMessage: string = 'An error occurred'): string => {
+  return error?.message || defaultMessage;
+};
+
+// Show user-friendly error message
+export const showAPIError = (error: any, context: string = 'Operation') => {
+  const message = handleAPIError(error, `${context} failed`);
+  alert(message);
+};
+
 // Make test function available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).testAPIConnection = testAPIConnection;
+  (window as any).handleAPIError = handleAPIError;
 }
 
 export default api;
