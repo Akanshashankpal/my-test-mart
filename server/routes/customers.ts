@@ -161,18 +161,85 @@ const customersService = new CustomersService();
 // Get all customers with filters and pagination
 export const getCustomers: RequestHandler = async (req, res) => {
   try {
-    const filters: CustomerFilters = {
-      search: req.query.search as string,
-      status: req.query.status as "active" | "inactive",
-      page: parseInt(req.query.page as string) || 1,
-      limit: parseInt(req.query.limit as string) || 20
-    };
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      customerType,
+      isActive = 'true',
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
 
-    const result = await customersService.getCustomers(filters);
-    
+    // For now, using mock data with filtering and sorting
+    let filteredCustomers = [...customersService['customers']];
+
+    // Apply search filter
+    if (search) {
+      const searchLower = (search as string).toLowerCase();
+      filteredCustomers = filteredCustomers.filter(customer =>
+        customer.name.toLowerCase().includes(searchLower) ||
+        customer.phone.toLowerCase().includes(searchLower) ||
+        (customer.email && customer.email.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Apply status filter
+    if (isActive !== 'all') {
+      const activeStatus = isActive === 'true';
+      filteredCustomers = filteredCustomers.filter(customer =>
+        customer.status === (activeStatus ? 'active' : 'inactive')
+      );
+    }
+
+    // Apply customer type filter (if applicable)
+    if (customerType) {
+      // Add customer type filtering if needed
+    }
+
+    // Apply sorting
+    filteredCustomers.sort((a, b) => {
+      const field = sortBy as keyof Customer;
+      if (field === 'createdAt' || field === 'updatedAt') {
+        const aDate = new Date(a[field]).getTime();
+        const bDate = new Date(b[field]).getTime();
+        return sortOrder === 'desc' ? bDate - aDate : aDate - bDate;
+      } else if (field === 'totalPurchases') {
+        return sortOrder === 'desc' ? b[field] - a[field] : a[field] - b[field];
+      } else {
+        const aValue = String(a[field]).toLowerCase();
+        const bValue = String(b[field]).toLowerCase();
+        if (sortOrder === 'desc') {
+          return bValue.localeCompare(aValue);
+        } else {
+          return aValue.localeCompare(bValue);
+        }
+      }
+    });
+
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
+    const total = filteredCustomers.length;
+    const totalPages = Math.ceil(total / limitNum);
+
+    // Apply pagination
+    const paginatedCustomers = filteredCustomers.slice(skip, skip + limitNum);
+
     res.json({
       success: true,
-      data: result
+      data: {
+        customers: paginatedCustomers,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalItems: total,
+          itemsPerPage: limitNum,
+          hasNextPage: pageNum < totalPages,
+          hasPrevPage: pageNum > 1
+        }
+      }
     });
   } catch (error) {
     console.error('Get customers error:', error);
