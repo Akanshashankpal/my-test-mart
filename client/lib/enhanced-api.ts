@@ -87,13 +87,13 @@ api.interceptors.response.use(
         break;
     }
 
-    console.error('API Error:', {
+    console.error('API Error:', JSON.stringify({
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
       data: error.response?.data,
       message: error.message
-    });
+    }, null, 2));
 
     return Promise.reject(error);
   }
