@@ -882,9 +882,15 @@ export default function SimpleBilling() {
 
   // Unified Invoice Creation Form
   if (currentStep === "create") {
+    const steps = [
+      { number: 1, title: "Customer Details", description: "Enter customer information" },
+      { number: 2, title: "Add Items", description: "Add products to invoice" },
+      { number: 3, title: "Review & Save", description: "Review and finalize invoice" }
+    ];
+
     return (
       <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-2xl mx-auto">
+        <div className={cn("mx-auto", createStep <= 1 ? "max-w-4xl" : "max-w-7xl")}>
           {/* Header */}
           <div className="mb-8">
             {/* Mobile Back Button */}
@@ -900,96 +906,705 @@ export default function SimpleBilling() {
               </Button>
             </div>
 
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">New Invoice</h1>
-              <p className="text-gray-600">Enter customer details to create a new invoice</p>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {createStep <= 1 ? "New Invoice" : `Create Invoice - ${currentInvoice.billNumber}`}
+              </h1>
+              <p className="text-gray-600">
+                {createStep === 1 && "Enter customer details and select document type"}
+                {createStep === 2 && "Add items to your invoice"}
+                {createStep === 3 && "Review invoice details and save"}
+              </p>
             </div>
+
+            {/* Step Indicator */}
+            <StepIndicator currentStep={createStep} steps={steps} />
           </div>
-          
-          {/* Billing Mode Selection */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5" />
-                Document Type
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select value={billingMode} onValueChange={(value: "GST" | "Non-GST" | "Quotation") => setBillingMode(value)}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select billing mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="GST">GST Billing</SelectItem>
-                  <SelectItem value="Non-GST">Non-GST Billing</SelectItem>
-                  <SelectItem value="Quotation">Quotation</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
-          
-          {/* Customer Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Customer Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="customerName">Customer Name *</Label>
-                <Input
-                  id="customerName"
-                  value={customer.name}
-                  onChange={(e) => setCustomer(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter customer name"
-                  className="h-12"
-                />
+
+          {/* Step 1: Customer Details & Document Type */}
+          {createStep === 1 && (
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Document Type Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="h-5 w-5" />
+                    Document Type
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select value={billingMode} onValueChange={(value: "GST" | "Non-GST" | "Quotation") => setBillingMode(value)}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select billing mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GST">GST Billing</SelectItem>
+                      <SelectItem value="Non-GST">Non-GST Billing</SelectItem>
+                      <SelectItem value="Quotation">Quotation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+
+              {/* Customer Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Customer Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="customerName">Customer Name *</Label>
+                    <Input
+                      id="customerName"
+                      value={customer.name}
+                      onChange={(e) => setCustomer(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter customer name"
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="customerPhone">Phone Number *</Label>
+                    <Input
+                      id="customerPhone"
+                      value={customer.phone}
+                      onChange={(e) => setCustomer(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Enter phone number"
+                      className="h-12"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="customerAddress">Address</Label>
+                    <Input
+                      id="customerAddress"
+                      value={customer.address}
+                      onChange={(e) => setCustomer(prev => ({ ...prev, address: e.target.value }))}
+                      placeholder="Enter customer address"
+                      className="h-12"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep("list")}
+                  className="flex-1 h-12"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={createInvoice}
+                  className="flex-1 h-12 bg-green-600 hover:bg-green-700"
+                >
+                  <Receipt className="h-5 w-5 mr-2" />
+                  Continue to Items
+                </Button>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="customerPhone">Phone Number *</Label>
-                <Input
-                  id="customerPhone"
-                  value={customer.phone}
-                  onChange={(e) => setCustomer(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="Enter phone number"
-                  className="h-12"
-                />
+            </div>
+          )}
+
+          {/* Step 2 & 3: Invoice Creation */}
+          {(createStep === 2 || createStep === 3) && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Invoice Details */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Customer Details (Read-only) */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      Customer Details
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCreateStep(1)}
+                        className="ml-auto text-green-600 hover:text-green-700"
+                      >
+                        Edit
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Name</Label>
+                        <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{currentInvoice.customer.name}</p>
+                      </div>
+                      <div>
+                        <Label>Phone</Label>
+                        <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{currentInvoice.customer.phone}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label>Address</Label>
+                        <p className="mt-1 text-sm bg-gray-50 p-2 rounded">{currentInvoice.customer.address || "Not provided"}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {createStep === 2 && (
+                  <>
+                    {/* Add Item Form */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          Add Item
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="productName">Product Name</Label>
+                            <Input
+                              id="productName"
+                              value={newItem.productName}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, productName: e.target.value }))}
+                              placeholder="Enter product name"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="quantity">Quantity</Label>
+                            <Input
+                              id="quantity"
+                              type="number"
+                              min="1"
+                              value={newItem.quantity}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, quantity: e.target.value }))}
+                              placeholder="Enter quantity"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="price">Price (₹)</Label>
+                            <Input
+                              id="price"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={newItem.price}
+                              onChange={(e) => setNewItem(prev => ({ ...prev, price: e.target.value }))}
+                              placeholder="Enter price"
+                            />
+                          </div>
+                        </div>
+                        <Button onClick={addItem} className="mt-4 w-full bg-green-600 hover:bg-green-700">
+                          <Package className="h-4 w-4 mr-2" />
+                          Add Item
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Items List */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Items ({currentInvoice.items.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {currentInvoice.items.length === 0 ? (
+                      <p className="text-center text-gray-500 py-8">No items added yet</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {currentInvoice.items.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{item.productName}</h4>
+                              <p className="text-sm text-gray-600">
+                                Qty: {item.quantity} × {formatCurrency(item.price)}
+                                {billingMode === "GST" && ` (GST: ${item.gstPercent}%)`}
+                              </p>
+                            </div>
+                            <div className="text-right mr-4">
+                              <div className="font-medium">{formatCurrency(item.totalAmount)}</div>
+                              {billingMode === "GST" && (
+                                <div className="text-xs text-gray-500">
+                                  +{formatCurrency(item.gstAmount)} GST
+                                </div>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeItem(item.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="customerAddress">Address</Label>
-                <Input
-                  id="customerAddress"
-                  value={customer.address}
-                  onChange={(e) => setCustomer(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Enter customer address"
-                  className="h-12"
-                />
+
+              {/* Right Column - Invoice Summary & Actions */}
+              <div className="space-y-6">
+                {/* Discount */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Discount</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={currentInvoice.discountPercent}
+                        onChange={(e) => setCurrentInvoice(prev => ({
+                          ...prev,
+                          discountPercent: parseFloat(e.target.value) || 0
+                        }))}
+                        placeholder="0"
+                        className="flex-1"
+                      />
+                      <span className="text-sm text-gray-600">%</span>
+                    </div>
+                    {currentInvoice.discountPercent > 0 && (
+                      <p className="text-sm text-green-600 mt-2">
+                        Discount: {formatCurrency(currentInvoice.discountAmount)}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Invoice Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Invoice Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>{formatCurrency(currentInvoice.subtotal)}</span>
+                      </div>
+
+                      {currentInvoice.discountAmount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Discount ({currentInvoice.discountPercent}%):</span>
+                          <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
+                        </div>
+                      )}
+
+                      {billingMode === "GST" && currentInvoice.gstTotal > 0 && (
+                        <>
+                          <div className="flex justify-between">
+                            <span>CGST (9%):</span>
+                            <span>{formatCurrency(currentInvoice.cgst)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>SGST (9%):</span>
+                            <span>{formatCurrency(currentInvoice.sgst)}</span>
+                          </div>
+                          <div className="flex justify-between font-medium">
+                            <span>Total GST:</span>
+                            <span>{formatCurrency(currentInvoice.gstTotal)}</span>
+                          </div>
+                        </>
+                      )}
+
+                      <div className="border-t pt-2">
+                        <div className="flex justify-between font-bold text-lg">
+                          <span>Total:</span>
+                          <span className="text-green-600">{formatCurrency(currentInvoice.finalAmount)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {createStep === 3 && (
+                  <>
+                    {/* Return Sale Toggle */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Return Sale
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="returnSale"
+                            checked={currentInvoice.isReturnSale}
+                            onChange={(e) => setCurrentInvoice(prev => ({
+                              ...prev,
+                              isReturnSale: e.target.checked
+                            }))}
+                            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                          />
+                          <Label htmlFor="returnSale" className="text-sm">
+                            This is a return sale
+                          </Label>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Observation */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Observation
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <textarea
+                          value={currentInvoice.observation}
+                          onChange={(e) => setCurrentInvoice(prev => ({
+                            ...prev,
+                            observation: e.target.value
+                          }))}
+                          placeholder="Add any notes or observations for this invoice..."
+                          className="w-full h-16 p-3 border border-gray-300 rounded-lg resize-none text-sm"
+                        />
+                      </CardContent>
+                    </Card>
+
+                    {/* Terms & Conditions */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Terms & Conditions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <textarea
+                          value={currentInvoice.termsAndConditions}
+                          onChange={(e) => setCurrentInvoice(prev => ({
+                            ...prev,
+                            termsAndConditions: e.target.value
+                          }))}
+                          placeholder="Enter terms and conditions..."
+                          className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none text-sm"
+                        />
+                      </CardContent>
+                    </Card>
+
+                    {/* Payment Management */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Payment Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="paymentMethod">Payment Method</Label>
+                            <Select
+                              value={currentInvoice.paymentMethod}
+                              onValueChange={(value: "cash" | "online" | "mixed") =>
+                                setCurrentInvoice(prev => ({ ...prev, paymentMethod: value }))
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="cash">Cash</SelectItem>
+                                <SelectItem value="online">Online</SelectItem>
+                                <SelectItem value="mixed">Mixed (Cash + Online)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="paymentMode">Payment Status</Label>
+                            <Select
+                              value={currentInvoice.paymentMode}
+                              onValueChange={(value: "full" | "partial") =>
+                                setCurrentInvoice(prev => ({ ...prev, paymentMode: value }))
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="full">Full Payment</SelectItem>
+                                <SelectItem value="partial">Partial Payment</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {currentInvoice.paymentMode === "partial" && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="paidAmount">Paid Amount (₹)</Label>
+                              <Input
+                                id="paidAmount"
+                                type="number"
+                                min="0"
+                                max={currentInvoice.finalAmount}
+                                value={currentInvoice.paidAmount}
+                                onChange={(e) => setCurrentInvoice(prev => ({
+                                  ...prev,
+                                  paidAmount: parseFloat(e.target.value) || 0
+                                }))}
+                                placeholder="Enter paid amount"
+                              />
+                            </div>
+                            <div>
+                              <Label>Pending Amount</Label>
+                              <div className="h-10 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md flex items-center text-sm">
+                                {formatCurrency(currentInvoice.pendingAmount)}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Action Buttons */}
+                <Card>
+                  <CardContent className="pt-6 space-y-3">
+                    {createStep === 2 && (
+                      <Button
+                        onClick={() => setCreateStep(3)}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        disabled={currentInvoice.items.length === 0}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Continue to Review
+                      </Button>
+                    )}
+
+                    {createStep === 3 && (
+                      <>
+                        <Button
+                          onClick={() => setShowPreview(true)}
+                          variant="outline"
+                          className="w-full"
+                          disabled={currentInvoice.items.length === 0}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Preview Bill
+                        </Button>
+
+                        <Button
+                          onClick={saveInvoice}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          disabled={currentInvoice.items.length === 0}
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Invoice
+                        </Button>
+
+                        <Button
+                          onClick={downloadPDF}
+                          variant="outline"
+                          className="w-full"
+                          disabled={currentInvoice.items.length === 0}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download PDF
+                        </Button>
+
+                        <Button
+                          onClick={printInvoice}
+                          variant="outline"
+                          className="w-full"
+                          disabled={currentInvoice.items.length === 0}
+                        >
+                          <Printer className="h-4 w-4 mr-2" />
+                          Print Invoice
+                        </Button>
+
+                        <Button
+                          onClick={() => setCreateStep(2)}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          <ArrowLeft className="h-4 w-4 mr-2" />
+                          Back to Items
+                        </Button>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-          
-          {/* Action Buttons */}
-          <div className="flex gap-4 mt-8">
-            <Button 
-              variant="outline" 
-              onClick={() => setCurrentStep("list")}
-              className="flex-1 h-12"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={createInvoice}
-              className="flex-1 h-12 bg-green-600 hover:bg-green-700"
-            >
-              <Receipt className="h-5 w-5 mr-2" />
-              Create Invoice
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
+
+        {/* Bill Preview Dialog */}
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Invoice Preview - {currentInvoice.billNumber}</DialogTitle>
+            </DialogHeader>
+            <div className="bg-white p-8 border border-gray-200 rounded-lg">
+              {/* Invoice Header */}
+              <div className="border-b pb-6 mb-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h1 className="text-3xl font-bold text-green-600 mb-2">ElectroMart</h1>
+                    <p className="text-sm text-gray-600">Business Management Solution</p>
+                    <p className="text-sm text-gray-600">Delhi, India</p>
+                  </div>
+                  <div className="text-right">
+                    <h2 className="text-2xl font-bold mb-2">
+                      {billingMode === "Quotation" ? "QUOTATION" : currentInvoice.isReturnSale ? "RETURN INVOICE" : "INVOICE"}
+                    </h2>
+                    <p><strong>No:</strong> {currentInvoice.billNumber}</p>
+                    <p><strong>Date:</strong> {new Date().toLocaleDateString('en-IN')}</p>
+                    <p><strong>Type:</strong> {billingMode}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Details */}
+              <div className="mb-6">
+                <h3 className="font-bold mb-2">Bill To:</h3>
+                <p className="font-medium">{currentInvoice.customer.name}</p>
+                <p>Phone: {currentInvoice.customer.phone}</p>
+                {currentInvoice.customer.address && (
+                  <p>Address: {currentInvoice.customer.address}</p>
+                )}
+              </div>
+
+              {/* Items Table */}
+              <div className="mb-6">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 p-2 text-left">Item</th>
+                      <th className="border border-gray-300 p-2 text-center">Qty</th>
+                      <th className="border border-gray-300 p-2 text-right">Rate (₹)</th>
+                      {billingMode === 'GST' && (
+                        <>
+                          <th className="border border-gray-300 p-2 text-center">GST%</th>
+                          <th className="border border-gray-300 p-2 text-right">GST Amt (₹)</th>
+                        </>
+                      )}
+                      <th className="border border-gray-300 p-2 text-right">Total (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentInvoice.items.map((item) => (
+                      <tr key={item.id}>
+                        <td className="border border-gray-300 p-2">{item.productName}</td>
+                        <td className="border border-gray-300 p-2 text-center">{item.quantity}</td>
+                        <td className="border border-gray-300 p-2 text-right">{item.price.toLocaleString()}</td>
+                        {billingMode === 'GST' && (
+                          <>
+                            <td className="border border-gray-300 p-2 text-center">{item.gstPercent}%</td>
+                            <td className="border border-gray-300 p-2 text-right">{item.gstAmount.toLocaleString()}</td>
+                          </>
+                        )}
+                        <td className="border border-gray-300 p-2 text-right">{item.totalAmount.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals */}
+              <div className="flex justify-end mb-6">
+                <div className="w-64">
+                  <div className="flex justify-between py-1">
+                    <span>Subtotal:</span>
+                    <span>₹{currentInvoice.subtotal.toLocaleString()}</span>
+                  </div>
+                  {currentInvoice.discountAmount > 0 && (
+                    <div className="flex justify-between py-1 text-green-600">
+                      <span>Discount ({currentInvoice.discountPercent}%):</span>
+                      <span>-₹{currentInvoice.discountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {billingMode === 'GST' && currentInvoice.gstTotal > 0 && (
+                    <>
+                      <div className="flex justify-between py-1">
+                        <span>CGST (9%):</span>
+                        <span>₹{currentInvoice.cgst.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span>SGST (9%):</span>
+                        <span>₹{currentInvoice.sgst.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between py-1 font-medium">
+                        <span>Total GST:</span>
+                        <span>₹{currentInvoice.gstTotal.toLocaleString()}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Final Amount:</span>
+                      <span>₹{currentInvoice.finalAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              <div className="mb-6 grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-bold mb-2">Payment Details:</h3>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Method:</strong> {currentInvoice.paymentMethod.toUpperCase()}</p>
+                    <p><strong>Status:</strong> {currentInvoice.paymentMode === "full" ? "Paid in Full" : "Partial Payment"}</p>
+                    {currentInvoice.paymentMode === "partial" && (
+                      <>
+                        <p><strong>Paid:</strong> ₹{currentInvoice.paidAmount.toLocaleString()}</p>
+                        <p className="text-red-600"><strong>Pending:</strong> ₹{currentInvoice.pendingAmount.toLocaleString()}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {currentInvoice.observation && (
+                  <div>
+                    <h3 className="font-bold mb-2">Observation:</h3>
+                    <p className="text-sm bg-gray-50 p-3 rounded border">{currentInvoice.observation}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Terms & Conditions */}
+              <div className="mb-6">
+                <h3 className="font-bold mb-2">Terms & Conditions:</h3>
+                <div className="text-sm bg-gray-50 p-3 rounded border">
+                  {currentInvoice.termsAndConditions.split('\\n').map((term, index) => (
+                    <p key={index} className="mb-1">{term}</p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-sm text-gray-600 mt-8 border-t pt-4">
+                <p className="font-medium">Thank you for your business!</p>
+                <p className="text-xs mt-1">This is a computer-generated document and does not require a signature.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-4">
+              <Button onClick={() => setShowPreview(false)} variant="outline" className="flex-1">
+                Close Preview
+              </Button>
+              <Button onClick={downloadPDF} className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
