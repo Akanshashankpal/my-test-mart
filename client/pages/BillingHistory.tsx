@@ -29,12 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit2, 
-  Trash2, 
+import {
+  Search,
+  Filter,
+  Eye,
+  Edit2,
+  Trash2,
   Download,
   FileText,
   Calendar,
@@ -43,7 +43,10 @@ import {
   Printer,
   RefreshCcw,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -103,6 +106,8 @@ export default function BillingHistory() {
   const [deleteBillId, setDeleteBillId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [billsPerPage] = useState(10);
+  const [sortField, setSortField] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Sync with bills from context
   useEffect(() => {
@@ -159,9 +164,54 @@ export default function BillingHistory() {
       filtered = filtered.filter(bill => new Date(bill.billDate || bill.createdAt) <= new Date(dateRange.end));
     }
 
+    // Apply sorting
+    if (sortField) {
+      filtered.sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        switch (sortField) {
+          case "billNumber":
+            aValue = a.billNumber || "";
+            bValue = b.billNumber || "";
+            break;
+          case "customerName":
+            aValue = a.customerName || "";
+            bValue = b.customerName || "";
+            break;
+          case "billDate":
+            aValue = new Date(a.billDate || a.createdAt);
+            bValue = new Date(b.billDate || b.createdAt);
+            break;
+          case "billType":
+            aValue = a.billType || "";
+            bValue = b.billType || "";
+            break;
+          case "totalAmount":
+            aValue = a.totalAmount || 0;
+            bValue = b.totalAmount || 0;
+            break;
+          case "paymentType":
+            aValue = a.paymentType || "";
+            bValue = b.paymentType || "";
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) {
+          return sortDirection === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortDirection === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
     setFilteredBills(filtered);
     setCurrentPage(1);
-  }, [bills, searchTerm, statusFilter, typeFilter, paymentFilter, dateRange]);
+  }, [bills, searchTerm, statusFilter, typeFilter, paymentFilter, dateRange, sortField, sortDirection]);
 
   // Pagination
   const indexOfLastBill = currentPage * billsPerPage;
@@ -396,6 +446,24 @@ export default function BillingHistory() {
 
   const stats = calculateStats();
 
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4 ml-1 opacity-50" />;
+    }
+    return sortDirection === "asc" ?
+      <ArrowUp className="h-4 w-4 ml-1" /> :
+      <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
@@ -560,12 +628,60 @@ export default function BillingHistory() {
             <table className="w-full">
               <thead className="border-b">
                 <tr className="text-left">
-                  <th className="p-4 font-medium">Bill Number</th>
-                  <th className="p-4 font-medium">Customer</th>
-                  <th className="p-4 font-medium">Date</th>
-                  <th className="p-4 font-medium">Type</th>
-                  <th className="p-4 font-medium">Amount</th>
-                  <th className="p-4 font-medium">Payment</th>
+                  <th className="p-4 font-medium">
+                    <button
+                      onClick={() => handleSort("billNumber")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Bill Number
+                      {getSortIcon("billNumber")}
+                    </button>
+                  </th>
+                  <th className="p-4 font-medium">
+                    <button
+                      onClick={() => handleSort("customerName")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Customer
+                      {getSortIcon("customerName")}
+                    </button>
+                  </th>
+                  <th className="p-4 font-medium">
+                    <button
+                      onClick={() => handleSort("billDate")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Date
+                      {getSortIcon("billDate")}
+                    </button>
+                  </th>
+                  <th className="p-4 font-medium">
+                    <button
+                      onClick={() => handleSort("billType")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Type
+                      {getSortIcon("billType")}
+                    </button>
+                  </th>
+                  <th className="p-4 font-medium">
+                    <button
+                      onClick={() => handleSort("totalAmount")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Amount
+                      {getSortIcon("totalAmount")}
+                    </button>
+                  </th>
+                  <th className="p-4 font-medium">
+                    <button
+                      onClick={() => handleSort("paymentType")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Payment
+                      {getSortIcon("paymentType")}
+                    </button>
+                  </th>
                   <th className="p-4 font-medium">Status</th>
                   <th className="p-4 font-medium">Actions</th>
                 </tr>
