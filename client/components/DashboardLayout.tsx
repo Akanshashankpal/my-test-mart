@@ -28,12 +28,7 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Billing", href: "/billing", icon: Receipt },
-  { name: "Enhanced Billing", href: "/enhanced-billing", icon: Receipt },
-  { name: "History", href: "/enhanced-billing-history", icon: BarChart3 },
-  { name: "Sales Returns", href: "/sales-returns", icon: RotateCcw },
-  { name: "Products", href: "/products", icon: Package },
-  { name: "Customers", href: "/customers", icon: Users },
-  { name: "Users", href: "/users", icon: UserCheck },
+  { name: "Billing History", href: "/billing-history", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
