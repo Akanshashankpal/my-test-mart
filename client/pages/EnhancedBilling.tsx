@@ -1,518 +1,498 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { useBilling } from "@/contexts/BillingContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { useProducts } from "@/contexts/ProductContext";
+import { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Plus,
-  Search,
-  Calculator,
   User,
-  Package,
-  CheckCircle,
-  X,
-  FileText,
+  Receipt,
   Download,
   Printer,
-  Edit,
+  Save,
   Trash2,
-  Receipt
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  Calculator,
+  Package,
+  Calendar,
+  X,
+  FileText,
+  ArrowLeft,
+  DollarSign,
+  Search,
+  Edit,
+  Copy
+} from 'lucide-react';
+import { billsAPI, customersAPI, productsAPI } from '@/lib/api';
+import { cn } from '@/lib/utils';
+
+interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address: string;
+  gstNumber?: string;
+  state: string;
+  status: 'active' | 'inactive';
+}
 
 interface Product {
   id: string;
   name: string;
-  category: string;
-  brand: string;
   price: number;
-  gstPercent: number;
-  stockQuantity: number;
+  unit: string;
+  gstRate: number;
+  category: string;
+  stock: number;
 }
 
-interface InvoiceItem {
+interface BillItem {
+  id: string;
   productId: string;
   productName: string;
   quantity: number;
-  price: number;
-  gstPercent: number;
+  rate: number;
+  unit: string;
+  gstRate: number;
+  taxableAmount: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  igstAmount: number;
   totalAmount: number;
-  gstAmount: number;
 }
 
-interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  customerName: string;
-  customerPhone: string;
-  customerAddress: string;
-  items: InvoiceItem[];
+interface Bill {
+  id?: string;
+  billNumber?: string;
+  billType: 'GST' | 'Non-GST' | 'Demo';
+  financialYear: string;
+  billDate: string;
+  dueDate?: string;
+  customer: {
+    id: string;
+    name: string;
+    phone: string;
+    email?: string;
+    address: string;
+    gstNumber?: string;
+    state: string;
+    stateCode: string;
+  };
+  company: {
+    name: string;
+    address: string;
+    gstNumber: string;
+    state: string;
+    stateCode: string;
+    phone: string;
+    email: string;
+  };
+  items: BillItem[];
   subtotal: number;
   discountPercent: number;
   discountAmount: number;
-  cgst: number;
-  sgst: number;
-  igst: number;
-  totalGst: number;
+  taxableAmount: number;
+  cgstTotal: number;
+  sgstTotal: number;
+  igstTotal: number;
+  totalTax: number;
+  roundOffAmount: number;
   finalAmount: number;
-  billingMode: "GST" | "Non-GST" | "Demo";
-  createdAt: Date;
-  status: "draft" | "finalized";
+  paymentStatus: 'Paid' | 'Pending' | 'Partial' | 'Overdue';
+  paymentMethod?: string;
+  notes?: string;
+  status: 'Draft' | 'Sent' | 'Paid' | 'Cancelled';
 }
 
-// Product search functionality will use products from context
+// State codes mapping
+const stateCodes: { [key: string]: string } = {
+  'Andhra Pradesh': '37',
+  'Arunachal Pradesh': '12',
+  'Assam': '18',
+  'Bihar': '10',
+  'Chhattisgarh': '22',
+  'Goa': '30',
+  'Gujarat': '24',
+  'Haryana': '06',
+  'Himachal Pradesh': '02',
+  'Jharkhand': '20',
+  'Karnataka': '29',
+  'Kerala': '32',
+  'Madhya Pradesh': '23',
+  'Maharashtra': '27',
+  'Manipur': '14',
+  'Meghalaya': '17',
+  'Mizoram': '15',
+  'Nagaland': '13',
+  'Odisha': '21',
+  'Punjab': '03',
+  'Rajasthan': '08',
+  'Sikkim': '11',
+  'Tamil Nadu': '33',
+  'Telangana': '36',
+  'Tripura': '16',
+  'Uttar Pradesh': '09',
+  'Uttarakhand': '05',
+  'West Bengal': '19',
+  'Delhi': '07',
+};
+
+const defaultCompany = {
+  name: 'ElectroMart Pvt Ltd',
+  address: '123 Business Park, Electronic City, Bangalore, Karnataka 560100',
+  gstNumber: '29ABCDE1234F1Z5',
+  state: 'Karnataka',
+  stateCode: '29',
+  phone: '+91 80 2345 6789',
+  email: 'info@electromart.com'
+};
 
 export default function EnhancedBilling() {
-  const { addBill } = useBilling();
-  const { user } = useAuth();
-  const { products, updateStock } = useProducts();
-  const [billingMode, setBillingMode] = useState<"GST" | "Non-GST" | "Demo" | null>(null);
-  const [currentInvoice, setCurrentInvoice] = useState<Invoice>({
-    id: "",
-    invoiceNumber: "",
-    customerName: "",
-    customerPhone: "",
-    customerAddress: "",
+  const [bill, setBill] = useState<Bill>({
+    billType: 'GST',
+    financialYear: '2024-25',
+    billDate: new Date().toISOString().split('T')[0],
+    customer: {
+      id: '',
+      name: '',
+      phone: '',
+      address: '',
+      state: 'Karnataka',
+      stateCode: '29'
+    },
+    company: defaultCompany,
     items: [],
     subtotal: 0,
     discountPercent: 0,
     discountAmount: 0,
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
-    totalGst: 0,
+    taxableAmount: 0,
+    cgstTotal: 0,
+    sgstTotal: 0,
+    igstTotal: 0,
+    totalTax: 0,
+    roundOffAmount: 0,
     finalAmount: 0,
-    billingMode: "GST",
-    createdAt: new Date(),
-    status: "draft",
+    paymentStatus: 'Pending',
+    status: 'Draft',
+    notes: ''
   });
 
-  const [searchProduct, setSearchProduct] = useState("");
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchCustomer, setSearchCustomer] = useState('');
+  const [searchProduct, setSearchProduct] = useState('');
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
+  const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [productQuantity, setProductQuantity] = useState("1");
-  const [invoicePreview, setInvoicePreview] = useState<Invoice | null>(null);
+  const [productQuantity, setProductQuantity] = useState(1);
+  const [customRate, setCustomRate] = useState<number | null>(null);
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-    product.brand.toLowerCase().includes(searchProduct.toLowerCase())
-  );
-
-  // Calculate invoice totals
+  // Fetch customers and products
   useEffect(() => {
-    const subtotal = currentInvoice.items.reduce((sum, item) => sum + item.totalAmount, 0);
-    const discountAmount = (subtotal * currentInvoice.discountPercent) / 100;
-    const discountedSubtotal = subtotal - discountAmount;
+    fetchCustomers();
+    fetchProducts();
+  }, []);
 
-    let cgst = 0, sgst = 0, igst = 0, totalGst = 0;
-
-    if (currentInvoice.billingMode === "GST") {
-      currentInvoice.items.forEach(item => {
-        const itemGst = ((item.totalAmount * (discountedSubtotal / subtotal)) * item.gstPercent) / 100;
-        
-        // For demo, assume intra-state (CGST + SGST)
-        cgst += itemGst / 2;
-        sgst += itemGst / 2;
-        totalGst += itemGst;
-      });
+  const fetchCustomers = async () => {
+    try {
+      const response = await customersAPI.getCustomers({ limit: 100 });
+      if (response.success) {
+        setCustomers(response.data.customers);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
     }
-
-    const finalAmount = discountedSubtotal + totalGst;
-
-    setCurrentInvoice(prev => ({
-      ...prev,
-      subtotal,
-      discountAmount,
-      cgst,
-      sgst,
-      igst,
-      totalGst,
-      finalAmount,
-    }));
-  }, [currentInvoice.items, currentInvoice.discountPercent, currentInvoice.billingMode]);
-
-  const generateInvoiceNumber = () => {
-    const timestamp = Date.now();
-    const prefix = billingMode === "GST" ? "GST" : billingMode === "Non-GST" ? "NGST" : "DEMO";
-    return `${prefix}/24/${timestamp.toString().slice(-4)}`;
   };
 
-  const addProductToInvoice = () => {
+  const fetchProducts = async () => {
+    try {
+      const response = await productsAPI.getProducts({ limit: 100 });
+      if (response.success) {
+        setProducts(response.data.products);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  // Calculate bill amounts
+  const calculateBill = () => {
+    const calculated = billsAPI.calculateBillAmounts(bill);
+    setBill(prev => ({ ...prev, ...calculated }));
+  };
+
+  useEffect(() => {
+    calculateBill();
+  }, [bill.items, bill.discountPercent, bill.customer.state]);
+
+  // Customer selection
+  const selectCustomer = (customer: Customer) => {
+    setBill(prev => ({
+      ...prev,
+      customer: {
+        ...customer,
+        stateCode: stateCodes[customer.state] || '29'
+      }
+    }));
+    setIsCustomerDialogOpen(false);
+    setSearchCustomer('');
+  };
+
+  // Add item to bill
+  const addItem = () => {
     if (!selectedProduct) return;
 
-    const quantity = parseInt(productQuantity);
-    if (quantity <= 0 || quantity > selectedProduct.stockQuantity) return;
+    const rate = customRate || selectedProduct.price;
+    const taxableAmount = productQuantity * rate;
+    const gstAmount = (taxableAmount * selectedProduct.gstRate) / 100;
+    
+    const isInterState = bill.customer.state !== bill.company.state;
+    
+    let cgstAmount = 0;
+    let sgstAmount = 0;
+    let igstAmount = 0;
 
-    const totalAmount = selectedProduct.price * quantity;
-    const gstAmount = currentInvoice.billingMode === "GST" 
-      ? (totalAmount * selectedProduct.gstPercent) / 100 
-      : 0;
+    if (bill.billType === 'GST') {
+      if (isInterState) {
+        igstAmount = gstAmount;
+      } else {
+        cgstAmount = gstAmount / 2;
+        sgstAmount = gstAmount / 2;
+      }
+    }
 
-    const newItem: InvoiceItem = {
+    const newItem: BillItem = {
+      id: Date.now().toString(),
       productId: selectedProduct.id,
       productName: selectedProduct.name,
-      quantity,
-      price: selectedProduct.price,
-      gstPercent: selectedProduct.gstPercent,
-      totalAmount,
-      gstAmount,
+      quantity: productQuantity,
+      rate,
+      unit: selectedProduct.unit,
+      gstRate: selectedProduct.gstRate,
+      taxableAmount,
+      cgstAmount,
+      sgstAmount,
+      igstAmount,
+      totalAmount: taxableAmount + gstAmount
     };
 
-    setCurrentInvoice(prev => ({
+    setBill(prev => ({
       ...prev,
-      items: [...prev.items, newItem],
+      items: [...prev.items, newItem]
     }));
 
+    // Reset form
     setSelectedProduct(null);
-    setProductQuantity("1");
-    setIsAddProductOpen(false);
+    setProductQuantity(1);
+    setCustomRate(null);
+    setIsProductDialogOpen(false);
+    setSearchProduct('');
   };
 
-  const removeItem = (index: number) => {
-    setCurrentInvoice(prev => ({
+  // Remove item
+  const removeItem = (itemId: string) => {
+    setBill(prev => ({
       ...prev,
-      items: prev.items.filter((_, i) => i !== index),
+      items: prev.items.filter(item => item.id !== itemId)
     }));
   };
 
-  const newInvoice = () => {
-    setCurrentInvoice({
-      id: "",
-      invoiceNumber: "",
-      customerName: "",
-      customerPhone: "",
-      customerAddress: "",
-      items: [],
-      subtotal: 0,
-      discountPercent: 0,
-      discountAmount: 0,
-      cgst: 0,
-      sgst: 0,
-      igst: 0,
-      totalGst: 0,
-      finalAmount: 0,
-      billingMode: billingMode || "GST",
-      createdAt: new Date(),
-      status: "draft",
-    });
+  // Update item quantity
+  const updateItemQuantity = (itemId: string, quantity: number) => {
+    setBill(prev => ({
+      ...prev,
+      items: prev.items.map(item => {
+        if (item.id === itemId) {
+          const taxableAmount = quantity * item.rate;
+          const gstAmount = (taxableAmount * item.gstRate) / 100;
+          
+          const isInterState = bill.customer.state !== bill.company.state;
+          
+          let cgstAmount = 0;
+          let sgstAmount = 0;
+          let igstAmount = 0;
+
+          if (bill.billType === 'GST') {
+            if (isInterState) {
+              igstAmount = gstAmount;
+            } else {
+              cgstAmount = gstAmount / 2;
+              sgstAmount = gstAmount / 2;
+            }
+          }
+
+          return {
+            ...item,
+            quantity,
+            taxableAmount,
+            cgstAmount,
+            sgstAmount,
+            igstAmount,
+            totalAmount: taxableAmount + gstAmount
+          };
+        }
+        return item;
+      })
+    }));
   };
 
-  const downloadPDF = async () => {
-    // Generate invoice number if not exists
-    const invoiceNumber = currentInvoice.invoiceNumber || generateInvoiceNumber();
+  // Save bill
+  const saveBill = async () => {
+    if (!bill.customer.name || bill.items.length === 0) {
+      alert('Please select customer and add at least one item');
+      return;
+    }
 
-    // Update current invoice with generated invoice number if it doesn't exist
-    if (!currentInvoice.invoiceNumber) {
-      setCurrentInvoice(prev => ({
-        ...prev,
-        invoiceNumber: invoiceNumber
-      }));
+    setIsLoading(true);
+    try {
+      const response = await billsAPI.createBill(bill);
+      alert('Bill saved successfully!');
+      // Reset form or redirect
+    } catch (error) {
+      console.error('Error saving bill:', error);
+      alert('Error saving bill');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate PDF
+  const generatePDF = async () => {
+    if (!bill.id) {
+      alert('Please save the bill first');
+      return;
     }
 
     try {
-      // Dynamic import of jsPDF
-      const { default: jsPDF } = await import('jspdf');
-
-      const doc = new jsPDF();
-
-      // Company Header
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('ElectroMart', 105, 20, { align: 'center' });
-
-      doc.setFontSize(16);
-      doc.text('INVOICE', 105, 30, { align: 'center' });
-
-      // Invoice details
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Invoice No: ${invoiceNumber}`, 20, 45);
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 52);
-      doc.text(`Mode: ${currentInvoice.billingMode} Billing`, 20, 59);
-
-      // Customer Info
-      doc.setFont('helvetica', 'bold');
-      doc.text('Bill To:', 20, 75);
-      doc.setFont('helvetica', 'normal');
-      doc.text(currentInvoice.customerName, 20, 82);
-      doc.text(`Phone: ${currentInvoice.customerPhone}`, 20, 89);
-      if (currentInvoice.customerAddress) {
-        doc.text(`Address: ${currentInvoice.customerAddress}`, 20, 96);
-      }
-
-      // Table Headers
-      let yPos = 115;
-      doc.setFont('helvetica', 'bold');
-      doc.text('Item', 20, yPos);
-      doc.text('Qty', 80, yPos);
-      doc.text('Rate (₹)', 100, yPos);
-      if (currentInvoice.billingMode === 'GST') {
-        doc.text('GST%', 130, yPos);
-        doc.text('GST Amt (₹)', 150, yPos);
-        doc.text('Total (₹)', 175, yPos);
-      } else {
-        doc.text('Total (₹)', 150, yPos);
-      }
-
-      // Draw line under headers
-      doc.line(20, yPos + 2, 190, yPos + 2);
-      yPos += 10;
-
-      // Items
-      doc.setFont('helvetica', 'normal');
-      currentInvoice.items.forEach(item => {
-        doc.text(item.productName.substring(0, 25), 20, yPos);
-        doc.text(item.quantity.toString(), 80, yPos);
-        doc.text(item.price.toLocaleString(), 100, yPos);
-        if (currentInvoice.billingMode === 'GST') {
-          doc.text(`${item.gstPercent}%`, 130, yPos);
-          doc.text(item.gstAmount.toLocaleString(), 150, yPos);
-          doc.text(item.totalAmount.toLocaleString(), 175, yPos);
-        } else {
-          doc.text(item.totalAmount.toLocaleString(), 150, yPos);
-        }
-        yPos += 8;
-      });
-
-      // Totals section
-      yPos += 10;
-      doc.line(100, yPos, 190, yPos);
-      yPos += 8;
-
-      doc.text('Subtotal:', 130, yPos);
-      doc.text(`₹${currentInvoice.subtotal.toLocaleString()}`, 175, yPos);
-      yPos += 6;
-
-      if (currentInvoice.discountAmount > 0) {
-        doc.text(`Discount (${currentInvoice.discountPercent}%):`, 130, yPos);
-        doc.text(`-₹${currentInvoice.discountAmount.toLocaleString()}`, 175, yPos);
-        yPos += 6;
-      }
-
-      if (currentInvoice.billingMode === 'GST' && currentInvoice.totalGst > 0) {
-        doc.text('CGST:', 130, yPos);
-        doc.text(`₹${currentInvoice.cgst.toLocaleString()}`, 175, yPos);
-        yPos += 6;
-
-        doc.text('SGST:', 130, yPos);
-        doc.text(`₹${currentInvoice.sgst.toLocaleString()}`, 175, yPos);
-        yPos += 6;
-
-        doc.text('Total GST:', 130, yPos);
-        doc.text(`₹${currentInvoice.totalGst.toLocaleString()}`, 175, yPos);
-        yPos += 8;
-      }
-
-      // Final total
-      doc.line(130, yPos, 190, yPos);
-      yPos += 6;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.text('Final Amount:', 130, yPos);
-      doc.text(`₹${currentInvoice.finalAmount.toLocaleString()}`, 175, yPos);
-
-      // Footer
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Thank you for your business!', 105, 280, { align: 'center' });
-
-      // Save the PDF
-      doc.save(`Invoice_${invoiceNumber}.pdf`);
-
-      // Also save to billing history
-      saveBillToHistory();
-
+      const pdfBlob = await billsAPI.generatePDF(bill.id);
+      const url = window.URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `Bill-${bill.billNumber || 'draft'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error generating PDF. Please try again.');
+      alert('Error generating PDF');
     }
   };
 
-  const finalizeInvoice = () => {
-    if (currentInvoice.items.length === 0 || !currentInvoice.customerName) return;
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchCustomer.toLowerCase()) ||
+    customer.phone.includes(searchCustomer)
+  );
 
-    const invoiceNumber = generateInvoiceNumber();
-    const finalizedInvoice = {
-      ...currentInvoice,
-      id: Date.now().toString(),
-      invoiceNumber,
-      status: "finalized" as const,
-    };
-
-    // Update stock for all items
-    currentInvoice.items.forEach(item => {
-      const product = products.find(p => p.id === item.productId);
-      if (product) {
-        updateStock(product.id, product.stockQuantity - item.quantity);
-      }
-    });
-
-    // Save to billing history
-    saveBillToHistory();
-
-    setInvoicePreview(finalizedInvoice);
-    newInvoice();
-  };
-
-  const formatCurrency = (amount: number) => {
-    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
-  const saveBillToHistory = () => {
-    if (currentInvoice.items.length === 0 || !currentInvoice.customerName) return;
-
-    const invoiceNumber = currentInvoice.invoiceNumber || generateInvoiceNumber();
-
-    const newBill = {
-      id: Date.now().toString(),
-      billNumber: invoiceNumber,
-      billType: currentInvoice.billingMode,
-      billDate: new Date(),
-      customer: {
-        id: Date.now().toString(),
-        name: currentInvoice.customerName,
-        phone: currentInvoice.customerPhone,
-        address: currentInvoice.customerAddress,
-      },
-      items: currentInvoice.items.map(item => ({
-        productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        gstPercent: item.gstPercent,
-        totalAmount: item.totalAmount,
-        gstAmount: item.gstAmount,
-      })),
-      subtotal: currentInvoice.subtotal,
-      discountAmount: currentInvoice.discountAmount,
-      discountPercent: currentInvoice.discountPercent,
-      taxAmount: currentInvoice.totalGst,
-      cgst: currentInvoice.cgst,
-      sgst: currentInvoice.sgst,
-      igst: currentInvoice.igst,
-      totalGst: currentInvoice.totalGst,
-      finalAmount: currentInvoice.finalAmount,
-      paymentStatus: "Pending" as const,
-      createdBy: user?.name || "Unknown",
-      createdAt: new Date(),
-      status: "Draft" as const,
-    };
-
-    addBill(newBill);
-
-    // Update the current invoice with the generated number
-    setCurrentInvoice(prev => ({
-      ...prev,
-      invoiceNumber: invoiceNumber
-    }));
-  };
-
-  // Billing mode selection screen
-  if (!billingMode) {
-    return (
-      <div className="p-6">
-        <div className="max-w-2xl mx-auto text-center space-y-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Select Billing Mode</h1>
-            <p className="text-gray-600">Choose the type of invoice you want to create</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                mode: "GST" as const,
-                title: "GST Billing",
-                description: "Create GST compliant invoices with CGST, SGST, or IGST",
-                icon: Calculator,
-                color: "green"
-              },
-              {
-                mode: "Non-GST" as const,
-                title: "Non-GST Billing",
-                description: "Create simple invoices without GST calculations",
-                icon: FileText,
-                color: "blue"
-              },
-              {
-                mode: "Demo" as const,
-                title: "Demo Billing",
-                description: "Create demo invoices for testing purposes",
-                icon: Package,
-                color: "purple"
-              }
-            ].map((option) => (
-              <Card
-                key={option.mode}
-                className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-green-300"
-                onClick={() => {
-                  setBillingMode(option.mode);
-                  setCurrentInvoice(prev => ({ ...prev, billingMode: option.mode }));
-                }}
-              >
-                <CardContent className="p-6 text-center space-y-4">
-                  <div className={cn(
-                    "w-16 h-16 mx-auto rounded-full flex items-center justify-center",
-                    option.color === "green" && "bg-emerald-100 text-emerald-600",
-                    option.color === "blue" && "bg-blue-100 text-blue-600",
-                    option.color === "purple" && "bg-purple-100 text-purple-600"
-                  )}>
-                    <option.icon className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">{option.title}</h3>
-                    <p className="text-gray-600 text-sm">{option.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchProduct.toLowerCase())
+  );
 
   return (
-    <div className="h-full flex">
-      {/* Main Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
-              <p className="text-gray-600">
-                {billingMode} Billing Mode
-                <Button
-                  variant="link"
-                  onClick={() => setBillingMode(null)}
-                  className="ml-2 p-0 h-auto text-slate-600"
-                >
-                  Change Mode
-                </Button>
-              </p>
-            </div>
-            <Button onClick={newInvoice} variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              New Invoice
-            </Button>
-          </div>
+    <div className="p-4 space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Create Bill</h1>
+          <p className="text-gray-600 mt-1">Generate GST/Non-GST bills with automatic calculations</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => window.history.back()}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Button variant="outline" onClick={generatePDF} disabled={!bill.id}>
+            <Download className="h-4 w-4 mr-2" />
+            PDF
+          </Button>
+          <Button onClick={saveBill} disabled={isLoading}>
+            <Save className="h-4 w-4 mr-2" />
+            {isLoading ? 'Saving...' : 'Save Bill'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Bill Details */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Bill Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Bill Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="billType">Bill Type</Label>
+                  <Select value={bill.billType} onValueChange={(value: 'GST' | 'Non-GST' | 'Demo') => 
+                    setBill(prev => ({ ...prev, billType: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GST">GST Bill</SelectItem>
+                      <SelectItem value="Non-GST">Non-GST Bill</SelectItem>
+                      <SelectItem value="Demo">Demo Bill</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="billDate">Bill Date</Label>
+                  <Input
+                    id="billDate"
+                    type="date"
+                    value={bill.billDate}
+                    onChange={(e) => setBill(prev => ({ ...prev, billDate: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="financialYear">Financial Year</Label>
+                  <Select value={bill.financialYear} onValueChange={(value) => 
+                    setBill(prev => ({ ...prev, financialYear: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2024-25">2024-25</SelectItem>
+                      <SelectItem value="2023-24">2023-24</SelectItem>
+                      <SelectItem value="2022-23">2022-23</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Customer Information */}
           <Card>
@@ -522,324 +502,398 @@ export default function EnhancedBilling() {
                 Customer Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="customerName">Customer Name *</Label>
-                  <Input
-                    id="customerName"
-                    value={currentInvoice.customerName}
-                    onChange={(e) => setCurrentInvoice(prev => ({ 
-                      ...prev, 
-                      customerName: e.target.value 
-                    }))}
-                    placeholder="Enter customer name"
-                  />
+            <CardContent>
+              {bill.customer.name ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg">{bill.customer.name}</h3>
+                      <p className="text-gray-600">{bill.customer.phone}</p>
+                      {bill.customer.email && (
+                        <p className="text-gray-600">{bill.customer.email}</p>
+                      )}
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setIsCustomerDialogOpen(true)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Change
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">{bill.customer.address}</p>
+                  <div className="flex gap-4 text-sm">
+                    <span><strong>State:</strong> {bill.customer.state}</span>
+                    {bill.customer.gstNumber && (
+                      <span><strong>GST:</strong> {bill.customer.gstNumber}</span>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="customerPhone">Phone Number</Label>
-                  <Input
-                    id="customerPhone"
-                    value={currentInvoice.customerPhone}
-                    onChange={(e) => setCurrentInvoice(prev => ({ 
-                      ...prev, 
-                      customerPhone: e.target.value 
-                    }))}
-                    placeholder="+91 9876543210"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="customerAddress">Address</Label>
-                <Input
-                  id="customerAddress"
-                  value={currentInvoice.customerAddress}
-                  onChange={(e) => setCurrentInvoice(prev => ({ 
-                    ...prev, 
-                    customerAddress: e.target.value 
-                  }))}
-                  placeholder="Customer address"
-                />
-              </div>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-20 border-dashed"
+                  onClick={() => setIsCustomerDialogOpen(true)}
+                >
+                  <User className="h-6 w-6 mr-2" />
+                  Select Customer
+                </Button>
+              )}
             </CardContent>
           </Card>
 
-          {/* Products */}
+          {/* Items */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Invoice Items
-                </CardTitle>
-                <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Product
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Product to Invoice</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                          placeholder="Search products..."
-                          value={searchProduct}
-                          onChange={(e) => setSearchProduct(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                      
-                      <div className="max-h-60 overflow-y-auto space-y-2">
-                        {filteredProducts.map(product => (
-                          <div
-                            key={product.id}
-                            onClick={() => setSelectedProduct(product)}
-                            className={cn(
-                              "p-3 border rounded-lg cursor-pointer hover:bg-gray-50",
-                              selectedProduct?.id === product.id && "border-green-500 bg-green-50"
-                            )}
-                          >
-                            <div className="font-medium">{product.name}</div>
-                            <div className="text-sm text-gray-600">
-                              {product.brand} • {formatCurrency(product.price)} • Stock: {product.stockQuantity}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {selectedProduct && (
-                        <div className="border-t pt-4 space-y-4">
-                          <div>
-                            <Label>Selected Product</Label>
-                            <p className="font-medium">{selectedProduct.name}</p>
-                            <p className="text-sm text-gray-600">
-                              Price: {formatCurrency(selectedProduct.price)} | GST: {selectedProduct.gstPercent}%
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="quantity">Quantity</Label>
-                            <Input
-                              id="quantity"
-                              type="number"
-                              min="1"
-                              max={selectedProduct.stockQuantity}
-                              value={productQuantity}
-                              onChange={(e) => setProductQuantity(e.target.value)}
-                            />
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button onClick={addProductToInvoice} className="flex-1">
-                              Add to Invoice
-                            </Button>
-                            <Button variant="outline" onClick={() => setSelectedProduct(null)}>
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                  Items
+                </div>
+                <Button size="sm" onClick={() => setIsProductDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {currentInvoice.items.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No items added yet</p>
-                  <p className="text-sm">Click "Add Product" to get started</p>
+              {bill.items.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead className="text-center">Qty</TableHead>
+                        <TableHead className="text-right">Rate</TableHead>
+                        <TableHead className="text-right">GST%</TableHead>
+                        {bill.billType === 'GST' && (
+                          <>
+                            <TableHead className="text-right">CGST</TableHead>
+                            <TableHead className="text-right">SGST</TableHead>
+                            <TableHead className="text-right">IGST</TableHead>
+                          </>
+                        )}
+                        <TableHead className="text-right">Total</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {bill.items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{item.productName}</div>
+                              <div className="text-sm text-gray-500">{item.unit}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateItemQuantity(item.id, Number(e.target.value))}
+                              className="w-20 text-center"
+                              min="1"
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">₹{item.rate.toFixed(2)}</TableCell>
+                          <TableCell className="text-right">{item.gstRate}%</TableCell>
+                          {bill.billType === 'GST' && (
+                            <>
+                              <TableCell className="text-right">₹{item.cgstAmount.toFixed(2)}</TableCell>
+                              <TableCell className="text-right">₹{item.sgstAmount.toFixed(2)}</TableCell>
+                              <TableCell className="text-right">₹{item.igstAmount.toFixed(2)}</TableCell>
+                            </>
+                          )}
+                          <TableCell className="text-right font-medium">₹{item.totalAmount.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm" onClick={() => removeItem(item.id)}>
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {currentInvoice.items.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-medium">{item.productName}</div>
-                        <div className="text-sm text-gray-600">
-                          Qty: {item.quantity} × {formatCurrency(item.price)}
-                          {currentInvoice.billingMode === "GST" && ` (GST: ${item.gstPercent}%)`}
-                        </div>
-                      </div>
-                      <div className="text-right mr-4">
-                        <div className="font-semibold">{formatCurrency(item.totalAmount)}</div>
-                        {currentInvoice.billingMode === "GST" && (
-                          <div className="text-xs text-gray-500">
-                            +{formatCurrency(item.gstAmount)} GST
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItem(index)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                <div className="text-center py-8 text-gray-500">
+                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No items added yet</p>
+                  <p className="text-sm">Click "Add Item" to get started</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Discount */}
-          {currentInvoice.items.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Discount</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={currentInvoice.discountPercent}
-                      onChange={(e) => setCurrentInvoice(prev => ({ 
-                        ...prev, 
-                        discountPercent: parseFloat(e.target.value) || 0 
-                      }))}
-                      className="w-20"
-                    />
-                    <span className="text-sm text-gray-600">%</span>
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    = {formatCurrency(currentInvoice.discountAmount)}
-                  </span>
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                placeholder="Add any additional notes or terms..."
+                value={bill.notes || ''}
+                onChange={(e) => setBill(prev => ({ ...prev, notes: e.target.value }))}
+                rows={3}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Summary */}
+        <div className="space-y-6">
+          {/* Bill Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                Bill Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span>Subtotal:</span>
+                  <span>₹{bill.subtotal.toFixed(2)}</span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                
+                {bill.discountPercent > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount ({bill.discountPercent}%):</span>
+                    <span>-₹{bill.discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between">
+                  <span>Taxable Amount:</span>
+                  <span>₹{bill.taxableAmount.toFixed(2)}</span>
+                </div>
+
+                {bill.billType === 'GST' && bill.totalTax > 0 && (
+                  <>
+                    {bill.cgstTotal > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>CGST:</span>
+                        <span>₹{bill.cgstTotal.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {bill.sgstTotal > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>SGST:</span>
+                        <span>₹{bill.sgstTotal.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {bill.igstTotal > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>IGST:</span>
+                        <span>₹{bill.igstTotal.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span>Total Tax:</span>
+                      <span>₹{bill.totalTax.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+
+                {bill.roundOffAmount !== 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span>Round Off:</span>
+                    <span>₹{bill.roundOffAmount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                <div className="border-t pt-3">
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Final Amount:</span>
+                    <span>₹{bill.finalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Discount Input */}
+              <div className="mt-4">
+                <Label htmlFor="discount">Discount %</Label>
+                <Input
+                  id="discount"
+                  type="number"
+                  value={bill.discountPercent}
+                  onChange={(e) => setBill(prev => ({ ...prev, discountPercent: Number(e.target.value) }))}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+              </div>
+
+              {/* Payment Status */}
+              <div>
+                <Label htmlFor="paymentStatus">Payment Status</Label>
+                <Select value={bill.paymentStatus} onValueChange={(value: any) => 
+                  setBill(prev => ({ ...prev, paymentStatus: value }))
+                }>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Paid">Paid</SelectItem>
+                    <SelectItem value="Partial">Partial</SelectItem>
+                    <SelectItem value="Overdue">Overdue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Company Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Company Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="font-semibold">{bill.company.name}</div>
+              <div className="text-gray-600">{bill.company.address}</div>
+              <div><strong>GST:</strong> {bill.company.gstNumber}</div>
+              <div><strong>Phone:</strong> {bill.company.phone}</div>
+              <div><strong>Email:</strong> {bill.company.email}</div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Side Panel - Invoice Summary */}
-      <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto">
-        <Card className="sticky top-0">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="h-5 w-5" />
-              Invoice Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>{formatCurrency(currentInvoice.subtotal)}</span>
-              </div>
-              
-              {currentInvoice.discountPercent > 0 && (
-                <div className="flex justify-between text-amber-600">
-                  <span>Discount ({currentInvoice.discountPercent}%):</span>
-                  <span>-{formatCurrency(currentInvoice.discountAmount)}</span>
-                </div>
-              )}
-
-              {currentInvoice.billingMode === "GST" && currentInvoice.totalGst > 0 && (
-                <>
-                  <div className="border-t pt-2 space-y-1">
-                    {currentInvoice.cgst > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span>CGST:</span>
-                        <span>{formatCurrency(currentInvoice.cgst)}</span>
-                      </div>
-                    )}
-                    {currentInvoice.sgst > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span>SGST:</span>
-                        <span>{formatCurrency(currentInvoice.sgst)}</span>
-                      </div>
-                    )}
-                    {currentInvoice.igst > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span>IGST:</span>
-                        <span>{formatCurrency(currentInvoice.igst)}</span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              <div className="border-t pt-2">
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total:</span>
-                  <span className="text-slate-700 font-semibold">{formatCurrency(currentInvoice.finalAmount)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Button
-                onClick={finalizeInvoice}
-                disabled={currentInvoice.items.length === 0 || !currentInvoice.customerName}
-                className="w-full"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Finalize Invoice
-              </Button>
-
-              <Button
-                onClick={downloadPDF}
-                disabled={currentInvoice.items.length === 0 || !currentInvoice.customerName}
-                variant="outline"
-                className="w-full"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-
-              <div className="text-xs text-center text-gray-500">
-                Mode: <Badge variant="outline">{currentInvoice.billingMode}</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Invoice Preview Dialog */}
-      <Dialog open={!!invoicePreview} onOpenChange={() => setInvoicePreview(null)}>
+      {/* Customer Selection Dialog */}
+      <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Receipt className="h-5 w-5" />
-              Invoice Generated Successfully
-            </DialogTitle>
+            <DialogTitle>Select Customer</DialogTitle>
           </DialogHeader>
-          {invoicePreview && (
-            <div className="space-y-6">
-              <div className="text-center p-6 bg-blue-50 rounded-lg">
-                <CheckCircle className="h-12 w-12 text-blue-600 mx-auto mb-2" />
-                <h3 className="text-lg font-semibold text-blue-800">Invoice Created!</h3>
-                <p className="text-blue-700">Invoice #{invoicePreview.invoiceNumber}</p>
-                <p className="text-sm text-blue-600 mt-1">
-                  Total: {formatCurrency(invoicePreview.finalAmount)}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button className="flex-1">
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print Invoice
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
-              </div>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search customers by name or phone..."
+                value={searchCustomer}
+                onChange={(e) => setSearchCustomer(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          )}
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {filteredCustomers.map((customer) => (
+                <div
+                  key={customer.id}
+                  className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                  onClick={() => selectCustomer(customer)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold">{customer.name}</div>
+                      <div className="text-sm text-gray-600">{customer.phone}</div>
+                      {customer.email && (
+                        <div className="text-sm text-gray-600">{customer.email}</div>
+                      )}
+                    </div>
+                    <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
+                      {customer.status}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">{customer.address}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Product Selection Dialog */}
+      <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Add Product</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search products by name or category..."
+                value={searchProduct}
+                onChange={(e) => setSearchProduct(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {selectedProduct ? (
+              <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">{selectedProduct.name}</h3>
+                    <p className="text-sm text-gray-600">{selectedProduct.category}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="quantity">Quantity</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      value={productQuantity}
+                      onChange={(e) => setProductQuantity(Number(e.target.value))}
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="rate">Rate (₹)</Label>
+                    <Input
+                      id="rate"
+                      type="number"
+                      value={customRate || selectedProduct.price}
+                      onChange={(e) => setCustomRate(Number(e.target.value))}
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <Label>GST Rate</Label>
+                    <div className="p-2 border rounded bg-gray-50">
+                      {selectedProduct.gstRate}%
+                    </div>
+                  </div>
+                </div>
+                
+                <Button onClick={addItem} className="w-full">
+                  Add to Bill
+                </Button>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid gap-2">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                      onClick={() => setSelectedProduct(product)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold">{product.name}</div>
+                          <div className="text-sm text-gray-600">{product.category}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold">₹{product.price}</div>
+                          <div className="text-sm text-gray-600">{product.gstRate}% GST</div>
+                        </div>
+                      </div>
+                      {product.stock && (
+                        <div className="text-sm text-gray-500 mt-1">
+                          Stock: {product.stock} {product.unit}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
