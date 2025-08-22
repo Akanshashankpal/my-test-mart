@@ -346,144 +346,42 @@ export default function Billing() {
                 <CardTitle className="text-sm">Customer</CardTitle>
               </CardHeader>
               <CardContent>
-                {currentInvoice.customer?.name ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">{currentInvoice.customer.name}</h3>
-                        <p className="text-sm text-muted-foreground">{currentInvoice.customer.phone}</p>
+                <Dialog open={isSelectCustomerOpen} onOpenChange={setIsSelectCustomerOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <User className="h-4 w-4" />
+                      {currentInvoice.customer?.name || "Select Customer"}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Select Customer</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search customers..."
+                          value={searchCustomer}
+                          onChange={(e) => setSearchCustomer(e.target.value)}
+                          className="pl-10"
+                        />
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => {
-                        setCurrentInvoice(prev => ({ ...prev, customer: null }));
-                        setSearchCustomer('');
-                      }}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{currentInvoice.customer.address}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Type customer name or phone to search..."
-                        value={searchCustomer}
-                        onChange={(e) => setSearchCustomer(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-
-                    {/* Customer search results */}
-                    {searchCustomer && (
-                      <div className="max-h-32 overflow-y-auto border rounded-lg bg-white">
-                        {filteredCustomers.length > 0 ? (
-                          <div className="space-y-1 p-2">
-                            {filteredCustomers.slice(0, 3).map((customer) => (
-                              <div
-                                key={customer.id}
-                                className="p-2 border rounded cursor-pointer hover:bg-muted/50"
-                                onClick={() => selectCustomer(customer)}
-                              >
-                                <div className="font-medium text-sm">{customer.name}</div>
-                                <div className="text-xs text-muted-foreground">{customer.phone}</div>
-                              </div>
-                            ))}
+                      <div className="max-h-60 overflow-y-auto space-y-2">
+                        {filteredCustomers.map(customer => (
+                          <div
+                            key={customer.id}
+                            onClick={() => selectCustomer(customer)}
+                            className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50"
+                          >
+                            <div className="font-medium">{customer.name}</div>
+                            <div className="text-sm text-muted-foreground">{customer.phone}</div>
                           </div>
-                        ) : (
-                          <div className="p-3 text-center">
-                            <p className="text-sm text-muted-foreground mb-2">No customer found</p>
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                const phone = prompt('Enter phone number:');
-                                const address = prompt('Enter address:');
-
-                                if (phone && address) {
-                                  const newCustomer = {
-                                    id: Date.now().toString(),
-                                    name: searchCustomer,
-                                    phone,
-                                    address,
-                                    email: ''
-                                  };
-
-                                  selectCustomer(newCustomer);
-                                  setSearchCustomer('');
-                                }
-                              }}
-                              className="w-full"
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Create "{searchCustomer}" as new customer
-                            </Button>
-                          </div>
-                        )}
+                        ))}
                       </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Dialog open={isSelectCustomerOpen} onOpenChange={setIsSelectCustomerOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" className="flex-1">
-                            <User className="h-4 w-4 mr-2" />
-                            Browse All
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Select Customer</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input
-                                placeholder="Search customers..."
-                                value={searchCustomer}
-                                onChange={(e) => setSearchCustomer(e.target.value)}
-                                className="pl-10"
-                              />
-                            </div>
-                            <div className="max-h-60 overflow-y-auto space-y-2">
-                              {filteredCustomers.map(customer => (
-                                <div
-                                  key={customer.id}
-                                  onClick={() => selectCustomer(customer)}
-                                  className="p-3 border rounded-lg cursor-pointer hover:bg-muted/50"
-                                >
-                                  <div className="font-medium">{customer.name}</div>
-                                  <div className="text-sm text-muted-foreground">{customer.phone}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          const name = prompt('Enter customer name:');
-                          const phone = prompt('Enter phone number:');
-                          const address = prompt('Enter address:');
-
-                          if (name && phone && address) {
-                            const newCustomer = {
-                              id: Date.now().toString(),
-                              name,
-                              phone,
-                              address,
-                              email: ''
-                            };
-
-                            selectCustomer(newCustomer);
-                          }
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
                     </div>
-                  </div>
-                )}
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </div>
