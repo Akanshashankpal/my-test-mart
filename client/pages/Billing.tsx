@@ -523,7 +523,7 @@ export default function Billing() {
                     value={currentInvoice.discountPercent}
                     onChange={(e) => setCurrentInvoice(prev => ({ 
                       ...prev, 
-                      discountPercent: parseFloat(e.target.value) || 0 
+                      discountPercent: parseFloat(e.target.value) 
                     }))}
                     className="w-24"
                   />
