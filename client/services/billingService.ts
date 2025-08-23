@@ -190,29 +190,85 @@ export const billingService = {
 
   // Update bill
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
-    // Recalculate if items or discount changed
-    const calculations = billData.items
-      ? calculateBill(billData as BillData)
-      : {};
+    // Try multiple possible endpoints for update
+    const updateEndpoints = [
+      `/api/newBill/update/${id}`,
+      `/api/updateBills/${id}`,
+      `/updateBills/${id}`,
+      `/api/newBill/edit/${id}`
+    ];
 
-    const billPayload = {
-      ...billData,
-      ...calculations,
-      updatedAt: new Date().toISOString(),
-    };
+    console.warn('⚠️ Server update endpoint not confirmed. Trying multiple endpoints...');
 
-    const response = await apiClient.put(`/updateBills/${id}`, billPayload);
+    for (const endpoint of updateEndpoints) {
+      try {
+        // Recalculate if items or discount changed
+        const calculations = billData.items
+          ? calculateBill(billData as BillData)
+          : {};
 
-    // Handle different response formats
-    if (response.data && response.data.data) {
-      return response.data.data;
+        const billPayload = {
+          ...billData,
+          ...calculations,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const response = await apiClient.put(endpoint, billPayload);
+
+        console.log(`✅ Update successful using endpoint: ${endpoint}`);
+
+        // Handle different response formats
+        if (response.data && response.data.data) {
+          return response.data.data;
+        }
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          console.warn(`❌ Endpoint ${endpoint} not found, trying next...`);
+          continue;
+        }
+        // If it's not a 404, throw the error
+        throw error;
+      }
     }
-    return response.data;
+
+    // If all endpoints fail, throw a helpful error
+    throw new Error(
+      'Update bill functionality is not available on the server. The server needs to implement an update endpoint like /api/newBill/update/:id'
+    );
   },
 
   // Delete bill
   async deleteBill(id: string): Promise<void> {
-    await apiClient.delete(`/deleteBills/${id}`);
+    // Try multiple possible endpoints for delete
+    const deleteEndpoints = [
+      `/api/newBill/delete/${id}`,
+      `/api/deleteBills/${id}`,
+      `/deleteBills/${id}`,
+      `/api/newBill/${id}`
+    ];
+
+    console.warn('⚠️ Server delete endpoint not confirmed. Trying multiple endpoints...');
+
+    for (const endpoint of deleteEndpoints) {
+      try {
+        await apiClient.delete(endpoint);
+        console.log(`✅ Delete successful using endpoint: ${endpoint}`);
+        return;
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          console.warn(`❌ Endpoint ${endpoint} not found, trying next...`);
+          continue;
+        }
+        // If it's not a 404, throw the error
+        throw error;
+      }
+    }
+
+    // If all endpoints fail, throw a helpful error
+    throw new Error(
+      'Delete bill functionality is not available on the server. The server needs to implement a delete endpoint like /api/newBill/delete/:id'
+    );
   },
 
   // Calculate bill totals (utility function)
