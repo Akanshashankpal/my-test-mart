@@ -1149,7 +1149,7 @@ export default function BillingHistory() {
                   </thead>
                   <tbody>
                     {selectedBill.items.map((item, index) => (
-                      <tr key={index} className="border-t">
+                      <tr key={`${item.itemName}-${index}-${item.itemPrice}`} className="border-t">
                         <td className="p-3">{item.itemName}</td>
                         <td className="p-3 text-right">{item.itemQuantity}</td>
                         <td className="p-3 text-right">
