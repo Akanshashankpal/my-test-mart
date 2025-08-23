@@ -44,7 +44,11 @@ apiClient.interceptors.response.use(
         status: error.response.status,
         statusText: error.response.statusText,
         data: error.response.data,
+        fullResponse: error.response,
       });
+
+      // Also log the actual error message for debugging
+      console.error('Actual error message:', errorMessage);
       
       // Handle specific status codes
       if (error.response.status === 401) {
