@@ -79,8 +79,9 @@ export function BillingProvider({ children }: { children: ReactNode }) {
 
       // If no bills returned and no error, show informational message
       if (apiBills.length === 0) {
-        console.info("📝 No bills available - either no bills exist or the bills listing endpoint is not implemented on the server");
-        console.info("✅ You can still create new bills using the Create Invoice functionality");
+        console.info("📝 No bills found");
+      } else {
+        console.info(`📋 Loaded ${apiBills.length} bills successfully`);
       }
     } catch (err) {
       const errorMessage =
