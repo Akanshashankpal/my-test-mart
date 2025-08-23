@@ -1,5 +1,6 @@
 import { DemoResponse } from "@shared/api";
 import { useEffect, useState } from "react";
+import apiClient from "@/lib/api";
 
 export default function Index() {
   const [exampleFromServer, setExampleFromServer] = useState("");
@@ -11,9 +12,8 @@ export default function Index() {
   // Example of how to fetch data from the server (if needed)
   const fetchDemo = async () => {
     try {
-      const response = await fetch("https://billing-system-i3py.onrender.com/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
+      const response = await apiClient.get<DemoResponse>("/api/demo");
+      setExampleFromServer(response.data.message);
     } catch (error) {
       console.error("Error fetching hello:", error);
     }
