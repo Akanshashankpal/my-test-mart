@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import apiClient from '@/lib/api';
 
 interface User {
   id: string;
@@ -50,15 +51,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://billing-system-i3py.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await apiClient.post('/api/auth/login', {
+        email,
+        password
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success && data.data?.user) {
         const userData: User = {
