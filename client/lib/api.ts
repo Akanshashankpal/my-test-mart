@@ -59,7 +59,12 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
       
-      throw new Error(errorMessage);
+      // Create a detailed error object
+      const detailedError = new Error(errorMessage);
+      (detailedError as any).response = error.response;
+      (detailedError as any).status = error.response.status;
+      (detailedError as any).data = error.response.data;
+      throw detailedError;
     } else if (error.request) {
       // Network error
       throw new Error('Network error: Unable to connect to server');
