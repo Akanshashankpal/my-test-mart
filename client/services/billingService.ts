@@ -142,7 +142,7 @@ export const billingService = {
       createdAt: new Date().toISOString(),
     };
 
-    const response = await apiClient.post("/api/newbill", billPayload);
+    const response = await apiClient.post("/api/newBill/register", billPayload);
 
     // Handle different response formats
     if (response.data && response.data.data) {
