@@ -76,6 +76,11 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       setError(null);
       const apiBills = await billingService.getAllBills();
       setBills(apiBills);
+
+      // If no bills returned and no error, show informational message
+      if (apiBills.length === 0) {
+        console.info("No bills found or bills endpoint not available on server");
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch bills";
