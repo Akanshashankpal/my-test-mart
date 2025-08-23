@@ -809,7 +809,7 @@ export default function SalesReturn() {
                   </thead>
                   <tbody>
                     {selectedReturn.items.map((item, index) => (
-                      <tr key={index} className="border-t">
+                      <tr key={`selected-${item.productName}-${item.returnedQuantity}-${index}`} className="border-t">
                         <td className="p-3">{item.productName}</td>
                         <td className="p-3 text-center">{item.returnedQuantity}</td>
                         <td className="p-3 text-center">
