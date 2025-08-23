@@ -26,7 +26,7 @@ const gstConfig = {
 
 // Calculate Bill function as provided
 function calculateBill(data: any) {
-  // 1️⃣ Subtotal
+  // 1��⃣ Subtotal
   let subtotal = data.items.reduce(
     (acc: number, item: any) => acc + item.itemPrice * item.itemQuantity,
     0,
@@ -167,7 +167,7 @@ export const billingService = {
 
   // Get bill by ID
   async getBillById(id: string): Promise<Bill> {
-    const response = await apiClient.get(`/api/getBillsbyid/${id}`);
+    const response = await apiClient.get(`/getBillsbyid/${id}`);
 
     // Handle different response formats
     if (response.data && response.data.data) {
@@ -189,7 +189,7 @@ export const billingService = {
       updatedAt: new Date().toISOString(),
     };
 
-    const response = await apiClient.put(`/api/updateBills/${id}`, billPayload);
+    const response = await apiClient.put(`/updateBills/${id}`, billPayload);
 
     // Handle different response formats
     if (response.data && response.data.data) {
@@ -200,7 +200,7 @@ export const billingService = {
 
   // Delete bill
   async deleteBill(id: string): Promise<void> {
-    await apiClient.delete(`/api/deleteBills/${id}`);
+    await apiClient.delete(`/deleteBills/${id}`);
   },
 
   // Calculate bill totals (utility function)
