@@ -142,9 +142,18 @@ export const billingService = {
       createdAt: new Date().toISOString(),
     };
 
+    // Log the payload for debugging
+    console.log('Creating bill with payload:', JSON.stringify(billPayload, null, 2));
+
     const response = await apiClient.post("/api/newBill/register", billPayload);
 
+    // Log the response for debugging
+    console.log('Create bill response:', response.data);
+
     // Handle different response formats
+    if (response.data && response.data.bill) {
+      return response.data.bill;
+    }
     if (response.data && response.data.data) {
       return response.data.data;
     }
