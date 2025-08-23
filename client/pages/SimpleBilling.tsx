@@ -848,7 +848,7 @@ export default function SimpleBilling() {
                 </tr>
                 <tr>
                   <td>SGST (9%):</td>
-                  <td class="text-right">₹${currentInvoice.sgst.toLocaleString()}</td>
+                  <td class="text-right">��${currentInvoice.sgst.toLocaleString()}</td>
                 </tr>
                 <tr>
                   <td><strong>Total GST:</strong></td>
@@ -1928,11 +1928,11 @@ export default function SimpleBilling() {
                 <p className="text-red-600 text-sm mt-1">{error}</p>
               </div>
             </div>
-          ) : bills && bills.length > 0 ? (
+          ) : bills && Array.isArray(bills) && bills.length > 0 ? (
             <div className="space-y-3">
-              {bills.slice(0, 10).map((bill) => (
+              {bills.slice(0, 10).map((bill, index) => (
                 <div
-                  key={bill.id}
+                  key={bill.id || `bill-${index}`}
                   className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex-1">
