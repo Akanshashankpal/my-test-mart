@@ -153,29 +153,16 @@ export const billingService = {
 
   // Get all bills
   async getAllBills(): Promise<Bill[]> {
-    try {
-      // Try different endpoint patterns
-      let response;
-      try {
-        response = await apiClient.get("/getBills");
-      } catch (error) {
-        // If /getBills fails, try /api/bills
-        response = await apiClient.get("/api/bills");
-      }
+    const response = await apiClient.get("/getBills");
 
-      // Handle different response formats
-      if (response.data && Array.isArray(response.data.data)) {
-        return response.data.data;
-      }
-      if (Array.isArray(response.data)) {
-        return response.data;
-      }
-      return [];
-    } catch (error) {
-      console.error('Error fetching bills:', error);
-      // Return empty array for now to prevent app crash
-      return [];
+    // Handle different response formats
+    if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
     }
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
   },
 
   // Get bill by ID
