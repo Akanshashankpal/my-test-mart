@@ -49,6 +49,11 @@ apiClient.interceptors.response.use(
 
       // Also log the actual error message for debugging
       console.error('Actual error message:', errorMessage);
+
+      // Additional debug info for "[object Object]" issues
+      if (typeof error.response.data === 'object') {
+        console.error('Response data object:', JSON.stringify(error.response.data, null, 2));
+      }
       
       // Handle specific status codes
       if (error.response.status === 401) {
