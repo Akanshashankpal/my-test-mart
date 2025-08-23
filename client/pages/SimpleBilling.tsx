@@ -1906,13 +1906,6 @@ export default function SimpleBilling() {
           <h2 className="text-2xl font-bold text-gray-900">Billing</h2>
           <p className="text-gray-600">Manage your invoices and billing</p>
         </div>
-        <Button
-          onClick={startNewInvoice}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Invoice
-        </Button>
       </div>
 
       {/* Bills List */}
