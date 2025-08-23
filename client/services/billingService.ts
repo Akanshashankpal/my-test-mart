@@ -1,5 +1,4 @@
-// Billing API Service - Using remote server
-const API_BASE_URL = "https://billing-system-i3py.onrender.com";
+import apiClient from '@/lib/api';
 
 // GST Configuration for state detection
 const gstConfig = {
@@ -90,46 +89,6 @@ function calculateBill(data: any) {
   };
 }
 
-// API Helper function
-async function apiCall(endpoint: string, options: RequestInit = {}) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    // Try to parse JSON response even for errors
-    let responseData;
-    try {
-      responseData = await response.json();
-    } catch (e) {
-      responseData = { message: response.statusText };
-    }
-
-    if (!response.ok) {
-      const errorMessage =
-        responseData.message ||
-        `HTTP ${response.status}: ${response.statusText}`;
-      console.error(`API Error for ${endpoint}:`, {
-        status: response.status,
-        statusText: response.statusText,
-        data: responseData,
-      });
-      throw new Error(errorMessage);
-    }
-
-    return responseData;
-  } catch (error) {
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error("Network error: Unable to connect to server");
-    }
-    throw error;
-  }
-}
-
 // Bill Service Interface
 export interface BillItem {
   itemName: string;
@@ -169,7 +128,7 @@ export interface Bill extends BillData {
   updatedAt?: string;
 }
 
-// Billing Service
+// Billing Service using axios
 export const billingService = {
   // Create new bill
   async createBill(billData: BillData): Promise<Bill> {
@@ -183,41 +142,38 @@ export const billingService = {
       createdAt: new Date().toISOString(),
     };
 
-    const response = await apiCall("/api/newbill", {
-      method: "POST",
-      body: JSON.stringify(billPayload),
-    });
+    const response = await apiClient.post("/api/newbill", billPayload);
 
     // Handle different response formats
-    if (response && response.data) {
-      return response.data;
+    if (response.data && response.data.data) {
+      return response.data.data;
     }
-    return response;
+    return response.data;
   },
 
   // Get all bills
   async getAllBills(): Promise<Bill[]> {
-    const response = await apiCall("/getBills");
+    const response = await apiClient.get("/api/getBills");
 
     // Handle different response formats
-    if (response && Array.isArray(response.data)) {
-      return response.data;
+    if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
     }
-    if (Array.isArray(response)) {
-      return response;
+    if (Array.isArray(response.data)) {
+      return response.data;
     }
     return [];
   },
 
   // Get bill by ID
   async getBillById(id: string): Promise<Bill> {
-    const response = await apiCall(`/getBillsbyid/${id}`);
+    const response = await apiClient.get(`/api/getBillsbyid/${id}`);
 
     // Handle different response formats
-    if (response && response.data) {
-      return response.data;
+    if (response.data && response.data.data) {
+      return response.data.data;
     }
-    return response;
+    return response.data;
   },
 
   // Update bill
@@ -233,23 +189,18 @@ export const billingService = {
       updatedAt: new Date().toISOString(),
     };
 
-    const response = await apiCall(`/updateBills/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(billPayload),
-    });
+    const response = await apiClient.put(`/api/updateBills/${id}`, billPayload);
 
     // Handle different response formats
-    if (response && response.data) {
-      return response.data;
+    if (response.data && response.data.data) {
+      return response.data.data;
     }
-    return response;
+    return response.data;
   },
 
   // Delete bill
   async deleteBill(id: string): Promise<void> {
-    await apiCall(`/deleteBills/${id}`, {
-      method: "DELETE",
-    });
+    await apiClient.delete(`/api/deleteBills/${id}`);
   },
 
   // Calculate bill totals (utility function)
