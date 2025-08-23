@@ -191,8 +191,9 @@ export const billingService = {
         }
       }
 
-      // If all endpoints fail, return empty array
-      console.warn("All bill endpoints failed. The server may not have a getBills endpoint implemented.");
+      // If all endpoints fail, return empty array with informative message
+      console.warn("📋 Bills listing endpoint not available on server");
+      console.info("💡 Available endpoints: POST /api/newBill/register (create bill), POST /api/auth/login (authentication)");
       return [];
 
     } catch (error) {
