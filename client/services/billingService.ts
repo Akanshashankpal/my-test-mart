@@ -192,10 +192,10 @@ export const billingService = {
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
     // Try multiple possible endpoints for update
     const updateEndpoints = [
-      `/api/newBill/update/${id}`,
+      `/api/newBill/updateBills/${id}`,
       `/api/updateBills/${id}`,
       `/updateBills/${id}`,
-      `/api/newBill/edit/${id}`
+      `/api/newBill/updateBills/${id}`
     ];
 
     console.warn('⚠️ Server update endpoint not confirmed. Trying multiple endpoints...');
