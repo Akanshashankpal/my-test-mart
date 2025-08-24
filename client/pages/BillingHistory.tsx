@@ -313,12 +313,12 @@ export default function BillingHistory() {
 
   const handleUpdateBill = async () => {
     if (!editBill) {
-      console.error('❌ No bill selected for editing');
+      console.error("❌ No bill selected for editing");
       return;
     }
 
-    console.log('📝 Editing bill:', editBill);
-    console.log('🆔 Bill ID:', editBill.id);
+    console.log("📝 Editing bill:", editBill);
+    console.log("🆔 Bill ID:", editBill.id);
 
     const updates = {
       customerName: editFormData.customerName,
@@ -330,11 +330,11 @@ export default function BillingHistory() {
       observation: editFormData.observation,
     };
 
-    console.log('📤 Sending updates:', updates);
+    console.log("📤 Sending updates:", updates);
 
     const success = await updateBill(editBill.id, updates);
     if (success) {
-      console.log('✅ Bill updated successfully');
+      console.log("✅ Bill updated successfully");
       setEditBill(null);
       setEditFormData({
         customerName: "",
@@ -346,7 +346,7 @@ export default function BillingHistory() {
         observation: "",
       });
     } else {
-      console.error('❌ Bill update failed');
+      console.error("❌ Bill update failed");
     }
   };
 
@@ -1160,7 +1160,10 @@ export default function BillingHistory() {
                   </thead>
                   <tbody>
                     {selectedBill.items.map((item, index) => (
-                      <tr key={`${item.itemName}-${index}-${item.itemPrice}`} className="border-t">
+                      <tr
+                        key={`${item.itemName}-${index}-${item.itemPrice}`}
+                        className="border-t"
+                      >
                         <td className="p-3">{item.itemName}</td>
                         <td className="p-3 text-right">{item.itemQuantity}</td>
                         <td className="p-3 text-right">

@@ -1,4 +1,4 @@
-import apiClient from '@/lib/api';
+import apiClient from "@/lib/api";
 
 // GST Configuration for state detection
 const gstConfig = {
@@ -143,12 +143,15 @@ export const billingService = {
     };
 
     // Log the payload for debugging
-    console.log('Creating bill with payload:', JSON.stringify(billPayload, null, 2));
+    console.log(
+      "Creating bill with payload:",
+      JSON.stringify(billPayload, null, 2),
+    );
 
     const response = await apiClient.post("/api/newBill/register", billPayload);
 
     // Log the response for debugging
-    console.log('Create bill response:', response.data);
+    console.log("Create bill response:", response.data);
 
     let bill;
     // Handle different response formats
@@ -163,7 +166,7 @@ export const billingService = {
     // Normalize the _id field to id
     return {
       ...bill,
-      id: bill.id || bill._id
+      id: bill.id || bill._id,
     };
   },
 
@@ -182,9 +185,9 @@ export const billingService = {
     }
 
     // Normalize all bills to have 'id' field for consistent client usage
-    return bills.map(bill => ({
+    return bills.map((bill) => ({
       ...bill,
-      id: bill.id || bill._id
+      id: bill.id || bill._id,
     }));
   },
 
@@ -203,14 +206,14 @@ export const billingService = {
     // Normalize the _id field to id
     return {
       ...bill,
-      id: bill.id || bill._id || id
+      id: bill.id || bill._id || id,
     };
   },
 
   // Update bill
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
-    console.log('🔄 Updating bill with ID:', id);
-    console.log('📝 Update data:', billData);
+    console.log("🔄 Updating bill with ID:", id);
+    console.log("📝 Update data:", billData);
 
     // Recalculate if items or discount changed
     const calculations = billData.items
@@ -223,11 +226,14 @@ export const billingService = {
       updatedAt: new Date().toISOString(),
     };
 
-    console.log('📤 Sending update payload:', billPayload);
+    console.log("📤 Sending update payload:", billPayload);
 
-    const response = await apiClient.put(`/api/newBill/updateBills/${id}`, billPayload);
+    const response = await apiClient.put(
+      `/api/newBill/updateBills/${id}`,
+      billPayload,
+    );
 
-    console.log('📥 Update response:', response.data);
+    console.log("📥 Update response:", response.data);
 
     // Handle server response - the server returns the bill in response.data.bill
     let updatedBill;
@@ -242,10 +248,10 @@ export const billingService = {
     // Normalize the _id field to id for consistent client-side usage
     const normalizedBill = {
       ...updatedBill,
-      id: updatedBill.id || updatedBill._id || id
+      id: updatedBill.id || updatedBill._id || id,
     };
 
-    console.log('✅ Normalized bill:', normalizedBill);
+    console.log("✅ Normalized bill:", normalizedBill);
 
     return normalizedBill;
   },
@@ -257,10 +263,12 @@ export const billingService = {
       `/api/newBill/delete/${id}`,
       `/api/deleteBills/${id}`,
       `/deleteBills/${id}`,
-      `/api/newBill/${id}`
+      `/api/newBill/${id}`,
     ];
 
-    console.warn('⚠️ Server delete endpoint not confirmed. Trying multiple endpoints...');
+    console.warn(
+      "⚠️ Server delete endpoint not confirmed. Trying multiple endpoints...",
+    );
 
     for (const endpoint of deleteEndpoints) {
       try {
@@ -279,7 +287,7 @@ export const billingService = {
 
     // If all endpoints fail, throw a helpful error
     throw new Error(
-      'Delete bill functionality is not available on the server. The server needs to implement a delete endpoint like /api/newBill/delete/:id'
+      "Delete bill functionality is not available on the server. The server needs to implement a delete endpoint like /api/newBill/delete/:id",
     );
   },
 

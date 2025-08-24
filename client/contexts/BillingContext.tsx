@@ -146,7 +146,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       // Ensure the updated bill has the correct ID
       const normalizedBill = {
         ...updatedBill,
-        id: updatedBill.id || updatedBill._id || billId
+        id: updatedBill.id || updatedBill._id || billId,
       };
 
       setBills((prev) =>
@@ -164,7 +164,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update bill";
 
-      console.error('❌ Update bill error:', err);
+      console.error("❌ Update bill error:", err);
 
       toast({
         title: "Error",
@@ -200,10 +200,11 @@ export function BillingProvider({ children }: { children: ReactNode }) {
         err instanceof Error ? err.message : "Failed to delete bill";
 
       // Check if it's a server endpoint issue
-      if (errorMessage.includes('not available on the server')) {
+      if (errorMessage.includes("not available on the server")) {
         toast({
           title: "Feature Not Available",
-          description: "Bill deletion is not yet supported by the server. Please contact support.",
+          description:
+            "Bill deletion is not yet supported by the server. Please contact support.",
           variant: "destructive",
         });
       } else {
