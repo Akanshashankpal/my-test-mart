@@ -79,7 +79,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
 
       // If no bills returned and no error, show informational message
       if (apiBills.length === 0) {
-        console.info("📝 No bills found");
+        console.info("��� No bills found");
       } else {
         console.info(`📋 Loaded ${apiBills.length} bills successfully`);
       }
@@ -164,20 +164,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update bill";
 
-      // Check if it's a server endpoint issue
-      if (errorMessage.includes('not available on the server')) {
-        toast({
-          title: "Feature Not Available",
-          description: "Bill editing is not yet supported by the server. Please contact support.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
+      console.error('❌ Update bill error:', err);
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
 
       setError(errorMessage);
       return null;
