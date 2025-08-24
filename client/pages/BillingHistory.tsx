@@ -312,7 +312,13 @@ export default function BillingHistory() {
   };
 
   const handleUpdateBill = async () => {
-    if (!editBill) return;
+    if (!editBill) {
+      console.error('❌ No bill selected for editing');
+      return;
+    }
+
+    console.log('📝 Editing bill:', editBill);
+    console.log('🆔 Bill ID:', editBill.id);
 
     const updates = {
       customerName: editFormData.customerName,
@@ -324,8 +330,11 @@ export default function BillingHistory() {
       observation: editFormData.observation,
     };
 
+    console.log('📤 Sending updates:', updates);
+
     const success = await updateBill(editBill.id, updates);
     if (success) {
+      console.log('✅ Bill updated successfully');
       setEditBill(null);
       setEditFormData({
         customerName: "",
@@ -336,6 +345,8 @@ export default function BillingHistory() {
         paidAmount: 0,
         observation: "",
       });
+    } else {
+      console.error('❌ Bill update failed');
     }
   };
 
