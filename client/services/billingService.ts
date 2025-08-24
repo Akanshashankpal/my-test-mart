@@ -67,7 +67,7 @@ function calculateBill(data: any) {
   let gstPercent = gstConfig[stateKey].gst;
   let gstAmount = (afterDiscount * gstPercent) / 100;
 
-  // 5️⃣ Final Total
+  // 5️�� Final Total
   let totalAmount = afterDiscount + gstAmount;
 
   // 6️⃣ Payment logic
@@ -150,92 +150,104 @@ export const billingService = {
     // Log the response for debugging
     console.log('Create bill response:', response.data);
 
+    let bill;
     // Handle different response formats
     if (response.data && response.data.bill) {
-      return response.data.bill;
+      bill = response.data.bill;
+    } else if (response.data && response.data.data) {
+      bill = response.data.data;
+    } else {
+      bill = response.data;
     }
-    if (response.data && response.data.data) {
-      return response.data.data;
-    }
-    return response.data;
+
+    // Normalize the _id field to id
+    return {
+      ...bill,
+      id: bill.id || bill._id
+    };
   },
 
   // Get all bills
   async getAllBills(): Promise<Bill[]> {
     const response = await apiClient.get("/api/newBill/getBills");
 
+    let bills = [];
     // Handle different response formats
     if (response.data && Array.isArray(response.data.data)) {
-      return response.data.data;
+      bills = response.data.data;
+    } else if (Array.isArray(response.data)) {
+      bills = response.data;
+    } else if (response.data && response.data.success && response.data.bills) {
+      bills = response.data.bills;
     }
-    if (Array.isArray(response.data)) {
-      return response.data;
-    }
-    if (response.data && response.data.success && response.data.bills) {
-      return response.data.bills;
-    }
-    return [];
+
+    // Normalize all bills to have 'id' field for consistent client usage
+    return bills.map(bill => ({
+      ...bill,
+      id: bill.id || bill._id
+    }));
   },
 
   // Get bill by ID
   async getBillById(id: string): Promise<Bill> {
     const response = await apiClient.get(`/getBillsbyid/${id}`);
 
+    let bill;
     // Handle different response formats
     if (response.data && response.data.data) {
-      return response.data.data;
+      bill = response.data.data;
+    } else {
+      bill = response.data;
     }
-    return response.data;
+
+    // Normalize the _id field to id
+    return {
+      ...bill,
+      id: bill.id || bill._id || id
+    };
   },
 
   // Update bill
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
-    // Try multiple possible endpoints for update
-    const updateEndpoints = [
-      `/api/newBill/updateBills/${id}`,
-      `/api/updateBills/${id}`,
-      `/updateBills/${id}`,
-      `/api/newBill/updateBills/${id}`
-    ];
+    console.log('🔄 Updating bill with ID:', id);
+    console.log('📝 Update data:', billData);
 
-    console.warn('⚠️ Server update endpoint not confirmed. Trying multiple endpoints...');
+    // Recalculate if items or discount changed
+    const calculations = billData.items
+      ? calculateBill(billData as BillData)
+      : {};
 
-    for (const endpoint of updateEndpoints) {
-      try {
-        // Recalculate if items or discount changed
-        const calculations = billData.items
-          ? calculateBill(billData as BillData)
-          : {};
+    const billPayload = {
+      ...billData,
+      ...calculations,
+      updatedAt: new Date().toISOString(),
+    };
 
-        const billPayload = {
-          ...billData,
-          ...calculations,
-          updatedAt: new Date().toISOString(),
-        };
+    console.log('📤 Sending update payload:', billPayload);
 
-        const response = await apiClient.put(endpoint, billPayload);
+    const response = await apiClient.put(`/api/newBill/updateBills/${id}`, billPayload);
 
-        console.log(`✅ Update successful using endpoint: ${endpoint}`);
+    console.log('📥 Update response:', response.data);
 
-        // Handle different response formats
-        if (response.data && response.data.data) {
-          return response.data.data;
-        }
-        return response.data;
-      } catch (error: any) {
-        if (error.response?.status === 404) {
-          console.warn(`❌ Endpoint ${endpoint} not found, trying next...`);
-          continue;
-        }
-        // If it's not a 404, throw the error
-        throw error;
-      }
+    // Handle server response - the server returns the bill in response.data.bill
+    let updatedBill;
+    if (response.data && response.data.bill) {
+      updatedBill = response.data.bill;
+    } else if (response.data && response.data.data) {
+      updatedBill = response.data.data;
+    } else {
+      updatedBill = response.data;
     }
 
-    // If all endpoints fail, throw a helpful error
-    throw new Error(
-      'Update bill functionality is not available on the server. The server needs to implement an update endpoint like /api/newBill/update/:id'
-    );
+    // Normalize the _id field to id for consistent client-side usage
+    const normalizedBill = {
+      ...updatedBill,
+      id: updatedBill.id || updatedBill._id || id
+    };
+
+    console.log('✅ Normalized bill:', normalizedBill);
+
+    return normalizedBill;
   },
 
   // Delete bill
