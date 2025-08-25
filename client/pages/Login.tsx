@@ -67,6 +67,42 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Development Test Credentials */}
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm font-medium text-blue-800 mb-2">Test Credentials:</p>
+              <div className="text-xs text-blue-600 space-y-1">
+                <p><span className="font-medium">Admin:</span> admin@electromart.com / password123</p>
+                <p><span className="font-medium">Manager:</span> manager@electromart.com / password123</p>
+                <p><span className="font-medium">Cashier:</span> cashier@electromart.com / password123</p>
+              </div>
+              <div className="mt-2 flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEmail('admin@electromart.com');
+                    setPassword('password123');
+                  }}
+                  className="text-xs h-6 px-2"
+                >
+                  Use Admin
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEmail('manager@electromart.com');
+                    setPassword('password123');
+                  }}
+                  className="text-xs h-6 px-2"
+                >
+                  Use Manager
+                </Button>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
