@@ -51,11 +51,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
 
     try {
+      console.log('Attempting login with:', { email, passwordLength: password.length });
+
       const response = await apiClient.post('/api/auth/login', {
         email,
         password
       });
 
+      console.log('Login response:', response.data);
       const data = response.data;
 
       if (data.token && data.user) {
@@ -71,13 +74,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('electromart_user', JSON.stringify(userData));
         localStorage.setItem('electromart_token', data.token);
         setIsLoading(false);
+        console.log('Login successful');
         return true;
       } else {
+        console.log('Login failed: No token or user in response');
         setIsLoading(false);
         return false;
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('Login error in AuthContext:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       setIsLoading(false);
       return false;
     }
