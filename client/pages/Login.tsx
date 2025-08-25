@@ -19,14 +19,22 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       setError('Please fill in all fields');
       return;
     }
 
-    const success = await login(email, password);
-    if (!success) {
-      setError('Invalid email or password');
+    try {
+      const success = await login(trimmedEmail, trimmedPassword);
+      if (!success) {
+        setError('Invalid email or password. Please use the test credentials shown above.');
+      }
+    } catch (error: any) {
+      console.error('Login error in component:', error);
+      setError(error.message || 'An error occurred during login');
     }
   };
 
