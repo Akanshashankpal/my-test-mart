@@ -40,6 +40,22 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Authentication API routes
+  app.post("/api/auth/login", login);
+  app.post("/api/auth/refresh", refreshToken);
+  app.get("/api/auth/profile", getUserProfile);
+
+  // User Management API routes
+  app.get("/api/users", getUsers);
+  app.post("/api/users", createUser);
+  app.put("/api/users/:id", updateUser);
+  app.delete("/api/users/:id", deleteUser);
+  app.get("/api/users/permission/:permission", checkPermission);
+
+  // Settings API routes
+  app.get("/api/settings", getSettings);
+  app.put("/api/settings", updateSettings);
+
   // Billing API routes
   app.post("/api/newbill", createBill);
   app.get("/getBills", getAllBills);
