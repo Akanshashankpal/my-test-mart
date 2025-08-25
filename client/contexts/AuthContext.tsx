@@ -58,18 +58,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = response.data;
 
-      if (data.success && data.data?.user) {
+      if (data.token && data.user) {
         const userData: User = {
-          id: data.data.user.id,
-          name: data.data.user.name,
-          email: data.data.user.email,
-          avatar: data.data.user.avatar,
-          role: data.data.user.role
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          avatar: data.user.avatar,
+          role: data.user.role
         };
 
         setUser(userData);
         localStorage.setItem('electromart_user', JSON.stringify(userData));
-        localStorage.setItem('electromart_token', data.data.token);
+        localStorage.setItem('electromart_token', data.token);
         setIsLoading(false);
         return true;
       } else {
