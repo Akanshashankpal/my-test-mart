@@ -67,19 +67,29 @@ const userService = new UserService();
 export const login: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    const result = await userService.authenticate(email, password);
-    
+
+    // Debug logging
+    console.log('Login attempt:', {
+      email: email ? email.trim() : 'undefined',
+      passwordProvided: !!password,
+      passwordLength: password ? password.length : 0
+    });
+
+    const result = await userService.authenticate(email?.trim(), password);
+
     if (!result.success) {
+      console.log('Login failed:', result.message);
       return res.status(401).json({ error: result.message });
     }
-    
+
+    console.log('Login successful for:', email);
     res.json({
       token: result.token,
       user: result.user,
       expiresIn: result.expiresIn,
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Authentication failed' });
   }
 };
