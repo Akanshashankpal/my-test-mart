@@ -1,43 +1,50 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
-import { Store, Lock, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
+import { Store, Lock, Mail, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
     if (!trimmedEmail || !trimmedPassword) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     try {
       const success = await login(trimmedEmail, trimmedPassword);
       if (!success) {
-        setError('Invalid email or password. Please use the test credentials shown above.');
+        setError(
+          "Invalid email or password. Please use the test credentials shown above.",
+        );
       }
     } catch (error: any) {
-      console.error('Login error in component:', error);
-      setError(error.message || 'An error occurred during login');
+      console.error("Login error in component:", error);
+      setError(error.message || "An error occurred during login");
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex items-center justify-center p-4">
@@ -54,13 +61,12 @@ export default function Login() {
             </div>
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            {isSignup ? 'Create Account' : 'Welcome Back'}
+            {isSignup ? "Create Account" : "Welcome Back"}
           </h2>
           <p className="text-gray-600">
-            {isSignup 
-              ? 'Enter your details to create your account' 
-              : 'Sign in to your business dashboard'
-            }
+            {isSignup
+              ? "Enter your details to create your account"
+              : "Sign in to your business dashboard"}
           </p>
         </div>
 
@@ -68,7 +74,7 @@ export default function Login() {
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">
-              {isSignup ? 'Sign Up' : 'Sign In'}
+              {isSignup ? "Sign Up" : "Sign In"}
             </CardTitle>
             <CardDescription className="text-center">
               Access your business management dashboard
@@ -77,11 +83,22 @@ export default function Login() {
           <CardContent className="space-y-4">
             {/* Development Test Credentials */}
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm font-medium text-blue-800 mb-2">Test Credentials:</p>
+              <p className="text-sm font-medium text-blue-800 mb-2">
+                Test Credentials:
+              </p>
               <div className="text-xs text-blue-600 space-y-1">
-                <p><span className="font-medium">Admin:</span> admin@electromart.com / password123</p>
-                <p><span className="font-medium">Manager:</span> manager@electromart.com / password123</p>
-                <p><span className="font-medium">Cashier:</span> cashier@electromart.com / password123</p>
+                <p>
+                  <span className="font-medium">Admin:</span>{" "}
+                  admin@electromart.com / password123
+                </p>
+                <p>
+                  <span className="font-medium">Manager:</span>{" "}
+                  manager@electromart.com / password123
+                </p>
+                <p>
+                  <span className="font-medium">Cashier:</span>{" "}
+                  cashier@electromart.com / password123
+                </p>
               </div>
               <div className="mt-2 flex gap-2">
                 <Button
@@ -89,8 +106,8 @@ export default function Login() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setEmail('admin@electromart.com');
-                    setPassword('password123');
+                    setEmail("admin@electromart.com");
+                    setPassword("password123");
                   }}
                   className="text-xs h-6 px-2"
                 >
@@ -101,8 +118,8 @@ export default function Login() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setEmail('manager@electromart.com');
-                    setPassword('password123');
+                    setEmail("manager@electromart.com");
+                    setPassword("password123");
                   }}
                   className="text-xs h-6 px-2"
                 >
@@ -134,7 +151,7 @@ export default function Login() {
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -164,8 +181,8 @@ export default function Login() {
                 </Alert>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-11 bg-green-600 hover:bg-green-700 text-white"
                 disabled={isLoading}
               >
@@ -174,8 +191,10 @@ export default function Login() {
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Signing In...
                   </>
+                ) : isSignup ? (
+                  "Create Account"
                 ) : (
-                  isSignup ? 'Create Account' : 'Sign In'
+                  "Sign In"
                 )}
               </Button>
             </form>
@@ -186,15 +205,13 @@ export default function Login() {
                 className="text-sm text-green-600 hover:text-green-700 font-medium"
                 disabled={isLoading}
               >
-                {isSignup 
-                  ? 'Already have an account? Sign in' 
-                  : "Don't have an account? Sign up"
-                }
+                {isSignup
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up"}
               </button>
             </div>
           </CardContent>
         </Card>
-
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-600">

@@ -4,7 +4,7 @@ export interface AuthResult {
   success: boolean;
   message?: string;
   token?: string;
-  user?: Omit<User, 'permissions'>;
+  user?: Omit<User, "permissions">;
   expiresIn?: string;
 }
 
@@ -86,12 +86,12 @@ export class UserService {
   async authenticate(email: string, password: string): Promise<AuthResult> {
     try {
       // Find user by email
-      const user = this.mockUsers.find(u => u.email === email && u.isActive);
-      
+      const user = this.mockUsers.find((u) => u.email === email && u.isActive);
+
       if (!user) {
         return {
           success: false,
-          message: "Invalid email or password"
+          message: "Invalid email or password",
         };
       }
 
@@ -99,7 +99,7 @@ export class UserService {
       if (password !== this.mockPassword) {
         return {
           success: false,
-          message: "Invalid email or password"
+          message: "Invalid email or password",
         };
       }
 
@@ -122,12 +122,12 @@ export class UserService {
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },
-        expiresIn: "24h"
+        expiresIn: "24h",
       };
     } catch (error) {
       return {
         success: false,
-        message: "Authentication failed"
+        message: "Authentication failed",
       };
     }
   }
@@ -137,24 +137,24 @@ export class UserService {
     return {
       success: true,
       token: `refreshed-${refreshToken}-${Date.now()}`,
-      expiresIn: "24h"
+      expiresIn: "24h",
     };
   }
 
   async getAllUsers(): Promise<User[]> {
-    return this.mockUsers.filter(u => u.isActive);
+    return this.mockUsers.filter((u) => u.isActive);
   }
 
   async getUserById(id: string): Promise<User | null> {
-    return this.mockUsers.find(u => u.id === id && u.isActive) || null;
+    return this.mockUsers.find((u) => u.id === id && u.isActive) || null;
   }
 
   async createUser(userData: Partial<User>): Promise<User> {
     const newUser: User = {
       id: (this.mockUsers.length + 1).toString(),
-      email: userData.email || '',
-      name: userData.name || '',
-      role: userData.role || 'cashier',
+      email: userData.email || "",
+      name: userData.name || "",
+      role: userData.role || "cashier",
       permissions: userData.permissions || {
         canCreateBills: true,
         canEditBills: false,
@@ -176,7 +176,7 @@ export class UserService {
   }
 
   async updateUser(id: string, updates: Partial<User>): Promise<User | null> {
-    const userIndex = this.mockUsers.findIndex(u => u.id === id);
+    const userIndex = this.mockUsers.findIndex((u) => u.id === id);
     if (userIndex === -1) return null;
 
     this.mockUsers[userIndex] = {
@@ -189,7 +189,7 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    const userIndex = this.mockUsers.findIndex(u => u.id === id);
+    const userIndex = this.mockUsers.findIndex((u) => u.id === id);
     if (userIndex === -1) return false;
 
     this.mockUsers[userIndex].isActive = false;
@@ -197,7 +197,10 @@ export class UserService {
     return true;
   }
 
-  async checkUserPermission(userId: string, permission: string): Promise<boolean> {
+  async checkUserPermission(
+    userId: string,
+    permission: string,
+  ): Promise<boolean> {
     const user = await this.getUserById(userId);
     if (!user) return false;
 
@@ -226,7 +229,7 @@ export class UserService {
       },
       financialYear: {
         startMonth: 4,
-        current: "2024-25"
+        current: "2024-25",
       },
       invoiceNumbering: {
         gstPrefix: "EM-GST-",
