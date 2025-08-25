@@ -403,7 +403,7 @@ export default function SalesReturn() {
                 </div>
                 
                 {formData.items.map((item, index) => (
-                  <Card key={index} className="p-4">
+                  <Card key={`form-item-${item.productName || 'empty'}-${index}`} className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                       <div className="space-y-2">
                         <Label>Product Name *</Label>
@@ -689,7 +689,7 @@ export default function SalesReturn() {
                   <div className="mb-3">
                     <span className="text-muted-foreground text-sm">Items: </span>
                     {returnItem.items.map((item, index) => (
-                      <span key={index} className="text-sm">
+                      <span key={`return-${item.productName}-${index}`} className="text-sm">
                         {item.productName} (×{item.returnedQuantity})
                         {index < returnItem.items.length - 1 && ", "}
                       </span>
@@ -809,7 +809,7 @@ export default function SalesReturn() {
                   </thead>
                   <tbody>
                     {selectedReturn.items.map((item, index) => (
-                      <tr key={index} className="border-t">
+                      <tr key={`selected-${item.productName}-${item.returnedQuantity}-${index}`} className="border-t">
                         <td className="p-3">{item.productName}</td>
                         <td className="p-3 text-center">{item.returnedQuantity}</td>
                         <td className="p-3 text-center">

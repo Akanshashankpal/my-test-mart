@@ -667,7 +667,7 @@ export default function EnhancedBilling() {
               ) : (
                 <div className="space-y-3">
                   {currentInvoice.items.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div key={`enhanced-${item.productName}-${index}-${item.quantity}`} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex-1">
                         <div className="font-medium">{item.productName}</div>
                         <div className="text-sm text-gray-600">

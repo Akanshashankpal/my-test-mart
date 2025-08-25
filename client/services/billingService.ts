@@ -1,5 +1,4 @@
-// Billing API Service - Using local server
-const API_BASE_URL = window.location.origin;
+import apiClient from "@/lib/api";
 
 // GST Configuration for state detection
 const gstConfig = {
@@ -27,7 +26,7 @@ const gstConfig = {
 
 // Calculate Bill function as provided
 function calculateBill(data: any) {
-  // 1️⃣ Subtotal
+  // 1��⃣ Subtotal
   let subtotal = data.items.reduce(
     (acc: number, item: any) => acc + item.itemPrice * item.itemQuantity,
     0,
@@ -68,7 +67,7 @@ function calculateBill(data: any) {
   let gstPercent = gstConfig[stateKey].gst;
   let gstAmount = (afterDiscount * gstPercent) / 100;
 
-  // 5️⃣ Final Total
+  // 5️�� Final Total
   let totalAmount = afterDiscount + gstAmount;
 
   // 6️⃣ Payment logic
@@ -88,46 +87,6 @@ function calculateBill(data: any) {
     remainingAmount,
     stateKey,
   };
-}
-
-// API Helper function
-async function apiCall(endpoint: string, options: RequestInit = {}) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    // Try to parse JSON response even for errors
-    let responseData;
-    try {
-      responseData = await response.json();
-    } catch (e) {
-      responseData = { message: response.statusText };
-    }
-
-    if (!response.ok) {
-      const errorMessage =
-        responseData.message ||
-        `HTTP ${response.status}: ${response.statusText}`;
-      console.error(`API Error for ${endpoint}:`, {
-        status: response.status,
-        statusText: response.statusText,
-        data: responseData,
-      });
-      throw new Error(errorMessage);
-    }
-
-    return responseData;
-  } catch (error) {
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      throw new Error("Network error: Unable to connect to server");
-    }
-    throw error;
-  }
 }
 
 // Bill Service Interface
@@ -169,7 +128,7 @@ export interface Bill extends BillData {
   updatedAt?: string;
 }
 
-// Billing Service
+// Billing Service using axios
 export const billingService = {
   // Create new bill
   async createBill(billData: BillData): Promise<Bill> {
@@ -183,45 +142,79 @@ export const billingService = {
       createdAt: new Date().toISOString(),
     };
 
-    const response = await apiCall("/api/newbill", {
-      method: "POST",
-      body: JSON.stringify(billPayload),
-    });
+    // Log the payload for debugging
+    console.log(
+      "Creating bill with payload:",
+      JSON.stringify(billPayload, null, 2),
+    );
 
+    const response = await apiClient.post("/api/newBill/register", billPayload);
+
+    // Log the response for debugging
+    console.log("Create bill response:", response.data);
+
+    let bill;
     // Handle different response formats
-    if (response && response.data) {
-      return response.data;
+    if (response.data && response.data.bill) {
+      bill = response.data.bill;
+    } else if (response.data && response.data.data) {
+      bill = response.data.data;
+    } else {
+      bill = response.data;
     }
-    return response;
+
+    // Normalize the _id field to id
+    return {
+      ...bill,
+      id: bill.id || bill._id,
+    };
   },
 
   // Get all bills
   async getAllBills(): Promise<Bill[]> {
-    const response = await apiCall("/getBills");
+    const response = await apiClient.get("/api/newBill/getBills");
 
+    let bills = [];
     // Handle different response formats
-    if (response && Array.isArray(response.data)) {
-      return response.data;
+    if (response.data && Array.isArray(response.data.data)) {
+      bills = response.data.data;
+    } else if (Array.isArray(response.data)) {
+      bills = response.data;
+    } else if (response.data && response.data.success && response.data.bills) {
+      bills = response.data.bills;
     }
-    if (Array.isArray(response)) {
-      return response;
-    }
-    return [];
+
+    // Normalize all bills to have 'id' field for consistent client usage
+    return bills.map((bill) => ({
+      ...bill,
+      id: bill.id || bill._id,
+    }));
   },
 
   // Get bill by ID
   async getBillById(id: string): Promise<Bill> {
-    const response = await apiCall(`/getBillsbyid/${id}`);
+    const response = await apiClient.get(`/getBillsbyid/${id}`);
 
+    let bill;
     // Handle different response formats
-    if (response && response.data) {
-      return response.data;
+    if (response.data && response.data.data) {
+      bill = response.data.data;
+    } else {
+      bill = response.data;
     }
-    return response;
+
+    // Normalize the _id field to id
+    return {
+      ...bill,
+      id: bill.id || bill._id || id,
+    };
   },
 
   // Update bill
   async updateBill(id: string, billData: Partial<BillData>): Promise<Bill> {
+    console.log("🔄 Updating bill with ID:", id);
+    console.log("📝 Update data:", billData);
+
     // Recalculate if items or discount changed
     const calculations = billData.items
       ? calculateBill(billData as BillData)
@@ -233,23 +226,69 @@ export const billingService = {
       updatedAt: new Date().toISOString(),
     };
 
-    const response = await apiCall(`/updateBills/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(billPayload),
-    });
+    console.log("📤 Sending update payload:", billPayload);
 
-    // Handle different response formats
-    if (response && response.data) {
-      return response.data;
+    const response = await apiClient.put(
+      `/api/newBill/updateBills/${id}`,
+      billPayload,
+    );
+
+    console.log("📥 Update response:", response.data);
+
+    // Handle server response - the server returns the bill in response.data.bill
+    let updatedBill;
+    if (response.data && response.data.bill) {
+      updatedBill = response.data.bill;
+    } else if (response.data && response.data.data) {
+      updatedBill = response.data.data;
+    } else {
+      updatedBill = response.data;
     }
-    return response;
+
+    // Normalize the _id field to id for consistent client-side usage
+    const normalizedBill = {
+      ...updatedBill,
+      id: updatedBill.id || updatedBill._id || id,
+    };
+
+    console.log("✅ Normalized bill:", normalizedBill);
+
+    return normalizedBill;
   },
 
   // Delete bill
   async deleteBill(id: string): Promise<void> {
-    await apiCall(`/deleteBills/${id}`, {
-      method: "DELETE",
-    });
+    // Try multiple possible endpoints for delete
+    const deleteEndpoints = [
+      `/api/newBill/delete/${id}`,
+      `/api/deleteBills/${id}`,
+      `/deleteBills/${id}`,
+      `/api/newBill/${id}`,
+    ];
+
+    console.warn(
+      "⚠️ Server delete endpoint not confirmed. Trying multiple endpoints...",
+    );
+
+    for (const endpoint of deleteEndpoints) {
+      try {
+        await apiClient.delete(endpoint);
+        console.log(`✅ Delete successful using endpoint: ${endpoint}`);
+        return;
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          console.warn(`❌ Endpoint ${endpoint} not found, trying next...`);
+          continue;
+        }
+        // If it's not a 404, throw the error
+        throw error;
+      }
+    }
+
+    // If all endpoints fail, throw a helpful error
+    throw new Error(
+      "Delete bill functionality is not available on the server. The server needs to implement a delete endpoint like /api/newBill/delete/:id",
+    );
   },
 
   // Calculate bill totals (utility function)

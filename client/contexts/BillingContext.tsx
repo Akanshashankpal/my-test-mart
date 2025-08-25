@@ -76,6 +76,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       setError(null);
       const apiBills = await billingService.getAllBills();
       setBills(apiBills);
+
+      // If no bills returned and no error, show informational message
+      if (apiBills.length === 0) {
+        console.info("��� No bills found");
+      } else {
+        console.info(`📋 Loaded ${apiBills.length} bills successfully`);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch bills";
@@ -135,8 +142,15 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       setError(null);
 
       const updatedBill = await billingService.updateBill(billId, updates);
+
+      // Ensure the updated bill has the correct ID
+      const normalizedBill = {
+        ...updatedBill,
+        id: updatedBill.id || updatedBill._id || billId,
+      };
+
       setBills((prev) =>
-        prev.map((bill) => (bill.id === billId ? updatedBill : bill)),
+        prev.map((bill) => (bill.id === billId ? normalizedBill : bill)),
       );
 
       toast({
@@ -145,16 +159,20 @@ export function BillingProvider({ children }: { children: ReactNode }) {
         variant: "default",
       });
 
-      return updatedBill;
+      return normalizedBill;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update bill";
-      setError(errorMessage);
+
+      console.error("❌ Update bill error:", err);
+
       toast({
         title: "Error",
         description: errorMessage,
         variant: "destructive",
       });
+
+      setError(errorMessage);
       return null;
     } finally {
       setIsLoading(false);
@@ -180,12 +198,24 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to delete bill";
+
+      // Check if it's a server endpoint issue
+      if (errorMessage.includes("not available on the server")) {
+        toast({
+          title: "Feature Not Available",
+          description:
+            "Bill deletion is not yet supported by the server. Please contact support.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
+
       setError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
       return false;
     } finally {
       setIsLoading(false);

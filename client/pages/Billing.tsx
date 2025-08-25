@@ -477,7 +477,7 @@ export default function Billing() {
               ) : (
                 <div className="space-y-3">
                   {currentInvoice.items.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div key={`${item.productName}-${index}-${item.quantity}`} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex-1">
                         <div className="font-medium">{item.productName}</div>
                         <div className="text-sm text-muted-foreground">
@@ -523,7 +523,7 @@ export default function Billing() {
                     value={currentInvoice.discountPercent}
                     onChange={(e) => setCurrentInvoice(prev => ({ 
                       ...prev, 
-                      discountPercent: parseFloat(e.target.value) || 0 
+                      discountPercent: parseFloat(e.target.value) 
                     }))}
                     className="w-24"
                   />
@@ -670,7 +670,7 @@ export default function Billing() {
               <div className="space-y-2">
                 <h4 className="font-semibold">Items:</h4>
                 {invoicePreview.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm py-1 border-b">
+                  <div key={`preview-${item.productName}-${index}`} className="flex justify-between text-sm py-1 border-b">
                     <span>{item.productName} × {item.quantity}</span>
                     <span>{formatCurrency(item.totalAmount)}</span>
                   </div>

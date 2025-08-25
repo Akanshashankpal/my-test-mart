@@ -680,7 +680,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span>
-                        {bill.billNumber || `BILL-${bill.id.slice(-4)}`}
+                        {bill.billNumber || `BILL-${bill.id?.slice(-4) ?? "N/A"}`}
                       </span>
                       <span>{bill.items?.length || 0} items</span>
                       <div className="flex items-center gap-1">
